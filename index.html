@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SILENT — Neo-Brutalist Laboratory Instrument</title>
-    <meta name="description" content="An interactive Neo-Brutalist lab for learning silent communication through sign language and Morse code.">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>SILENT — Learn. Sign. Blink. Communicate.</title>
+    <meta name="description" content="An interactive Neo-Brutalist laboratory for learning silent communication through sign language and Morse code."/>
     <!-- Google Fonts: Bricolage Grotesque, Work Sans, Space Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,23 +16,23 @@
     <!-- 1. TerminalHeader Component -->
     <header class="terminal-header site-header" role="banner">
         <div class="container header-container">
-            <a href="#" class="brand-logo" aria-label="SILENT Home">
+            <a href="index.html" class="brand-logo" aria-label="SILENT Home">
                 <span class="logo-icon">⚡</span>
                 <span class="logo-text">SILENT</span>
             </a>
 
-            <!-- Header Navigation -->
+            <!-- Header Navigation Links -->
             <nav class="header-nav" aria-label="Main Navigation">
-                <a href="#hero" class="nav-link active" aria-current="page">HOME</a>
-                <a href="#learning-paths" class="nav-link">SIGN LAB</a>
-                <a href="#learning-paths" class="nav-link">MORSE LAB</a>
-                <a href="#components-showcase" class="nav-link">COMPONENTS</a>
+                <a href="#hero" class="nav-link active" id="nav-home" aria-current="page">HOME</a>
+                <a href="#learning-paths" class="nav-link" id="nav-sign-lab">SIGN LAB</a>
+                <a href="#learning-paths" class="nav-link" id="nav-morse-lab">MORSE LAB</a>
+                <a href="#demo-preview" class="nav-link" id="nav-progress">PROGRESS</a>
             </nav>
 
-            <!-- Section Indicator & Status Indicator -->
-            <div style="display: flex; align-items: center; gap: 8px;">
+            <!-- Header Status & Section Indicator -->
+            <div class="header-status-group">
                 <span class="section-indicator">SEC: HOME</span>
-                <div class="status-indicator status-live" id="camera-status" aria-label="Status: Live Camera-Powered Learning">
+                <div class="status-indicator status-live" id="camera-status" aria-label="Status: Camera-Powered Learning Live">
                     <span class="status-dot dot-live" aria-hidden="true"></span>
                     <span class="status-text mono-label">CAMERA-POWERED</span>
                 </div>
@@ -40,192 +40,238 @@
         </div>
     </header>
 
-    <!-- Main Content Layout Structure -->
+    <!-- Main Content Layout -->
     <main class="main-layout" id="main-content">
-        <!-- Hero Section -->
+
+        <!-- 2. HERO SECTION -->
         <section class="hero-section" id="hero">
             <div class="container hero-container">
-                <div class="sticker-badge badge-coral rotate-hero">
-                    <span>✦ INTERACTIVE COMMUNICATION LAB</span>
+                <div class="sticker-badge badge-coral rotate-hero" id="hero-badge">
+                    <span class="status-dot dot-live" style="width: 8px; height: 8px; margin-right: 4px;" aria-hidden="true"></span>
+                    <span>CAMERA-POWERED LEARNING</span>
                 </div>
-                <h1 class="font-display hero-title">SILENT</h1>
-                <p class="hero-tagline">Learn. Sign. Blink. Communicate.</p>
-                <p class="hero-description">
-                    A Neo-Brutalist computer laboratory for learning silent communication through sign language and eye-blink Morse code.
+
+                <h1 class="font-display hero-title">
+                    LEARN. SIGN. BLINK. COMMUNICATE.
+                </h1>
+
+                <p class="hero-description hard-card">
+                    An interactive way to learn silent communication through sign language and Morse code using computer vision.
                 </p>
+
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 8px;">
+                    <a href="#learning-paths" class="brutalist-button btn-yellow">
+                        <span>EXPLORE LABS</span>
+                        <span aria-hidden="true">↓</span>
+                    </a>
+                    <a href="#demo-preview" class="brutalist-button btn-secondary">
+                        <span>VIEW DEMO SHELL</span>
+                        <span aria-hidden="true">→</span>
+                    </a>
+                </div>
             </div>
         </section>
 
-        <!-- ModeSelectorTabs Component Section -->
-        <section class="container" style="margin-bottom: var(--space-xl);">
-            <div class="mode-selector-tabs" role="tablist" aria-label="Communication Mode Selector">
-                <button class="brutalist-button mode-tab-btn active" id="tab-sign" role="tab" aria-selected="true" aria-controls="panel-sign" type="button">
-                    <span>🤟 HAND SIGN LANGUAGE</span>
-                </button>
-                <button class="brutalist-button mode-tab-btn btn-secondary" id="tab-morse" role="tab" aria-selected="false" aria-controls="panel-morse" type="button">
-                    <span>👁 EYES MORSE CODE</span>
-                </button>
-            </div>
-        </section>
-
-        <!-- Main Path Choice Section -->
+        <!-- 3. DUAL CORE MODULE SHOWCASE -->
         <section class="paths-section" id="learning-paths">
-            <div class="container paths-container">
-                <!-- Card 1: Sign Language -->
-                <article class="hard-card path-card path-card-sign interactive" id="card-sign-language" tabindex="0" role="button" aria-label="Start learning Sign Language">
-                    <div class="card-header-bar">
-                        <span class="mono-label">MODULE_01 // ASL</span>
-                        <span class="sticker-badge badge-yellow rotate-right">GESTURE</span>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-icon-wrapper">
-                            <span class="card-icon" aria-hidden="true">🤟</span>
+            <div class="container">
+                <div style="text-align: center; margin-bottom: var(--space-xl);">
+                    <h2 class="section-title">SELECT LEARNING MODULE</h2>
+                </div>
+
+                <div class="paths-container">
+                    <!-- Module 1: Sign Language Card -->
+                    <article class="hard-card path-card module-card-sign interactive" id="card-sign-language" tabindex="0" role="button" aria-label="Open Sign Language Lab">
+                        <div class="card-header-bar">
+                            <h2 class="card-title-heading">
+                                <span class="card-emoji" aria-hidden="true">🤟</span> SIGN LANGUAGE
+                            </h2>
+                            <span class="sticker-badge badge-yellow rotate-right">MODULE_01</span>
                         </div>
-                        <h2 class="card-title">SIGN LANGUAGE</h2>
-                        <p class="card-description">Master American Sign Language gestures through computer vision landmark analysis.</p>
-                        
+
                         <div class="feature-labels">
                             <span class="sticker-badge badge-peach rotate-left">HAND TRACKING</span>
-                            <span class="sticker-badge badge-yellow">SIGN RECOGNITION</span>
+                            <span class="sticker-badge badge-yellow">SIGN PRACTICE</span>
                             <span class="sticker-badge badge-coral rotate-right">LIVE FEEDBACK</span>
                         </div>
 
-                        <button class="brutalist-button btn-yellow btn-start" type="button">
+                        <!-- Brutalist Vector Preview Frame -->
+                        <div class="module-preview-frame">
+                            <svg class="preview-svg" viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sign Language Hand Gesture Graphic">
+                                <rect width="400" height="200" fill="#ffdad8"/>
+                                <path d="M0 0L400 200M400 0L0 200" stroke="#000000" stroke-width="1" stroke-dasharray="4 4" opacity="0.3"/>
+                                <!-- Stylized Hand Gesture Vector -->
+                                <path d="M160 160V100C160 90 168 82 178 82C188 82 196 90 196 100V150M196 100C196 90 204 82 214 82C224 82 232 90 232 100V150M232 100C232 92 240 86 248 86C256 86 264 92 264 100V160C264 180 248 190 210 190C170 190 150 175 150 150V110C150 98 140 90 130 90C120 90 110 100 110 115C110 145 140 160 160 160Z" fill="#fdf9f0" stroke="#000000" stroke-width="4"/>
+                                <!-- Landmark Tracking Points -->
+                                <circle cx="178" cy="82" r="6" fill="#ea4a51" stroke="#000" stroke-width="2"/>
+                                <circle cx="214" cy="82" r="6" fill="#ea4a51" stroke="#000" stroke-width="2"/>
+                                <circle cx="248" cy="86" r="6" fill="#ea4a51" stroke="#000" stroke-width="2"/>
+                                <circle cx="130" cy="90" r="6" fill="#facc15" stroke="#000" stroke-width="2"/>
+                                <circle cx="210" cy="140" r="6" fill="#000000"/>
+                                <line x1="178" y1="82" x2="214" y2="82" stroke="#ea4a51" stroke-width="2"/>
+                                <line x1="214" y1="82" x2="248" y2="86" stroke="#ea4a51" stroke-width="2"/>
+                                <text x="14" y="28" font-family="Space Mono" font-size="12" font-weight="700" fill="#000">ASL_LANDMARKS // READY</text>
+                            </svg>
+                        </div>
+
+                        <p class="card-description">
+                            Master American Sign Language gestures through real-time computer vision landmark analysis and guided practice.
+                        </p>
+
+                        <button class="brutalist-button btn-coral btn-start-module" type="button" id="btn-start-sign">
                             <span>START LEARNING</span>
                             <span class="btn-arrow" aria-hidden="true">→</span>
                         </button>
-                    </div>
-                </article>
+                    </article>
 
-                <!-- Card 2: Morse Code -->
-                <article class="hard-card path-card path-card-morse interactive" id="card-morse-code" tabindex="0" role="button" aria-label="Start learning Morse Code">
-                    <div class="card-header-bar">
-                        <span class="mono-label">MODULE_02 // MORSE</span>
-                        <span class="sticker-badge badge-coral rotate-left">EYE TRACK</span>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-icon-wrapper">
-                            <span class="card-icon" aria-hidden="true">👁</span>
+                    <!-- Module 2: Morse Code Card -->
+                    <article class="hard-card path-card module-card-morse interactive" id="card-morse-code" tabindex="0" role="button" aria-label="Open Morse Code Lab">
+                        <div class="card-header-bar">
+                            <h2 class="card-title-heading">
+                                <span class="card-emoji" aria-hidden="true">👁</span> MORSE CODE
+                            </h2>
+                            <span class="sticker-badge badge-coral rotate-left">MODULE_02</span>
                         </div>
-                        <h2 class="card-title">MORSE CODE</h2>
-                        <p class="card-description">Learn hands-free telegraphy using eye blinks and timing detection.</p>
-                        
+
                         <div class="feature-labels">
                             <span class="sticker-badge badge-yellow rotate-left">EYE TRACKING</span>
                             <span class="sticker-badge badge-peach rotate-right">BLINK DETECTION</span>
                             <span class="sticker-badge badge-coral">MORSE PRACTICE</span>
                         </div>
 
-                        <button class="brutalist-button btn-coral btn-start" type="button">
+                        <!-- Brutalist Vector Preview Frame -->
+                        <div class="module-preview-frame">
+                            <svg class="preview-svg" viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Morse Code Eye Tracking Graphic">
+                                <rect width="400" height="200" fill="#facc15"/>
+                                <path d="M0 0L400 200M400 0L0 200" stroke="#000000" stroke-width="1" stroke-dasharray="4 4" opacity="0.3"/>
+                                <!-- Stylized Eye Vector -->
+                                <path d="M100 100C130 55 270 55 300 100C270 145 130 145 100 100Z" fill="#fdf9f0" stroke="#000000" stroke-width="4"/>
+                                <circle cx="200" cy="100" r="32" fill="#ea4a51" stroke="#000000" stroke-width="4"/>
+                                <circle cx="200" cy="100" r="14" fill="#000000"/>
+                                <circle cx="194" cy="94" r="5" fill="#ffffff"/>
+                                <!-- Morse Code Dot & Dash Symbols -->
+                                <rect x="80" y="160" width="16" height="16" fill="#000000"/>
+                                <rect x="110" y="160" width="40" height="16" fill="#000000"/>
+                                <rect x="160" y="160" width="16" height="16" fill="#000000"/>
+                                <rect x="190" y="160" width="40" height="16" fill="#ea4a51"/>
+                                <text x="14" y="28" font-family="Space Mono" font-size="12" font-weight="700" fill="#000">BLINK_TIMING // ACTIVE</text>
+                            </svg>
+                        </div>
+
+                        <p class="card-description">
+                            Learn hands-free telegraphy using camera eye tracking, blink duration measurement, and signal decoding.
+                        </p>
+
+                        <button class="brutalist-button btn-yellow btn-start-module" type="button" id="btn-start-morse">
                             <span>START LEARNING</span>
                             <span class="btn-arrow" aria-hidden="true">→</span>
                         </button>
-                    </div>
-                </article>
+                    </article>
+                </div>
             </div>
         </section>
 
-        <!-- Components Showcase Section -->
-        <section class="container" id="components-showcase" style="margin-top: var(--space-xl);">
+        <!-- 4. LIVE DEMO PREVIEW & 5. INTERFACE LOG SECTION -->
+        <section class="container" id="demo-preview" style="margin-top: var(--space-xl);">
             <div style="margin-bottom: var(--space-lg);">
-                <h2 class="section-title">CORE COMPONENTS SYSTEM</h2>
+                <h2 class="section-title">CAMERA STREAM & INTERFACE LOG</h2>
             </div>
 
-            <div class="showcase-grid">
-                <!-- 1. BrutalistButton Showcase -->
-                <div class="hard-card has-header">
-                    <div class="card-header-black">
-                        <span>COMPONENT // BRUTALIST_BUTTON</span>
-                        <span class="sticker-badge badge-yellow">5 VARIANTS</span>
-                    </div>
-                    <div class="card-body showcase-group">
-                        <p class="mono-label">BUTTON VARIANTS & STATES:</p>
-                        <div class="btn-group">
-                            <button class="brutalist-button btn-primary" type="button">PRIMARY</button>
-                            <button class="brutalist-button btn-coral" type="button">CORAL</button>
-                            <button class="brutalist-button btn-yellow" type="button">YELLOW</button>
-                            <button class="brutalist-button btn-secondary" type="button">SECONDARY</button>
-                            <button class="brutalist-button btn-danger" type="button">DANGER</button>
-                            <button class="brutalist-button" disabled type="button">DISABLED</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. StickerBadge & StatusIndicator Showcase -->
-                <div class="hard-card has-header">
-                    <div class="card-header-coral">
-                        <span>COMPONENT // BADGES & STATUS</span>
-                        <span class="sticker-badge badge-black">TACTILE</span>
-                    </div>
-                    <div class="card-body showcase-group">
-                        <p class="mono-label">STICKER BADGES:</p>
-                        <div class="badge-group">
-                            <span class="sticker-badge badge-coral rotate-left">CORAL BADGE</span>
-                            <span class="sticker-badge badge-yellow rotate-right">YELLOW BADGE</span>
-                            <span class="sticker-badge badge-peach rotate-hero">PEACH BADGE</span>
-                            <span class="sticker-badge badge-black">BLACK BADGE</span>
-                        </div>
-
-                        <p class="mono-label" style="margin-top: 12px;">STATUS INDICATOR STATES:</p>
-                        <div class="badge-group">
-                            <div class="status-indicator status-live">
-                                <span class="status-dot dot-live"></span>
-                                <span>LIVE</span>
-                            </div>
-                            <div class="status-indicator status-ready">
-                                <span class="status-dot dot-ready"></span>
-                                <span>READY</span>
-                            </div>
-                            <div class="status-indicator status-active">
-                                <span class="status-dot dot-active"></span>
-                                <span>ACTIVE</span>
-                            </div>
-                            <div class="status-indicator status-warning">
-                                <span class="status-dot dot-warning"></span>
-                                <span>WARNING</span>
-                            </div>
-                            <div class="status-indicator status-offline">
-                                <span class="status-dot dot-offline"></span>
-                                <span>OFFLINE</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. TerminalPanel & TerminalConsoleLog Showcase -->
-                <div class="terminal-panel" style="grid-column: 1 / -1;">
+            <div class="demo-grid">
+                <!-- 4. Camera Preview Placeholder Shell -->
+                <article class="terminal-panel camera-shell-panel" aria-label="Camera Live Preview Shell">
                     <div class="terminal-panel-header">
-                        <span>TERMINAL_PANEL // DIAGNOSTIC_CONSOLE</span>
-                        <div class="status-indicator status-active">
-                            <span class="status-dot dot-active"></span>
-                            <span>INSTRUMENT READY</span>
+                        <span class="mono-label">CAMERA_STREAM // PREVIEW_SHELL</span>
+                        <div class="status-indicator status-live">
+                            <span class="status-dot dot-live" aria-hidden="true"></span>
+                            <span>LIVE PREVIEW</span>
                         </div>
                     </div>
-                    <div class="terminal-panel-body" style="display: flex; flex-direction: column; gap: var(--space-md);">
-                        <p class="mono-label">REAL-TIME SYSTEM DIAGNOSTIC LOG:</p>
-                        <div class="terminal-console-log" id="system-console-log" role="region" aria-label="System Terminal Log">
-                            <div class="log-entry">
-                                <span class="log-time">[17:00:01]</span>
-                                <span class="log-prompt">></span>
-                                <span class="log-text">SILENT Laboratory System Core v1.0 initialized.</span>
-                            </div>
-                            <div class="log-entry">
-                                <span class="log-time">[17:00:02]</span>
-                                <span class="log-prompt">></span>
-                                <span class="log-text log-yellow">[SYS] Neo-Brutalist design tokens loaded successfully.</span>
-                            </div>
-                            <div class="log-entry">
-                                <span class="log-time">[17:00:03]</span>
-                                <span class="log-prompt">></span>
-                                <span class="log-text log-coral">[STREAM] Interface standing by for module activation.</span>
-                            </div>
+
+                    <div class="camera-canvas-wrapper" id="camera-preview-box">
+                        <!-- Corner Crosshair Marks -->
+                        <span class="corner-mark mark-tl" aria-hidden="true">+</span>
+                        <span class="corner-mark mark-tr" aria-hidden="true">+</span>
+                        <span class="corner-mark mark-bl" aria-hidden="true">+</span>
+                        <span class="corner-mark mark-br" aria-hidden="true">+</span>
+
+                        <!-- Decorative Landmark Skeleton Vector Overlay -->
+                        <svg class="camera-placeholder-overlay" viewBox="0 0 640 360" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Camera tracking mesh preview placeholder">
+                            <rect width="640" height="360" fill="#1c1c17"/>
+                            <!-- Target Grid Line Crosshairs -->
+                            <line x1="320" y1="0" x2="320" y2="360" stroke="#474747" stroke-width="1" stroke-dasharray="4 4"/>
+                            <line x1="0" y1="180" x2="640" y2="180" stroke="#474747" stroke-width="1" stroke-dasharray="4 4"/>
+                            <!-- Simulated Hand Landmark Skeleton Overlay -->
+                            <g stroke="#facc15" stroke-width="2" opacity="0.85">
+                                <circle cx="320" cy="240" r="6" fill="#ea4a51"/>
+                                <circle cx="280" cy="200" r="5" fill="#facc15"/>
+                                <circle cx="260" cy="160" r="5" fill="#facc15"/>
+                                <circle cx="300" cy="140" r="5" fill="#facc15"/>
+                                <circle cx="320" cy="120" r="5" fill="#facc15"/>
+                                <circle cx="340" cy="140" r="5" fill="#facc15"/>
+                                <circle cx="360" cy="160" r="5" fill="#facc15"/>
+                                <line x1="320" y1="240" x2="280" y2="200"/>
+                                <line x1="280" y1="200" x2="260" y2="160"/>
+                                <line x1="320" y1="240" x2="300" y2="140"/>
+                                <line x1="300" y1="140" x2="320" y2="120"/>
+                                <line x1="320" y1="240" x2="340" y2="140"/>
+                                <line x1="340" y1="140" x2="360" y2="160"/>
+                            </g>
+                            <text x="20" y="340" font-family="Space Mono" font-size="12" fill="#ea4a51" font-weight="700">STATUS: CAMERA MODULE STANDBY // READY FOR MEDIAPIPE</text>
+                        </svg>
+
+                        <div class="camera-center-label">
+                            <span class="sticker-badge badge-yellow">CAMERA FEED PLACEHOLDER</span>
+                            <span class="mono-label" style="color: #ffffff; background: #000; padding: 4px 8px; margin-top: 6px;">VISION ENGINE INACTIVE IN PHASE 3</span>
                         </div>
                     </div>
+
                     <div class="terminal-panel-footer">
-                        <span class="mono-label">OPERATOR_ID: USER_01</span>
-                        <button class="brutalist-button btn-yellow" id="btn-add-log-demo" type="button">SEND TEST SIGNAL</button>
+                        <span class="mono-label">FPS: -- // LATENCY: 0ms</span>
+                        <div class="status-indicator status-ready">
+                            <span class="status-dot dot-ready"></span>
+                            <span>STANDBY MODE</span>
+                        </div>
                     </div>
-                </div>
+                </article>
+
+                <!-- 5. Interface Log Terminal Console -->
+                <article class="terminal-panel log-panel" aria-label="Interface Console Log">
+                    <div class="terminal-panel-header">
+                        <span class="mono-label">[INTERFACE LOG]</span>
+                        <span class="sticker-badge badge-peach">STATIC DEMO</span>
+                    </div>
+
+                    <div class="terminal-panel-body" style="padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-sm);">
+                        <div class="terminal-console-log" id="system-console-log" role="region" aria-label="Terminal Interface Log Messages">
+                            <div class="log-entry">
+                                <span class="log-time">[17:10:01]</span>
+                                <span class="log-prompt">></span>
+                                <span class="log-text">SILENT System Hub v1.0 initialized.</span>
+                            </div>
+                            <div class="log-entry">
+                                <span class="log-time">[17:10:02]</span>
+                                <span class="log-prompt">></span>
+                                <span class="log-text log-yellow">[SYS] Neo-Brutalist design tokens active.</span>
+                            </div>
+                            <div class="log-entry">
+                                <span class="log-time">[17:10:03]</span>
+                                <span class="log-prompt">></span>
+                                <span class="log-text log-coral">[CAM] Standby mode active. Select a module to begin.</span>
+                            </div>
+                            <div class="log-entry">
+                                <span class="log-time">[17:10:04]</span>
+                                <span class="log-prompt">></span>
+                                <span class="log-text">[INPUT] Awaiting gesture or eye-blink practice module selection.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="terminal-panel-footer">
+                        <span class="mono-label">BUFFER: 4 ENTRIES</span>
+                        <button class="brutalist-button btn-yellow" id="btn-add-log-demo" type="button">PING TERMINAL</button>
+                    </div>
+                </article>
             </div>
         </section>
 
@@ -267,7 +313,7 @@
         </div>
     </footer>
 
-    <!-- Placeholder Modal / Modal Overlay -->
+    <!-- 6. Placeholder Modal for Routes Not Yet Built -->
     <div class="modal-overlay" id="placeholder-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="hard-card modal-card">
             <button class="modal-close brutalist-button" id="modal-close-btn" aria-label="Close modal">&times;</button>
@@ -277,7 +323,7 @@
             <div class="sticker-badge badge-coral rotate-left" id="modal-badge">MODULE INITIALIZING</div>
             <h3 class="modal-title" id="modal-title">Sign Language Lab</h3>
             <p class="modal-description" id="modal-description">
-                The hand sign tracking module is currently in preparation. Real-time camera hand tracking and sign recognition will be coming in the next release!
+                The interactive learning module is currently in preparation. Real-time camera tracking and practice will be active in the next phase!
             </p>
             <button class="brutalist-button modal-action-btn" id="modal-action-btn" type="button">RETURN TO HUB</button>
         </div>

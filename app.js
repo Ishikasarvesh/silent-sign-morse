@@ -1,44 +1,39 @@
 /**
  * SILENT — Neo-Brutalist Laboratory Instrument
- * Core Global Components Controller
+ * Phase 3 Controller: SILENT Home / Landing Page
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------------
-    // 1. ModeSelectorTabs Component Controller
+    // 1. Navigation & Active Link Handler
     // ----------------------------------------------------------
-    const tabSign = document.getElementById('tab-sign');
-    const tabMorse = document.getElementById('tab-morse');
+    const navLinks = document.querySelectorAll('.header-nav .nav-link');
 
-    function setActiveModeTab(selectedTab, inactiveTab) {
-        if (!selectedTab || !inactiveTab) return;
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            navLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
 
-        selectedTab.classList.add('active');
-        selectedTab.classList.remove('btn-secondary');
-        selectedTab.setAttribute('aria-selected', 'true');
-
-        inactiveTab.classList.remove('active');
-        inactiveTab.classList.add('btn-secondary');
-        inactiveTab.setAttribute('aria-selected', 'false');
-
-        const modeName = selectedTab.id === 'tab-sign' ? 'HAND SIGN LANGUAGE' : 'EYES MORSE CODE';
-        addConsoleLog(`Switched active laboratory mode to: ${modeName}`, 'yellow');
-    }
-
-    if (tabSign && tabMorse) {
-        tabSign.addEventListener('click', () => setActiveModeTab(tabSign, tabMorse));
-        tabMorse.addEventListener('click', () => setActiveModeTab(tabMorse, tabSign));
-    }
+            const href = link.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                const target = document.querySelector(href);
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+    });
 
     // ----------------------------------------------------------
-    // 2. TerminalConsoleLog Helper Component
+    // 2. TerminalConsoleLog Logging Engine
     // ----------------------------------------------------------
     const consoleLogContainer = document.getElementById('system-console-log');
 
     /**
      * Add timestamped entry to Terminal Console Log
-     * @param {string} text - Message content
-     * @param {string} [type='normal'] - Style variant ('yellow', 'coral', 'normal')
+     * @param {string} text - Log text content
+     * @param {string} [type='normal'] - Color variant ('yellow', 'coral', 'normal')
      */
     function addConsoleLog(text, type = 'normal') {
         if (!consoleLogContainer) return;
@@ -71,27 +66,29 @@ document.addEventListener('DOMContentLoaded', () => {
         consoleLogContainer.scrollTop = consoleLogContainer.scrollHeight;
     }
 
-    // Demo Log Trigger Button
+    // Ping Terminal Demo Button
     const btnAddLogDemo = document.getElementById('btn-add-log-demo');
     if (btnAddLogDemo) {
-        let signalCount = 1;
+        let count = 1;
         btnAddLogDemo.addEventListener('click', () => {
-            const types = ['normal', 'yellow', 'coral'];
-            const sampleType = types[signalCount % types.length];
-            addConsoleLog(`[TEST_SIGNAL_${signalCount.toString().padStart(2, '0')}] Pulse transmitted via laboratory stream.`, sampleType);
-            signalCount++;
+            const colors = ['normal', 'yellow', 'coral'];
+            const color = colors[count % colors.length];
+            addConsoleLog(`[PING_${count.toString().padStart(2, '0')}] Interface standing by for module selection.`, color);
+            count++;
         });
     }
 
-    // Expose global helper for future modules
+    // Expose logger globally for future phases
     window.SILENT = window.SILENT || {};
     window.SILENT.addConsoleLog = addConsoleLog;
 
     // ----------------------------------------------------------
-    // 3. Modal Overlay Component Controller
+    // 3. Module Selection & Placeholder Route Modal
     // ----------------------------------------------------------
     const cardSign = document.getElementById('card-sign-language');
     const cardMorse = document.getElementById('card-morse-code');
+    const btnStartSign = document.getElementById('btn-start-sign');
+    const btnStartMorse = document.getElementById('btn-start-morse');
 
     const modalOverlay = document.getElementById('placeholder-modal');
     const modalCloseBtn = document.getElementById('modal-close-btn');
@@ -105,15 +102,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const moduleDetails = {
         sign: {
             icon: '🤟',
-            badge: 'HAND TRACKING MODULE',
+            badge: 'ASL HAND TRACKING',
             title: 'Sign Language Lab',
-            description: 'The interactive hand tracking learning lab is under initialization. Real-time camera hand tracking and sign recognition will be active in the next phase!'
+            description: 'The interactive hand gesture learning lab is under initialization. Real-time camera tracking, landmark analysis, and sign practice will be active in the next phase!'
         },
         morse: {
             icon: '👁',
-            badge: 'EYE TRACKING MODULE',
+            badge: 'EYE BLINK DETECTOR',
             title: 'Morse Code Lab',
-            description: 'The interactive blink detection learning lab is under initialization. Real-time camera eye tracking and Morse code practice will be active in the next phase!'
+            description: 'The interactive blink detection learning lab is under initialization. Real-time camera eye tracking, Morse timing gauges, and telegraph practice will be active in the next phase!'
         }
     };
 
@@ -128,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalOverlay.classList.add('active');
         modalOverlay.setAttribute('aria-hidden', 'false');
 
-        addConsoleLog(`Module modal opened: ${details.title}`, 'coral');
+        addConsoleLog(`Module route selected: ${details.title}`, 'coral');
 
         if (modalActionBtn) modalActionBtn.focus();
     }
@@ -140,26 +137,25 @@ document.addEventListener('DOMContentLoaded', () => {
         modalOverlay.setAttribute('aria-hidden', 'true');
     }
 
-    if (cardSign) {
-        cardSign.addEventListener('click', () => openModal(moduleDetails.sign));
-        cardSign.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                openModal(moduleDetails.sign);
-            }
+    // Module 1: Sign Language Triggers
+    if (cardSign) cardSign.addEventListener('click', () => openModal(moduleDetails.sign));
+    if (btnStartSign) {
+        btnStartSign.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openModal(moduleDetails.sign);
         });
     }
 
-    if (cardMorse) {
-        cardMorse.addEventListener('click', () => openModal(moduleDetails.morse));
-        cardMorse.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                openModal(moduleDetails.morse);
-            }
+    // Module 2: Morse Code Triggers
+    if (cardMorse) cardMorse.addEventListener('click', () => openModal(moduleDetails.morse));
+    if (btnStartMorse) {
+        btnStartMorse.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openModal(moduleDetails.morse);
         });
     }
 
+    // Modal Dismiss Triggers
     if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
     if (modalActionBtn) modalActionBtn.addEventListener('click', closeModal);
 
