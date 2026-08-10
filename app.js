@@ -884,6 +884,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnConfirmResetYes.addEventListener('click', () => {
             completedSigns.clear();
             completedMorseChars.clear();
+            Object.keys(bestScores).forEach(key => delete bestScores[key]);
             progressData = {
                 completedSigns: [],
                 completedMorse: [],
