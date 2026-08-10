@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>SILENT — Sign Language Lab & Morse Code Laboratory</title>
-    <meta name="description" content="Interactive ASL Sign Language Lab and Morse Code Laboratory with real-time camera tracking, normalized scoring, and signal decoding."/>
+    <meta name="description" content="Interactive ASL Sign Language Lab, Morse Code Laboratory, and Unified Silent Communication Mode with real-time camera tracking and signal decoding."/>
     <!-- Google Fonts: Bricolage Grotesque, Work Sans, Space Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,6 +32,7 @@
                 <button class="nav-link" id="nav-btn-sign-lab" type="button">SIGN LAB</button>
                 <button class="nav-link" id="nav-btn-practice" type="button">PRACTICE</button>
                 <button class="nav-link" id="nav-btn-morse-lab" type="button">MORSE LAB</button>
+                <button class="nav-link" id="nav-btn-silent-mode" type="button">SILENT MODE</button>
                 <button class="nav-link" id="nav-btn-progress" type="button">PROGRESS</button>
             </nav>
 
@@ -69,12 +70,16 @@
                     </p>
 
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 8px;">
+                        <button class="brutalist-button btn-coral" id="hero-btn-silent-mode" type="button" style="font-size: 1.05rem;">
+                            <span>ENTER SILENT MODE</span>
+                            <span aria-hidden="true">⚡</span>
+                        </button>
                         <button class="brutalist-button btn-yellow" id="hero-btn-explore" type="button">
                             <span>LAUNCH SIGN LAB</span>
                             <span aria-hidden="true">→</span>
                         </button>
-                        <button class="brutalist-button btn-coral" id="hero-btn-practice" type="button">
-                            <span>START SIGN PRACTICE</span>
+                        <button class="brutalist-button btn-secondary" id="hero-btn-practice" type="button">
+                            <span>SIGN PRACTICE</span>
                             <span aria-hidden="true">★</span>
                         </button>
                         <button class="brutalist-button btn-yellow" id="hero-btn-morse" type="button">
@@ -178,9 +183,9 @@
                     <div class="terminal-panel-body">
                         <div class="terminal-console-log" id="system-console-log" role="region" aria-label="Terminal Interface Log">
                             <div class="log-entry">
-                                <span class="log-time">[18:30:00]</span>
+                                <span class="log-time">[18:43:00]</span>
                                 <span class="log-prompt">></span>
-                                <span class="log-text">SILENT System Hub initialized. Click "SIGN LAB", "SIGN PRACTICE", or "MORSE LAB" to launch module.</span>
+                                <span class="log-text">SILENT System Hub initialized. Click "SILENT MODE", "SIGN LAB", or "MORSE LAB" to launch module.</span>
                             </div>
                         </div>
                     </div>
@@ -684,7 +689,7 @@
                             <div style="padding: var(--space-md);">
                                 <div class="terminal-console-log" id="morse-terminal-log" style="height: 180px;">
                                     <div class="log-entry">
-                                        <span class="log-time">[18:30:00]</span>
+                                        <span class="log-time">[18:43:00]</span>
                                         <span class="log-prompt">&gt;</span>
                                         <span class="log-text">SILENT Morse Code Telemetry Engine initialized. Use BLINK or DOT/DASH keys.</span>
                                     </div>
@@ -830,6 +835,180 @@
                         </div>
                     </section>
                 </div>
+            </div>
+        </div>
+
+        <!-- ==========================================================
+             VIEW 6: SILENT MODE (PHASE 10 UNIFIED HANDS-FREE HUB)
+             ========================================================== -->
+        <div class="page-view" id="view-silent-mode">
+            <div class="container" style="padding-top: var(--space-lg);">
+                
+                <!-- Top Header Bar -->
+                <div class="hard-card has-header" style="margin-bottom: var(--space-md);">
+                    <div class="card-header-black">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="mono-label">SILENT MODE // UNIFIED COMMUNICATION INSTRUMENT</span>
+                            <span class="mono-label text-dim">HOME &gt; SILENT MODE</span>
+                            <span class="sticker-badge badge-yellow rotate-right" id="sm-camera-status-badge">CAMERA-POWERED</span>
+                        </div>
+                        <button class="brutalist-button btn-secondary" id="btn-exit-silent-mode" style="padding: 4px 10px; font-size: 0.75rem;" type="button">EXIT SILENT MODE</button>
+                    </div>
+                </div>
+
+                <!-- Hero Header Message -->
+                <div class="hard-card" style="margin-bottom: var(--space-md); background-color: var(--surface-container); text-align: center; padding: var(--space-md);">
+                    <h1 class="font-display" style="font-size: 2.2rem; color: var(--primary);">COMMUNICATE WITHOUT SPEAKING.</h1>
+                    <p class="mono-label" style="color: var(--secondary); font-size: 0.9rem; margin-top: 4px;">USE HAND SIGNS + EYE BLINKS TO BUILD A MESSAGE.</p>
+                    
+                    <!-- Mode Selector Bar -->
+                    <div style="display: flex; justify-content: center; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                        <button class="brutalist-button btn-coral mode-selector-btn active" id="btn-sm-mode-hybrid" type="button" style="padding: 6px 16px; font-size: 0.85rem;">[ HYBRID ]</button>
+                        <button class="brutalist-button btn-secondary mode-selector-btn" id="btn-sm-mode-hand" type="button" style="padding: 6px 16px; font-size: 0.85rem;">[ HAND SIGNS ]</button>
+                        <button class="brutalist-button btn-secondary mode-selector-btn" id="btn-sm-mode-morse" type="button" style="padding: 6px 16px; font-size: 0.85rem;">[ MORSE BLINKS ]</button>
+                    </div>
+                </div>
+
+                <!-- Unified Message Terminal Card (Central Output) -->
+                <article class="hard-card has-header" style="margin-bottom: var(--space-lg);">
+                    <div class="card-header-black">
+                        <span class="mono-label">[ SILENT MESSAGE TERMINAL ]</span>
+                        <span class="sticker-badge badge-yellow" id="sm-feedback-status-badge">READY TO COMMUNICATE</span>
+                    </div>
+
+                    <div style="padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-md);">
+                        <div class="morse-buffer-display" style="min-height: 80px; flex-direction: column; justify-content: center; gap: 4px;">
+                            <span class="mono-label text-dim" style="font-size: 0.75rem;">CURRENT MESSAGE:</span>
+                            <span class="font-display" id="sm-current-message-text" style="color: var(--accent-yellow); font-size: 2.8rem; letter-spacing: 2px;"> </span>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; background-color: var(--surface); border: var(--border-secondary); padding: 8px 12px; box-shadow: 2px 2px 0px #000;">
+                            <span class="mono-label" id="sm-telemetry-last-input">LAST INPUT: NONE</span>
+                            <span class="mono-label" id="sm-telemetry-morse-buffer">MORSE BUFFER: --</span>
+                            <span class="mono-label" id="sm-telemetry-decoded">DECODED: --</span>
+                        </div>
+
+                        <!-- Message Controls Toolbar -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px;">
+                            <button class="brutalist-button btn-secondary" id="btn-sm-space" type="button">SPACE</button>
+                            <button class="brutalist-button btn-secondary" id="btn-sm-backspace" type="button">BACKSPACE</button>
+                            <button class="brutalist-button btn-secondary" id="btn-sm-undo" type="button">UNDO</button>
+                            <button class="brutalist-button btn-secondary" id="btn-sm-clear" type="button">CLEAR</button>
+                            <button class="brutalist-button btn-yellow" id="btn-sm-transmit" type="button">TRANSMIT</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Dual Camera Viewports Grid -->
+                <div class="sign-lab-grid" style="margin-bottom: var(--space-lg);">
+                    <!-- LEFT — HAND SIGN INPUT PANEL -->
+                    <section class="sign-lab-col-left">
+                        <article class="hard-card has-header camera-analysis-card">
+                            <div class="card-header-coral">
+                                <div class="flex-row-center">
+                                    <span class="status-dot dot-live"></span>
+                                    <span class="mono-label">LEFT — HAND SIGN INPUT</span>
+                                </div>
+                                <span class="sticker-badge badge-yellow" id="sm-hand-status-badge">NO HAND</span>
+                            </div>
+
+                            <div class="camera-viewport-container" style="height: 320px;">
+                                <video class="camera-video" id="sm-hand-webcam-video" autoplay playsinline muted></video>
+                                <canvas class="camera-canvas" id="sm-hand-landmark-canvas"></canvas>
+
+                                <span class="corner-mark mark-tl" aria-hidden="true">+</span>
+                                <span class="corner-mark mark-tr" aria-hidden="true">+</span>
+                                <span class="corner-mark mark-bl" aria-hidden="true">+</span>
+                                <span class="corner-mark mark-br" aria-hidden="true">+</span>
+
+                                <div class="practice-score-overlay" style="top: 12px; left: 12px;">
+                                    <span class="mono-label text-dim">DETECTED ASL</span>
+                                    <span class="font-display" id="sm-hand-detected-letter" style="font-size: 2.2rem; line-height: 1;">--</span>
+                                    <span class="mono-label" id="sm-hand-match-score" style="color: var(--accent-coral);">MATCH: 0%</span>
+                                </div>
+                            </div>
+
+                            <div style="padding: 10px; background-color: var(--surface-container-low); border-top: var(--border-primary);">
+                                <span class="mono-label text-dim" style="font-size: 0.75rem;">STABILIZATION HOLDER:</span>
+                                <div class="calibration-progress-bar-container" style="height: 8px; margin: 4px 0 0 0;">
+                                    <div class="calibration-progress-fill" id="sm-hand-hold-fill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </article>
+                    </section>
+
+                    <!-- RIGHT — EYE MORSE INPUT PANEL -->
+                    <section class="sign-lab-col-right">
+                        <article class="hard-card has-header camera-analysis-card">
+                            <div class="card-header-black">
+                                <div class="flex-row-center">
+                                    <span class="status-dot dot-live"></span>
+                                    <span class="mono-label">RIGHT — EYE MORSE INPUT</span>
+                                </div>
+                                <span class="sticker-badge badge-peach" id="sm-eye-status-badge">EYES OPEN</span>
+                            </div>
+
+                            <div class="camera-viewport-container" style="height: 320px; background-color: #1c1c17;">
+                                <video class="camera-video" id="sm-eye-webcam-video" autoplay playsinline muted></video>
+                                <canvas class="camera-canvas" id="sm-eye-landmark-canvas"></canvas>
+
+                                <span class="corner-mark mark-tl" aria-hidden="true">+</span>
+                                <span class="corner-mark mark-tr" aria-hidden="true">+</span>
+                                <span class="corner-mark mark-bl" aria-hidden="true">+</span>
+                                <span class="corner-mark mark-br" aria-hidden="true">+</span>
+
+                                <div class="eye-hud-sticker">
+                                    <span class="sticker-badge badge-yellow" id="sm-eye-hud-badge">[ TRACKING ]</span>
+                                    <span class="mono-label" id="sm-eye-duration-text" style="color: var(--accent-yellow); font-size: 0.8rem; background: #000; padding: 2px 6px; border: 1px solid #000; box-shadow: 2px 2px 0px #000;">BLINK: 0 ms</span>
+                                    <span class="sticker-badge badge-coral hidden" id="sm-eye-last-signal-badge">LAST: NONE</span>
+                                </div>
+                            </div>
+
+                            <div style="padding: 10px; background-color: var(--surface-container-low); border-top: var(--border-primary); display: flex; justify-content: space-between; align-items: center;">
+                                <span class="mono-label text-dim" style="font-size: 0.75rem;">CURRENT MORSE BUFFER:</span>
+                                <span class="mono-label" id="sm-eye-buffer-display" style="color: var(--accent-coral); font-weight: 800;">--</span>
+                            </div>
+                        </article>
+                    </section>
+                </div>
+
+                <!-- Lower Layout: Live Translation Log & Help Panel -->
+                <div class="sign-lab-grid">
+                    <section class="sign-lab-col-left">
+                        <article class="hard-card has-header">
+                            <div class="card-header-black">
+                                <span class="mono-label">[ LIVE TRANSLATION LOG ]</span>
+                                <button class="brutalist-button btn-secondary" id="btn-sm-clear-log" style="padding: 2px 8px; font-size: 0.7rem;" type="button">CLEAR LOG</button>
+                            </div>
+                            
+                            <div style="padding: var(--space-md);">
+                                <div class="terminal-console-log" id="sm-terminal-log" style="height: 180px;">
+                                    <div class="log-entry">
+                                        <span class="log-time">[18:43:00]</span>
+                                        <span class="log-prompt">&gt;</span>
+                                        <span class="log-text">SILENT Unified Hands-Free Mode active. Sign letters or blink Morse code to build messages.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </section>
+
+                    <section class="sign-lab-col-right">
+                        <article class="hard-card has-header">
+                            <div class="card-header-coral">
+                                <span class="mono-label">HOW TO COMMUNICATE</span>
+                                <span class="sticker-badge badge-yellow">QUICK EXAMPLES</span>
+                            </div>
+                            <div style="padding: var(--space-md); display: flex; flex-direction: column; gap: 8px;">
+                                <div class="finger-state-pill is-extended" style="text-align: left; padding: 6px 10px;">HAND → SIGN ASL LETTERS WITH WEBCAM</div>
+                                <div class="finger-state-pill is-curled" style="text-align: left; padding: 6px 10px;">BLINK → SHORT BLINK = DOT (•), LONG = DASH (—)</div>
+                                <div class="finger-state-pill" style="text-align: left; padding: 6px 10px;">SPACE → SEPARATE WORDS / COMMIT CHARACTERS</div>
+                                <div class="finger-state-pill is-extended" style="text-align: left; padding: 6px 10px;">TRANSMIT → SEND COMPLETED MESSAGE TO LOG</div>
+                            </div>
+                        </article>
+                    </section>
+                </div>
+
             </div>
         </div>
 

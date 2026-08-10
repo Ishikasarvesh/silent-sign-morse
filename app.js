@@ -1,6 +1,6 @@
 /**
  * SILENT — Neo-Brutalist Laboratory Instrument
- * Phase 4, 6, 7, 8 & 9 Controller: ASL Sign Language Lab, Practice Mode & Auto-Calibrated Eye Blink Morse Practice Engine
+ * Phase 4, 6, 7, 8, 9 & 10 Controller: ASL Sign Language Lab, Practice Mode & SILENT MODE Unified Hands-Free Engine
  * Stitch Screen ID: 0586a8cfaa1543629a7525d4f95efbb9
  */
 
@@ -105,10 +105,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let morsePracticeIndex = 0;
     const completedMorseChars = new Set();
     let mpUserBuffer = '';
-    let mpCurrentScore = 0;
+
+    // Phase 10 SILENT MODE State Tracking
+    let silentModeType = 'HYBRID'; // 'HYBRID', 'HAND', 'MORSE'
+    let smMessageBuffer = '';
+    let smHistoryStack = [];
+    let smMorseBuffer = '';
+    let smCurrentFrameHandLetter = 'NONE';
+    let smHandFrameCount = 0;
+    let smLastCommittedLetter = '';
+    let smSharedWebcamStream = null;
+    let smDualAnimFrameId = null;
 
     // ----------------------------------------------------------
-    // 3. PHASE 8 & 9: REFINED AUTO-CALIBRATED EYE BLINK CONFIG
+    // 3. PHASE 8 & 10: AUTO-CALIBRATED EYE BLINK CONFIG
     // ----------------------------------------------------------
     const blinkConfig = {
         dotMax: 350,        // ms: blinks < 350ms generate DOT
@@ -117,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
         cooldownMs: 250      // Cooldown timer between consecutive blinks
     };
 
-    // State Tracking & Multi-frame Noise Filter Variables
     let isEyeBlinking = false;
     let blinkStartTime = 0;
     let lastBlinkEndTime = 0;
@@ -129,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let openFrameCount = 0;
     let isFaceDetected = false;
 
-    // Auto-Calibration Sequence State
     let isCalibrating = false;
     let calibrationStartTime = 0;
     let calibrationSamples = [];
@@ -143,12 +151,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewSignPractice = document.getElementById('view-sign-practice');
     const viewMorseLab = document.getElementById('view-morse-lab');
     const viewMorsePractice = document.getElementById('view-morse-practice');
+    const viewSilentMode = document.getElementById('view-silent-mode');
 
     const navBtnHome = document.getElementById('nav-btn-home');
     const navBtnSignLab = document.getElementById('nav-btn-sign-lab');
     const navBtnPractice = document.getElementById('nav-btn-practice');
     const navBtnMorseLab = document.getElementById('nav-btn-morse-lab');
+    const navBtnSilentMode = document.getElementById('nav-btn-silent-mode');
     const navBtnProgress = document.getElementById('nav-btn-progress');
+
     const logoHomeLink = document.getElementById('logo-home-link');
     const btnReturnHome = document.getElementById('btn-return-home');
     const btnMorseReturnHome = document.getElementById('btn-morse-return-home');
@@ -156,6 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const heroBtnExplore = document.getElementById('hero-btn-explore');
     const heroBtnPractice = document.getElementById('hero-btn-practice');
     const heroBtnMorse = document.getElementById('hero-btn-morse');
+    const heroBtnSilentMode = document.getElementById('hero-btn-silent-mode');
+
     const btnHomeStartSign = document.getElementById('btn-home-start-sign');
     const btnHomeStartMorse = document.getElementById('btn-home-start-morse');
     const cardSignLanguage = document.getElementById('card-sign-language');
@@ -249,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const morseTerminalLog = document.getElementById('morse-terminal-log');
     const btnMorseClearTerminal = document.getElementById('btn-morse-clear-terminal');
 
-    // Phase 7 & 8 Eye Tracking & Calibration Elements
+    // Phase 7 & 8 Eye Tracking Elements
     const morseVideoElement = document.getElementById('morse-webcam-video');
     const morseCanvasElement = document.getElementById('morse-eye-canvas');
     const morseCameraLoadingPanel = document.getElementById('morse-camera-loading-panel');
@@ -318,6 +331,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnMpSkip = document.getElementById('btn-mp-skip');
     const btnMpNext = document.getElementById('btn-mp-next');
 
+    // Phase 10 SILENT MODE DOM References
+    const btnExitSilentMode = document.getElementById('btn-exit-silent-mode');
+    const btnSmModeHybrid = document.getElementById('btn-sm-mode-hybrid');
+    const btnSmModeHand = document.getElementById('btn-sm-mode-hand');
+    const btnSmModeMorse = document.getElementById('btn-sm-mode-morse');
+
+    const smFeedbackStatusBadge = document.getElementById('sm-feedback-status-badge');
+    const smCurrentMessageText = document.getElementById('sm-current-message-text');
+
+    const smTelemetryLastInput = document.getElementById('sm-telemetry-last-input');
+    const smTelemetryMorseBuffer = document.getElementById('sm-telemetry-morse-buffer');
+    const smTelemetryDecoded = document.getElementById('sm-telemetry-decoded');
+
+    const btnSmSpace = document.getElementById('btn-sm-space');
+    const btnSmBackspace = document.getElementById('btn-sm-backspace');
+    const btnSmUndo = document.getElementById('btn-sm-undo');
+    const btnSmClear = document.getElementById('btn-sm-clear');
+    const btnSmTransmit = document.getElementById('btn-sm-transmit');
+
+    const smHandVideo = document.getElementById('sm-hand-webcam-video');
+    const smHandCanvas = document.getElementById('sm-hand-landmark-canvas');
+    const smHandStatusBadge = document.getElementById('sm-hand-status-badge');
+    const smHandDetectedLetter = document.getElementById('sm-hand-detected-letter');
+    const smHandMatchScore = document.getElementById('sm-hand-match-score');
+    const smHandHoldFill = document.getElementById('sm-hand-hold-fill');
+
+    const smEyeVideo = document.getElementById('sm-eye-webcam-video');
+    const smEyeCanvas = document.getElementById('sm-eye-landmark-canvas');
+    const smEyeStatusBadge = document.getElementById('sm-eye-status-badge');
+    const smEyeHudBadge = document.getElementById('sm-eye-hud-badge');
+    const smEyeDurationText = document.getElementById('sm-eye-duration-text');
+    const smEyeLastSignalBadge = document.getElementById('sm-eye-last-signal-badge');
+    const smEyeBufferDisplay = document.getElementById('sm-eye-buffer-display');
+
+    const smTerminalLog = document.getElementById('sm-terminal-log');
+    const btnSmClearLog = document.getElementById('btn-sm-clear-log');
+
     // Modals
     const placeholderModal = document.getElementById('placeholder-modal');
     const modalCloseBtn = document.getElementById('modal-close-btn');
@@ -332,11 +382,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (viewSignPractice) viewSignPractice.classList.remove('active');
         if (viewMorseLab) viewMorseLab.classList.remove('active');
         if (viewMorsePractice) viewMorsePractice.classList.remove('active');
+        if (viewSilentMode) viewSilentMode.classList.remove('active');
 
         if (navBtnHome) navBtnHome.classList.remove('active');
         if (navBtnSignLab) navBtnSignLab.classList.remove('active');
         if (navBtnPractice) navBtnPractice.classList.remove('active');
         if (navBtnMorseLab) navBtnMorseLab.classList.remove('active');
+        if (navBtnSilentMode) navBtnSilentMode.classList.remove('active');
 
         if (targetView === 'sign-lab') {
             if (viewSignLab) viewSignLab.classList.add('active');
@@ -345,6 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cameraStatusText) cameraStatusText.textContent = 'VISION ENGINE ACTIVE';
 
             stopMorseEyeStream();
+            stopSilentModeStreams();
             initCameraAndMediaPipe();
         } else if (targetView === 'sign-practice') {
             if (viewSignPractice) viewSignPractice.classList.add('active');
@@ -353,6 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cameraStatusText) cameraStatusText.textContent = 'PRACTICE MODE ACTIVE';
 
             stopMorseEyeStream();
+            stopSilentModeStreams();
             updatePracticeTarget(practiceSequence[practiceIndex]);
             initCameraAndMediaPipe();
         } else if (targetView === 'morse-lab') {
@@ -361,7 +415,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (headerSecIndicator) headerSecIndicator.textContent = 'SEC: MORSE LAB';
             if (cameraStatusText) cameraStatusText.textContent = 'EYE TELEGRAPHY ACTIVE';
 
-            stopWebcamStream(); // Stop ASL hand stream
+            stopWebcamStream();
+            stopSilentModeStreams();
             initMorseLabView();
             initMorseFaceMeshEngine();
         } else if (targetView === 'morse-practice') {
@@ -370,9 +425,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (headerSecIndicator) headerSecIndicator.textContent = 'SEC: MORSE PRACTICE';
             if (cameraStatusText) cameraStatusText.textContent = 'MORSE PRACTICE ACTIVE';
 
-            stopWebcamStream(); // Stop ASL hand stream
+            stopWebcamStream();
+            stopSilentModeStreams();
             updateMorsePracticeTarget(morsePracticeSequence[morsePracticeIndex]);
             initMorseFaceMeshEngine();
+        } else if (targetView === 'silent-mode') {
+            if (viewSilentMode) viewSilentMode.classList.add('active');
+            if (navBtnSilentMode) navBtnSilentMode.classList.add('active');
+            if (headerSecIndicator) headerSecIndicator.textContent = 'SEC: SILENT MODE';
+            if (cameraStatusText) cameraStatusText.textContent = 'DUAL ENGINE ACTIVE';
+
+            stopWebcamStream();
+            stopMorseEyeStream();
+            initSilentModeDualEngine();
         } else {
             if (viewHome) viewHome.classList.add('active');
             if (navBtnHome) navBtnHome.classList.add('active');
@@ -381,6 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             stopWebcamStream();
             stopMorseEyeStream();
+            stopSilentModeStreams();
         }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -390,16 +456,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navBtnSignLab) navBtnSignLab.addEventListener('click', () => switchView('sign-lab'));
     if (navBtnPractice) navBtnPractice.addEventListener('click', () => switchView('sign-practice'));
     if (navBtnMorseLab) navBtnMorseLab.addEventListener('click', () => switchView('morse-lab'));
+    if (navBtnSilentMode) navBtnSilentMode.addEventListener('click', () => switchView('silent-mode'));
 
     if (logoHomeLink) logoHomeLink.addEventListener('click', (e) => { e.preventDefault(); switchView('home'); });
     if (btnReturnHome) btnReturnHome.addEventListener('click', () => switchView('home'));
     if (btnMorseReturnHome) btnMorseReturnHome.addEventListener('click', () => switchView('home'));
     if (btnExitPractice) btnExitPractice.addEventListener('click', () => switchView('sign-lab'));
     if (btnExitMorsePractice) btnExitMorsePractice.addEventListener('click', () => switchView('morse-lab'));
+    if (btnExitSilentMode) btnExitSilentMode.addEventListener('click', () => switchView('home'));
 
     if (heroBtnExplore) heroBtnExplore.addEventListener('click', () => switchView('sign-lab'));
     if (heroBtnPractice) heroBtnPractice.addEventListener('click', () => switchView('sign-practice'));
     if (heroBtnMorse) heroBtnMorse.addEventListener('click', () => switchView('morse-lab'));
+    if (heroBtnSilentMode) heroBtnSilentMode.addEventListener('click', () => switchView('silent-mode'));
 
     if (btnHomeStartSign) btnHomeStartSign.addEventListener('click', () => switchView('sign-lab'));
     if (btnHomeStartMorse) btnHomeStartMorse.addEventListener('click', () => switchView('morse-lab'));
@@ -623,6 +692,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (viewMorsePractice && viewMorsePractice.classList.contains('active')) {
                 mpUserBuffer += symbol;
                 evaluateMorsePracticeAttempt(symbol);
+            } else if (viewSilentMode && viewSilentMode.classList.contains('active')) {
+                smMorseBuffer += symbol;
+                const displayPattern = smMorseBuffer.replace(/\./g, '• ').replace(/-/g, '— ');
+                if (smEyeBufferDisplay) smEyeBufferDisplay.textContent = displayPattern;
+                if (smTelemetryMorseBuffer) smTelemetryMorseBuffer.textContent = `MORSE BUFFER: ${displayPattern}`;
+
+                const decodedChar = decodeMorseSignal(smMorseBuffer);
+                if (smTelemetryDecoded) smTelemetryDecoded.textContent = `DECODED: ${decodedChar}`;
+
+                if (decodedChar !== '--' && decodedChar !== '?') {
+                    if (silentModeType === 'HYBRID' || silentModeType === 'MORSE') {
+                        commitSilentModeCharacter(decodedChar, 'MORSE');
+                    }
+                    smMorseBuffer = '';
+                    if (smEyeBufferDisplay) smEyeBufferDisplay.textContent = '--';
+                }
             } else {
                 currentMorseBuffer += symbol;
                 updateMorseBufferUI();
@@ -849,7 +934,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let score = Math.round((matches / NT) * 100);
 
-        // Penalties for extra or wrong signals
         if (NU > NT) {
             score = Math.max(0, score - (NU - NT) * 20);
         }
@@ -858,11 +942,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mpScoreNumber) mpScoreNumber.textContent = `${mpCurrentScore}%`;
         if (mpMatchBadge) mpMatchBadge.textContent = `MATCH: ${mpCurrentScore}%`;
 
-        // Attempt feedback status
         const symbolLabel = lastReceivedSymbol === '.' ? 'DOT RECEIVED' : 'DASH RECEIVED';
 
         if (mpUserBuffer === targetPattern) {
-            // Perfect 100% Match!
             mpCurrentScore = 100;
             if (mpScoreNumber) mpScoreNumber.textContent = '100%';
             if (mpMatchBadge) mpMatchBadge.textContent = 'MATCH: 100%';
@@ -914,7 +996,207 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------
-    // 9. REAL MEDIAPIPE FACE MESH & AUTO-CALIBRATED BLINK ENGINE
+    // 9. PHASE 10: SILENT MODE UNIFIED CONTROLLER & TELEMETRY
+    // ----------------------------------------------------------
+    function logSilentModeTerminalMessage(msgText) {
+        if (!smTerminalLog) return;
+        const now = new Date();
+        const timeStr = `[${now.toTimeString().split(' ')[0]}]`;
+
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.innerHTML = `
+            <span class="log-time">${timeStr}</span>
+            <span class="log-prompt">&gt;</span>
+            <span class="log-text">${msgText}</span>
+        `;
+
+        smTerminalLog.appendChild(entry);
+        smTerminalLog.scrollTop = smTerminalLog.scrollHeight;
+    }
+
+    function commitSilentModeCharacter(char, source) {
+        smHistoryStack.push(smMessageBuffer);
+        smMessageBuffer += char;
+
+        if (smCurrentMessageText) smCurrentMessageText.textContent = smMessageBuffer || ' ';
+        if (smTelemetryLastInput) smTelemetryLastInput.textContent = `LAST INPUT: ${source} → ${char}`;
+        if (smFeedbackStatusBadge) smFeedbackStatusBadge.textContent = `${source} INPUT ACTIVE`;
+
+        logSilentModeTerminalMessage(`${source} → ${char}`);
+    }
+
+    function setSilentModeType(mode) {
+        silentModeType = mode;
+        const btns = [btnSmModeHybrid, btnSmModeHand, btnSmModeMorse];
+        btns.forEach(b => {
+            if (b) b.classList.remove('active');
+        });
+
+        if (mode === 'HYBRID' && btnSmModeHybrid) btnSmModeHybrid.classList.add('active');
+        if (mode === 'HAND' && btnSmModeHand) btnSmModeHand.classList.add('active');
+        if (mode === 'MORSE' && btnSmModeMorse) btnSmModeMorse.classList.add('active');
+
+        logSilentModeTerminalMessage(`MODE SWITCHED TO: [ ${mode} ]`);
+    }
+
+    if (btnSmModeHybrid) btnSmModeHybrid.addEventListener('click', () => setSilentModeType('HYBRID'));
+    if (btnSmModeHand) btnSmModeHand.addEventListener('click', () => setSilentModeType('HAND'));
+    if (btnSmModeMorse) btnSmModeMorse.addEventListener('click', () => setSilentModeType('MORSE'));
+
+    if (btnSmSpace) {
+        btnSmSpace.addEventListener('click', () => {
+            smHistoryStack.push(smMessageBuffer);
+            smMessageBuffer += ' ';
+            if (smCurrentMessageText) smCurrentMessageText.textContent = smMessageBuffer || ' ';
+            logSilentModeTerminalMessage('SPACE ADDED');
+        });
+    }
+
+    if (btnSmBackspace) {
+        btnSmBackspace.addEventListener('click', () => {
+            smHistoryStack.push(smMessageBuffer);
+            smMessageBuffer = smMessageBuffer.slice(0, -1);
+            if (smCurrentMessageText) smCurrentMessageText.textContent = smMessageBuffer || ' ';
+            logSilentModeTerminalMessage('BACKSPACE APPLIED');
+        });
+    }
+
+    if (btnSmUndo) {
+        btnSmUndo.addEventListener('click', () => {
+            if (smHistoryStack.length > 0) {
+                smMessageBuffer = smHistoryStack.pop();
+                if (smCurrentMessageText) smCurrentMessageText.textContent = smMessageBuffer || ' ';
+                logSilentModeTerminalMessage('UNDO REVERTED LAST STEP');
+            }
+        });
+    }
+
+    if (btnSmClear) {
+        btnSmClear.addEventListener('click', () => {
+            smHistoryStack.push(smMessageBuffer);
+            smMessageBuffer = '';
+            if (smCurrentMessageText) smCurrentMessageText.textContent = ' ';
+            if (smTelemetryLastInput) smTelemetryLastInput.textContent = 'LAST INPUT: NONE';
+            if (smFeedbackStatusBadge) smFeedbackStatusBadge.textContent = 'READY TO COMMUNICATE';
+            logSilentModeTerminalMessage('MESSAGE BUFFER CLEARED');
+        });
+    }
+
+    if (btnSmTransmit) {
+        btnSmTransmit.addEventListener('click', () => {
+            if (smMessageBuffer.trim().length > 0) {
+                if (smFeedbackStatusBadge) smFeedbackStatusBadge.textContent = 'TRANSMITTING...';
+                const msg = smMessageBuffer;
+                logSilentModeTerminalMessage(`MESSAGE TRANSMITTED: "${msg}"`);
+                
+                setTimeout(() => {
+                    if (smFeedbackStatusBadge) smFeedbackStatusBadge.textContent = 'MESSAGE SENT';
+                    smHistoryStack.push(smMessageBuffer);
+                    smMessageBuffer = '';
+                    if (smCurrentMessageText) smCurrentMessageText.textContent = ' ';
+                }, 300);
+            } else {
+                logSilentModeTerminalMessage('TRANSMISSION FAILED: MESSAGE BUFFER EMPTY.');
+            }
+        });
+    }
+
+    if (btnSmClearLog) {
+        btnSmClearLog.addEventListener('click', () => {
+            if (smTerminalLog) smTerminalLog.innerHTML = '';
+            logSilentModeTerminalMessage('Translation log cleared.');
+        });
+    }
+
+    // Single Stream Lifecycle for Silent Mode Dual Engines
+    async function initSilentModeDualEngine() {
+        try {
+            if (!smSharedWebcamStream) {
+                smSharedWebcamStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
+                    audio: false
+                });
+
+                if (smHandVideo) {
+                    smHandVideo.srcObject = smSharedWebcamStream;
+                    await smHandVideo.play();
+                }
+                if (smEyeVideo) {
+                    smEyeVideo.srcObject = smSharedWebcamStream;
+                    await smEyeVideo.play();
+                }
+            }
+
+            if (!handsEngine) {
+                handsEngine = new window.Hands({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+                });
+                handsEngine.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+                handsEngine.onResults(onHandResults);
+                if (handsEngine.initialize) await handsEngine.initialize();
+            }
+
+            if (!faceMeshEngine) {
+                faceMeshEngine = new window.FaceMesh({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+                });
+                faceMeshEngine.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+                faceMeshEngine.onResults(onFaceMeshResults);
+                if (faceMeshEngine.initialize) await faceMeshEngine.initialize();
+            }
+
+            engineInitialized = true;
+            morseEngineInitialized = true;
+            startSilentModeDualLoop();
+
+        } catch (err) {
+            console.error('Silent Mode Dual Stream Error:', err);
+            logSilentModeTerminalMessage(`CAMERA ERROR: ${err.message}`);
+        }
+    }
+
+    function stopSilentModeStreams() {
+        if (smDualAnimFrameId) {
+            cancelAnimationFrame(smDualAnimFrameId);
+            smDualAnimFrameId = null;
+        }
+
+        if (smSharedWebcamStream) {
+            smSharedWebcamStream.getTracks().forEach(track => track.stop());
+            smSharedWebcamStream = null;
+        }
+
+        if (smHandVideo) smHandVideo.srcObject = null;
+        if (smEyeVideo) smEyeVideo.srcObject = null;
+
+        smHandFrameCount = 0;
+        smLastCommittedLetter = '';
+    }
+
+    function startSilentModeDualLoop() {
+        if (smDualAnimFrameId) cancelAnimationFrame(smDualAnimFrameId);
+
+        async function processDualFrame() {
+            if (smHandVideo && !smHandVideo.paused && !smHandVideo.ended && smHandVideo.readyState >= 2) {
+                if (handsEngine && engineInitialized) {
+                    try { await handsEngine.send({ image: smHandVideo }); } catch (e) {}
+                }
+                if (faceMeshEngine && morseEngineInitialized) {
+                    try { await faceMeshEngine.send({ image: smHandVideo }); } catch (e) {}
+                }
+            }
+
+            if (smSharedWebcamStream && viewSilentMode && viewSilentMode.classList.contains('active')) {
+                smDualAnimFrameId = requestAnimationFrame(processDualFrame);
+            }
+        }
+
+        smDualAnimFrameId = requestAnimationFrame(processDualFrame);
+    }
+
+    // ----------------------------------------------------------
+    // 10. REAL MEDIAPIPE FACE MESH & AUTO-CALIBRATED BLINK ENGINE
     // ----------------------------------------------------------
     function startEyeCalibration() {
         if (!isFaceDetected) {
@@ -1047,7 +1329,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         await faceMeshEngine.send({ image: activeMorseVideo });
                     } catch (e) {
                         console.warn('FaceMesh Frame Error:', e);
-                    } opacity: 1;
+                    }
                     isSendingMorseFrame = false;
                 }
             }
@@ -1061,7 +1343,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------
-    // 10. REFINED EAR CALCULATOR & MULTI-FRAME BLINK CLASSIFIER
+    // 11. REFINED EAR CALCULATOR & MULTI-FRAME BLINK CLASSIFIER
     // ----------------------------------------------------------
     const LEFT_EYE_INDICES = { outer: 33, inner: 133, top1: 160, top2: 158, bot1: 144, bot2: 153 };
     const RIGHT_EYE_INDICES = { outer: 263, inner: 362, top1: 385, top2: 387, bot1: 380, bot2: 373 };
@@ -1085,7 +1367,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function onFaceMeshResults(results) {
         const isMorsePractice = viewMorsePractice.classList.contains('active');
-        const activeCanvas = isMorsePractice ? morsePracticeCanvasElement : morseCanvasElement;
+        const isSilentMode = viewSilentMode.classList.contains('active');
+
+        let activeCanvas = morseCanvasElement;
+        if (isMorsePractice) activeCanvas = morsePracticeCanvasElement;
+        if (isSilentMode) activeCanvas = smEyeCanvas;
 
         if (!activeCanvas) return;
 
@@ -1149,6 +1435,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (eyeStateBadge) eyeStateBadge.textContent = 'BLINK DETECTED';
                     if (eyeTrackingHudBadge) eyeTrackingHudBadge.textContent = '[ BLINKING ]';
                     if (mpEyeTrackingBadge) mpEyeTrackingBadge.textContent = '[ BLINKING ]';
+                    if (smEyeStatusBadge) smEyeStatusBadge.textContent = 'BLINK DETECTED';
+                    if (smEyeHudBadge) smEyeHudBadge.textContent = '[ BLINKING ]';
                 }
             } else {
                 openFrameCount++;
@@ -1175,6 +1463,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                     mpLastSignalBadge.className = 'sticker-badge badge-yellow';
                                     mpLastSignalBadge.classList.remove('hidden');
                                 }
+                                if (smEyeLastSignalBadge) {
+                                    smEyeLastSignalBadge.textContent = 'LAST: DOT ( • )';
+                                    smEyeLastSignalBadge.className = 'sticker-badge badge-yellow';
+                                    smEyeLastSignalBadge.classList.remove('hidden');
+                                }
                                 addMorseSignal('.');
                                 logMorseTerminalMessage(`> BLINK TELEGRAPHY: SHORT BLINK ( ${duration} ms ) -> DOT ( . )`);
                                 if (eyeStateBadge) eyeStateBadge.textContent = 'DOT DETECTED';
@@ -1190,6 +1483,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                     mpLastSignalBadge.className = 'sticker-badge badge-coral';
                                     mpLastSignalBadge.classList.remove('hidden');
                                 }
+                                if (smEyeLastSignalBadge) {
+                                    smEyeLastSignalBadge.textContent = 'LAST: DASH ( — )';
+                                    smEyeLastSignalBadge.className = 'sticker-badge badge-coral';
+                                    smEyeLastSignalBadge.classList.remove('hidden');
+                                }
                                 addMorseSignal('-');
                                 logMorseTerminalMessage(`> BLINK TELEGRAPHY: LONG BLINK ( ${duration} ms ) -> DASH ( — )`);
                                 if (eyeStateBadge) eyeStateBadge.textContent = 'DASH DETECTED';
@@ -1199,6 +1497,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (eyeStateBadge) eyeStateBadge.textContent = 'EYES OPEN';
                         if (eyeTrackingHudBadge) eyeTrackingHudBadge.textContent = '[ TRACKING ]';
                         if (mpEyeTrackingBadge) mpEyeTrackingBadge.textContent = '[ TRACKING ]';
+                        if (smEyeStatusBadge) smEyeStatusBadge.textContent = 'EYES OPEN';
+                        if (smEyeHudBadge) smEyeHudBadge.textContent = '[ TRACKING ]';
                     }
                 }
             }
@@ -1207,6 +1507,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (eyeDurationHudText) eyeDurationHudText.textContent = `BLINK: ${lastMeasuredBlinkDuration} ms`;
             if (mpEyeDurationText) mpEyeDurationText.textContent = `BLINK: ${lastMeasuredBlinkDuration} ms`;
+            if (smEyeDurationText) smEyeDurationText.textContent = `BLINK: ${lastMeasuredBlinkDuration} ms`;
             if (morseStatusBadge) morseStatusBadge.textContent = 'EYE ENGINE ACTIVE';
 
             if (dbgFaceDetected) dbgFaceDetected.textContent = 'YES';
@@ -1226,6 +1527,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (eyeStateBadge) eyeStateBadge.textContent = 'NO FACE';
             if (eyeTrackingHudBadge) eyeTrackingHudBadge.textContent = '[ NO FACE ]';
             if (mpEyeTrackingBadge) mpEyeTrackingBadge.textContent = '[ NO FACE ]';
+            if (smEyeStatusBadge) smEyeStatusBadge.textContent = 'NO FACE';
+            if (smEyeHudBadge) smEyeHudBadge.textContent = '[ NO FACE ]';
             if (morseStatusBadge) morseStatusBadge.textContent = 'EYE SEARCHING';
 
             if (dbgFaceDetected) dbgFaceDetected.textContent = 'NO';
@@ -1283,7 +1586,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.startEyeCalibration = startEyeCalibration;
 
     // ----------------------------------------------------------
-    // 11. MEDIA PIPE HAND TRACKING PIPELINE (ASL LAB & PRACTICE)
+    // 12. MEDIA PIPE HAND TRACKING PIPELINE (ASL LAB & SILENT MODE)
     // ----------------------------------------------------------
     let webcamStream = null;
     let handsEngine = null;
@@ -1427,14 +1730,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function onHandResults(results) {
         const isPracticeMode = viewSignPractice.classList.contains('active');
-        const activeCanvas = isPracticeMode ? practiceCanvasElement : canvasElement;
-        const ctx = activeCanvas ? activeCanvas.getContext('2d') : null;
+        const isSilentMode = viewSilentMode.classList.contains('active');
 
-        if (!activeCanvas || !ctx) return;
+        let activeCanvas = canvasElement;
+        if (isPracticeMode) activeCanvas = practiceCanvasElement;
+        if (isSilentMode) activeCanvas = smHandCanvas;
+
+        if (!activeCanvas) return;
 
         activeCanvas.width = activeCanvas.clientWidth || 640;
         activeCanvas.height = activeCanvas.clientHeight || 480;
 
+        const ctx = activeCanvas.getContext('2d');
         const width = activeCanvas.width;
         const height = activeCanvas.height;
 
@@ -1523,6 +1830,56 @@ document.addEventListener('DOMContentLoaded', () => {
             pinky: pinkyExtended ? 'EXTENDED' : 'CURLED'
         };
 
+        const isSilentMode = viewSilentMode.classList.contains('active');
+
+        // Silent Mode Multi-Letter Best-Match Recognition
+        if (isSilentMode) {
+            let bestLetter = 'A';
+            let maxMatchesCount = -1;
+
+            Object.entries(aslTargetPoses).forEach(([letter, pose]) => {
+                let mCount = 0;
+                if (currentFingers.thumb === pose.thumb) mCount++;
+                if (currentFingers.index === pose.index) mCount++;
+                if (currentFingers.middle === pose.middle) mCount++;
+                if (currentFingers.ring === pose.ring) mCount++;
+                if (currentFingers.pinky === pose.pinky) mCount++;
+
+                if (mCount > maxMatchesCount) {
+                    maxMatchesCount = mCount;
+                    bestLetter = letter;
+                }
+            });
+
+            const smScore = Math.min(maxMatchesCount * 18 + 8, 98);
+
+            if (smHandDetectedLetter) smHandDetectedLetter.textContent = bestLetter;
+            if (smHandMatchScore) smHandMatchScore.textContent = `MATCH: ${smScore}%`;
+            if (smHandStatusBadge) smHandStatusBadge.textContent = 'SIGN DETECTED';
+
+            if (smScore >= 80) {
+                if (bestLetter === smCurrentFrameHandLetter) {
+                    smHandFrameCount++;
+                } else {
+                    smCurrentFrameHandLetter = bestLetter;
+                    smHandFrameCount = 1;
+                }
+
+                const holdPct = Math.min((smHandFrameCount / 10) * 100, 100);
+                if (smHandHoldFill) smHandHoldFill.style.width = `${holdPct}%`;
+
+                // Anti-Duplicate Stabilization Lock (Requires 10 held frames & pose change)
+                if (smHandFrameCount >= 10 && bestLetter !== smLastCommittedLetter) {
+                    smLastCommittedLetter = bestLetter;
+                    if (silentModeType === 'HYBRID' || silentModeType === 'HAND') {
+                        commitSilentModeCharacter(bestLetter, 'HAND');
+                    }
+                }
+            }
+            return;
+        }
+
+        // Standard Sign Lab & Practice Single Target Pose Comparison
         const targetPose = aslTargetPoses[selectedLetter] || aslTargetPoses['A'];
 
         let matchedFingersCount = 0;
@@ -1611,6 +1968,11 @@ document.addEventListener('DOMContentLoaded', () => {
             handStatusBadge.className = `sticker-badge ${isDetected ? 'badge-yellow' : 'badge-coral'}`;
         }
 
+        if (smHandStatusBadge) {
+            smHandStatusBadge.textContent = isDetected ? 'HAND READY' : 'NO HAND';
+            smHandStatusBadge.className = `sticker-badge ${isDetected ? 'badge-yellow' : 'badge-coral'}`;
+        }
+
         if (handsCountLabel) {
             handsCountLabel.textContent = `HANDS: ${count}`;
         }
@@ -1626,6 +1988,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!isDetected) {
+            smHandFrameCount = 0;
+            smLastCommittedLetter = '';
+            if (smHandHoldFill) smHandHoldFill.style.width = '0%';
+            if (smHandDetectedLetter) smHandDetectedLetter.textContent = '--';
+            if (smHandMatchScore) smHandMatchScore.textContent = 'MATCH: 0%';
+
             updateFingerPill(valThumb, 'UNKNOWN', false);
             updateFingerPill(valIndex, 'UNKNOWN', false);
             updateFingerPill(valMiddle, 'UNKNOWN', false);
