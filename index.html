@@ -4,49 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SILENT — Learn. Sign. Blink. Communicate.</title>
-    <meta name="description" content="An interactive way to learn silent communication through sign language and Morse code.">
-    <!-- Google Fonts -->
+    <meta name="description" content="An interactive Neo-Brutalist lab for learning silent communication through sign language and Morse code.">
+    <!-- Google Fonts: Bricolage Grotesque, Work Sans, Space Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Background atmospheric elements -->
-    <div class="bg-effects" aria-hidden="true">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-2"></div>
-        <div class="glow-orb orb-3"></div>
-        <div class="bg-grid"></div>
-    </div>
 
-    <!-- Header Navigation -->
-    <header class="site-header">
+    <!-- Header Navigation (Terminal Header Style) -->
+    <header class="terminal-header site-header">
         <div class="container header-container">
             <a href="#" class="brand-logo" aria-label="SILENT Home">
                 <span class="logo-icon">⚡</span>
                 <span class="logo-text">SILENT</span>
             </a>
-            <div class="status-badge" id="camera-status">
+            <div class="status-indicator" id="camera-status">
                 <span class="status-dot"></span>
-                <span class="status-text">CAMERA-POWERED LEARNING</span>
+                <span class="status-text mono-label">CAMERA-POWERED LEARNING</span>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main>
+    <main class="main-layout">
         <!-- Hero Section -->
         <section class="hero-section" id="hero">
             <div class="container hero-container">
-                <div class="hero-badge">
-                    <span class="badge-sparkle">✦</span>
-                    <span>INTERACTIVE COMMUNICATION LAB</span>
+                <div class="sticker-badge badge-hero">
+                    <span>✦ INTERACTIVE COMMUNICATION LAB</span>
                 </div>
-                <h1 class="hero-title">SILENT</h1>
+                <h1 class="font-display hero-title">SILENT</h1>
                 <p class="hero-tagline">Learn. Sign. Blink. Communicate.</p>
                 <p class="hero-description">
-                    An interactive way to learn silent communication through sign language and Morse code.
+                    A Neo-Brutalist computer laboratory for learning silent communication through sign language and eye-blink Morse code.
                 </p>
             </div>
         </section>
@@ -55,48 +47,54 @@
         <section class="paths-section" id="learning-paths">
             <div class="container paths-container">
                 <!-- Card 1: Sign Language -->
-                <article class="path-card path-card-sign" id="card-sign-language" tabindex="0" role="button" aria-label="Start learning Sign Language">
-                    <div class="card-glow-bg"></div>
+                <article class="hard-card path-card path-card-sign" id="card-sign-language" tabindex="0" role="button" aria-label="Start learning Sign Language">
+                    <div class="card-header-bar">
+                        <span class="mono-label">MODULE_01 // ASL</span>
+                        <span class="sticker-badge badge-accent-yellow">GESTURE</span>
+                    </div>
                     <div class="card-content">
                         <div class="card-icon-wrapper">
                             <span class="card-icon" aria-hidden="true">🤟</span>
                         </div>
                         <h2 class="card-title">SIGN LANGUAGE</h2>
-                        <p class="card-description">Learn communication through hand signs.</p>
+                        <p class="card-description">Master American Sign Language gestures through computer vision landmark analysis.</p>
                         
-                        <ul class="feature-labels">
-                            <li class="feature-badge">HAND TRACKING</li>
-                            <li class="feature-badge">SIGN RECOGNITION</li>
-                            <li class="feature-badge">LIVE FEEDBACK</li>
-                        </ul>
+                        <div class="feature-labels">
+                            <span class="sticker-badge">HAND TRACKING</span>
+                            <span class="sticker-badge">SIGN RECOGNITION</span>
+                            <span class="sticker-badge">LIVE FEEDBACK</span>
+                        </div>
 
-                        <div class="btn-start">
+                        <button class="brutalist-button btn-start" type="button">
                             <span>START LEARNING</span>
                             <span class="btn-arrow" aria-hidden="true">→</span>
-                        </div>
+                        </button>
                     </div>
                 </article>
 
                 <!-- Card 2: Morse Code -->
-                <article class="path-card path-card-morse" id="card-morse-code" tabindex="0" role="button" aria-label="Start learning Morse Code">
-                    <div class="card-glow-bg"></div>
+                <article class="hard-card path-card path-card-morse" id="card-morse-code" tabindex="0" role="button" aria-label="Start learning Morse Code">
+                    <div class="card-header-bar">
+                        <span class="mono-label">MODULE_02 // MORSE</span>
+                        <span class="sticker-badge badge-accent-coral">EYE TRACK</span>
+                    </div>
                     <div class="card-content">
                         <div class="card-icon-wrapper">
                             <span class="card-icon" aria-hidden="true">👁</span>
                         </div>
                         <h2 class="card-title">MORSE CODE</h2>
-                        <p class="card-description">Learn communication through dots, dashes, and your eyes.</p>
+                        <p class="card-description">Learn hands-free telegraphy using eye blinks and timing detection.</p>
                         
-                        <ul class="feature-labels">
-                            <li class="feature-badge">EYE TRACKING</li>
-                            <li class="feature-badge">BLINK DETECTION</li>
-                            <li class="feature-badge">MORSE PRACTICE</li>
-                        </ul>
+                        <div class="feature-labels">
+                            <span class="sticker-badge">EYE TRACKING</span>
+                            <span class="sticker-badge">BLINK DETECTION</span>
+                            <span class="sticker-badge">MORSE PRACTICE</span>
+                        </div>
 
-                        <div class="btn-start">
+                        <button class="brutalist-button btn-start btn-coral" type="button">
                             <span>START LEARNING</span>
                             <span class="btn-arrow" aria-hidden="true">→</span>
-                        </div>
+                        </button>
                     </div>
                 </article>
             </div>
@@ -107,26 +105,25 @@
             <div class="container how-container">
                 <div class="section-header">
                     <h2 class="section-title">HOW IT WORKS</h2>
-                    <div class="section-line"></div>
                 </div>
 
                 <div class="steps-grid">
-                    <div class="step-card">
-                        <div class="step-number">01</div>
+                    <div class="hard-card step-card">
+                        <div class="step-number mono-label">01</div>
                         <h3 class="step-title">LEARN</h3>
-                        <p class="step-description">Understand the sign or Morse pattern.</p>
+                        <p class="step-description">Study reference sign postures and Morse dot/dash timings.</p>
                     </div>
 
-                    <div class="step-card">
-                        <div class="step-number">02</div>
+                    <div class="hard-card step-card">
+                        <div class="step-number mono-label">02</div>
                         <h3 class="step-title">PRACTICE</h3>
-                        <p class="step-description">Use your camera to practice.</p>
+                        <p class="step-description">Use your camera for real-time gesture & blink verification.</p>
                     </div>
 
-                    <div class="step-card">
-                        <div class="step-number">03</div>
+                    <div class="hard-card step-card">
+                        <div class="step-number mono-label">03</div>
                         <h3 class="step-title">MASTER</h3>
-                        <p class="step-description">Get instant visual feedback and improve.</p>
+                        <p class="step-description">Test your skills in interactive quizzes and earn clearance badges.</p>
                     </div>
                 </div>
             </div>
@@ -136,24 +133,24 @@
     <!-- Footer Section -->
     <footer class="site-footer">
         <div class="container footer-container">
-            <p class="footer-brand">SILENT</p>
-            <p class="footer-subtext">Interactive communication learning</p>
+            <p class="footer-brand mono-label">⚡ SILENT LABORATORY INSTRUMENT // V1.0</p>
+            <p class="footer-subtext mono-label">NEO-BRUTALIST SILENT COMMUNICATION HUB</p>
         </div>
     </footer>
 
     <!-- Placeholder Modal / Modal Overlay -->
     <div class="modal-overlay" id="placeholder-modal" aria-hidden="true" role="dialog" aria-modal="true">
-        <div class="modal-card">
-            <button class="modal-close" id="modal-close-btn" aria-label="Close modal">&times;</button>
+        <div class="hard-card modal-card">
+            <button class="modal-close brutalist-button" id="modal-close-btn" aria-label="Close modal">&times;</button>
             <div class="modal-icon-container" id="modal-icon-container">
                 <span class="modal-icon" id="modal-icon">🤟</span>
             </div>
-            <div class="modal-badge" id="modal-badge">MODULE INITIALIZING</div>
+            <div class="sticker-badge badge-accent-coral" id="modal-badge">MODULE INITIALIZING</div>
             <h3 class="modal-title" id="modal-title">Sign Language Lab</h3>
             <p class="modal-description" id="modal-description">
                 The hand sign tracking module is currently in preparation. Real-time camera hand tracking and sign recognition will be coming in the next release!
             </p>
-            <button class="modal-action-btn" id="modal-action-btn">RETURN TO HUB</button>
+            <button class="brutalist-button modal-action-btn" id="modal-action-btn">RETURN TO HUB</button>
         </div>
     </div>
 
