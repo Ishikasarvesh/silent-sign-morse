@@ -1,6 +1,6 @@
 /**
  * SILENT — Neo-Brutalist Laboratory Instrument
- * Phase 4, 6, 7 & 8 Controller: ASL Sign Language Lab, Practice Mode & Auto-Calibrated Eye Blink Engine
+ * Phase 4, 6, 7, 8 & 9 Controller: ASL Sign Language Lab, Practice Mode & Auto-Calibrated Eye Blink Morse Practice Engine
  * Stitch Screen ID: 0586a8cfaa1543629a7525d4f95efbb9
  */
 
@@ -97,8 +97,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentDecodedMessage = '';
     let currentMorseTargetChar = 'R';
 
+    // Phase 9 Morse Practice State Tracking (36 Characters)
+    const morsePracticeSequence = [
+        'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+        '0','1','2','3','4','5','6','7','8','9'
+    ];
+    let morsePracticeIndex = 0;
+    const completedMorseChars = new Set();
+    let mpUserBuffer = '';
+    let mpCurrentScore = 0;
+
     // ----------------------------------------------------------
-    // 3. PHASE 8: REFINED AUTO-CALIBRATED EYE BLINK CONFIG
+    // 3. PHASE 8 & 9: REFINED AUTO-CALIBRATED EYE BLINK CONFIG
     // ----------------------------------------------------------
     const blinkConfig = {
         dotMax: 350,        // ms: blinks < 350ms generate DOT
@@ -132,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewSignLab = document.getElementById('view-sign-lab');
     const viewSignPractice = document.getElementById('view-sign-practice');
     const viewMorseLab = document.getElementById('view-morse-lab');
+    const viewMorsePractice = document.getElementById('view-morse-practice');
 
     const navBtnHome = document.getElementById('nav-btn-home');
     const navBtnSignLab = document.getElementById('nav-btn-sign-lab');
@@ -150,6 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cardSignLanguage = document.getElementById('card-sign-language');
     const cardMorseCode = document.getElementById('card-morse-code');
     const btnLaunchPracticeMode = document.getElementById('btn-launch-practice-mode');
+    const btnLaunchMorsePractice = document.getElementById('btn-launch-morse-practice');
 
     const headerSecIndicator = document.getElementById('header-sec-indicator');
     const cameraStatusText = document.getElementById('camera-status-text');
@@ -273,6 +285,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const dbgBlinkDuration = document.getElementById('dbg-blink-duration');
     const dbgLastSignal = document.getElementById('dbg-last-signal');
 
+    // Phase 9 Morse Practice View DOM References
+    const btnExitMorsePractice = document.getElementById('btn-exit-morse-practice');
+    const mpStepIndicator = document.getElementById('mp-step-indicator');
+    const mpTargetCharBanner = document.getElementById('mp-target-char-banner');
+    const mpTargetPatternBanner = document.getElementById('mp-target-pattern-banner');
+    const mpCompletedCount = document.getElementById('mp-completed-count');
+    const mpProgressBarText = document.getElementById('mp-progress-bar-text');
+
+    const mpStandardBadge = document.getElementById('mp-standard-badge');
+    const mpCardChar = document.getElementById('mp-card-char');
+    const mpCardPattern = document.getElementById('mp-card-pattern');
+    const mpHumanBreakdown = document.getElementById('mp-human-breakdown');
+
+    const mpMatchBadge = document.getElementById('mp-match-badge');
+    const morsePracticeVideoElement = document.getElementById('morse-practice-webcam-video');
+    const morsePracticeCanvasElement = document.getElementById('morse-practice-eye-canvas');
+    const mpEyeTrackingBadge = document.getElementById('mp-eye-tracking-badge');
+    const mpEyeDurationText = document.getElementById('mp-eye-duration-text');
+    const mpLastSignalBadge = document.getElementById('mp-last-signal-badge');
+
+    const mpSeqComparisonTarget = document.getElementById('mp-seq-comparison-target');
+    const mpSeqComparisonUser = document.getElementById('mp-seq-comparison-user');
+    const mpScoreNumber = document.getElementById('mp-score-number');
+    const mpAchievementBanner = document.getElementById('mp-achievement-banner');
+
+    const mpFeedbackBadge = document.getElementById('mp-feedback-badge');
+    const mpUserBufferText = document.getElementById('mp-user-buffer-text');
+
+    const btnMpPrev = document.getElementById('btn-mp-prev');
+    const btnMpRetry = document.getElementById('btn-mp-retry');
+    const btnMpSkip = document.getElementById('btn-mp-skip');
+    const btnMpNext = document.getElementById('btn-mp-next');
+
     // Modals
     const placeholderModal = document.getElementById('placeholder-modal');
     const modalCloseBtn = document.getElementById('modal-close-btn');
@@ -286,6 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (viewSignLab) viewSignLab.classList.remove('active');
         if (viewSignPractice) viewSignPractice.classList.remove('active');
         if (viewMorseLab) viewMorseLab.classList.remove('active');
+        if (viewMorsePractice) viewMorsePractice.classList.remove('active');
 
         if (navBtnHome) navBtnHome.classList.remove('active');
         if (navBtnSignLab) navBtnSignLab.classList.remove('active');
@@ -318,6 +364,15 @@ document.addEventListener('DOMContentLoaded', () => {
             stopWebcamStream(); // Stop ASL hand stream
             initMorseLabView();
             initMorseFaceMeshEngine();
+        } else if (targetView === 'morse-practice') {
+            if (viewMorsePractice) viewMorsePractice.classList.add('active');
+            if (navBtnMorseLab) navBtnMorseLab.classList.add('active');
+            if (headerSecIndicator) headerSecIndicator.textContent = 'SEC: MORSE PRACTICE';
+            if (cameraStatusText) cameraStatusText.textContent = 'MORSE PRACTICE ACTIVE';
+
+            stopWebcamStream(); // Stop ASL hand stream
+            updateMorsePracticeTarget(morsePracticeSequence[morsePracticeIndex]);
+            initMorseFaceMeshEngine();
         } else {
             if (viewHome) viewHome.classList.add('active');
             if (navBtnHome) navBtnHome.classList.add('active');
@@ -340,6 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnReturnHome) btnReturnHome.addEventListener('click', () => switchView('home'));
     if (btnMorseReturnHome) btnMorseReturnHome.addEventListener('click', () => switchView('home'));
     if (btnExitPractice) btnExitPractice.addEventListener('click', () => switchView('sign-lab'));
+    if (btnExitMorsePractice) btnExitMorsePractice.addEventListener('click', () => switchView('morse-lab'));
 
     if (heroBtnExplore) heroBtnExplore.addEventListener('click', () => switchView('sign-lab'));
     if (heroBtnPractice) heroBtnPractice.addEventListener('click', () => switchView('sign-practice'));
@@ -350,6 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cardSignLanguage) cardSignLanguage.addEventListener('click', () => switchView('sign-lab'));
     if (cardMorseCode) cardMorseCode.addEventListener('click', () => switchView('morse-lab'));
     if (btnLaunchPracticeMode) btnLaunchPracticeMode.addEventListener('click', () => switchView('sign-practice'));
+    if (btnLaunchMorsePractice) btnLaunchMorsePractice.addEventListener('click', () => switchView('morse-practice'));
 
     function openPlaceholderModal(title, icon, desc) {
         if (!placeholderModal) return;
@@ -563,8 +620,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function addMorseSignal(symbol) {
         if (symbol === '.' || symbol === '-') {
-            currentMorseBuffer += symbol;
-            updateMorseBufferUI();
+            if (viewMorsePractice && viewMorsePractice.classList.contains('active')) {
+                mpUserBuffer += symbol;
+                evaluateMorsePracticeAttempt(symbol);
+            } else {
+                currentMorseBuffer += symbol;
+                updateMorseBufferUI();
+            }
         }
     }
 
@@ -717,7 +779,142 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------
-    // 8. PHASE 8: AUTO-CALIBRATION SEQUENCE ENGINE
+    // 8. PHASE 9: DEDICATED MORSE PRACTICE ENGINE & MATCH SCORER
+    // ----------------------------------------------------------
+    function getHumanReadableMorseBreakdown(signal) {
+        if (!signal) return '';
+        const items = [];
+        for (let i = 0; i < signal.length; i++) {
+            if (signal[i] === '.') {
+                items.push('<div class="finger-state-pill is-extended">SHORT BLINK ( &lt; 350ms )</div>');
+            } else if (signal[i] === '-') {
+                items.push('<div class="finger-state-pill is-curled">LONG BLINK ( &ge; 350ms )</div>');
+            }
+        }
+        return items.join('');
+    }
+
+    function updateMorsePracticeTarget(char) {
+        if (!morseSignalMap[char]) return;
+        const targetPattern = morseSignalMap[char];
+        const displayPattern = targetPattern.replace(/\./g, '• ').replace(/-/g, '— ');
+        morsePracticeIndex = morsePracticeSequence.indexOf(char);
+
+        if (mpStepIndicator) mpStepIndicator.textContent = `STEP ${morsePracticeIndex + 1} OF ${morsePracticeSequence.length}`;
+        if (mpTargetCharBanner) mpTargetCharBanner.textContent = char;
+        if (mpTargetPatternBanner) mpTargetPatternBanner.textContent = `PATTERN: ${displayPattern}`;
+        if (mpCompletedCount) mpCompletedCount.textContent = `COMPLETED: ${completedMorseChars.size} / ${morsePracticeSequence.length}`;
+        if (mpStandardBadge) mpStandardBadge.textContent = `STANDARD: ${char}`;
+
+        const filledBlocks = Math.floor((completedMorseChars.size / morsePracticeSequence.length) * 30);
+        const emptyBlocks = 30 - filledBlocks;
+        if (mpProgressBarText) mpProgressBarText.textContent = `PROGRESS: [${'█'.repeat(filledBlocks)}${'░'.repeat(emptyBlocks)}] ${completedMorseChars.size} / ${morsePracticeSequence.length}`;
+
+        if (mpCardChar) mpCardChar.textContent = char;
+        if (mpCardPattern) mpCardPattern.textContent = displayPattern;
+        if (mpHumanBreakdown) mpHumanBreakdown.innerHTML = getHumanReadableMorseBreakdown(targetPattern);
+
+        // Reset User Attempt State
+        mpUserBuffer = '';
+        mpCurrentScore = 0;
+
+        if (mpUserBufferText) mpUserBufferText.textContent = ' ';
+        if (mpSeqComparisonTarget) mpSeqComparisonTarget.textContent = `TARGET: ${displayPattern}`;
+        if (mpSeqComparisonUser) mpSeqComparisonUser.textContent = 'YOU: --';
+        if (mpScoreNumber) mpScoreNumber.textContent = '0%';
+        if (mpMatchBadge) mpMatchBadge.textContent = 'MATCH: 0%';
+
+        if (mpAchievementBanner) mpAchievementBanner.classList.add('hidden');
+        if (btnMpNext) btnMpNext.disabled = true;
+        if (mpFeedbackBadge) mpFeedbackBadge.textContent = 'WAITING FOR SIGNAL';
+    }
+
+    function evaluateMorsePracticeAttempt(lastReceivedSymbol) {
+        const currentChar = morsePracticeSequence[morsePracticeIndex];
+        const targetPattern = morseSignalMap[currentChar];
+        const targetDisplay = targetPattern.replace(/\./g, '• ').replace(/-/g, '— ');
+        const userDisplay = mpUserBuffer.replace(/\./g, '• ').replace(/-/g, '— ');
+
+        if (mpUserBufferText) mpUserBufferText.textContent = userDisplay;
+        if (mpSeqComparisonUser) mpSeqComparisonUser.textContent = `YOU: ${userDisplay}`;
+
+        const NT = targetPattern.length;
+        const NU = mpUserBuffer.length;
+
+        let matches = 0;
+        const minLen = Math.min(NT, NU);
+        for (let i = 0; i < minLen; i++) {
+            if (mpUserBuffer[i] === targetPattern[i]) matches++;
+        }
+
+        let score = Math.round((matches / NT) * 100);
+
+        // Penalties for extra or wrong signals
+        if (NU > NT) {
+            score = Math.max(0, score - (NU - NT) * 20);
+        }
+
+        mpCurrentScore = score;
+        if (mpScoreNumber) mpScoreNumber.textContent = `${mpCurrentScore}%`;
+        if (mpMatchBadge) mpMatchBadge.textContent = `MATCH: ${mpCurrentScore}%`;
+
+        // Attempt feedback status
+        const symbolLabel = lastReceivedSymbol === '.' ? 'DOT RECEIVED' : 'DASH RECEIVED';
+
+        if (mpUserBuffer === targetPattern) {
+            // Perfect 100% Match!
+            mpCurrentScore = 100;
+            if (mpScoreNumber) mpScoreNumber.textContent = '100%';
+            if (mpMatchBadge) mpMatchBadge.textContent = 'MATCH: 100%';
+
+            completedMorseChars.add(currentChar);
+            if (mpCompletedCount) mpCompletedCount.textContent = `COMPLETED: ${completedMorseChars.size} / ${morsePracticeSequence.length}`;
+
+            const filledBlocks = Math.floor((completedMorseChars.size / morsePracticeSequence.length) * 30);
+            const emptyBlocks = 30 - filledBlocks;
+            if (mpProgressBarText) mpProgressBarText.textContent = `PROGRESS: [${'█'.repeat(filledBlocks)}${'░'.repeat(emptyBlocks)}] ${completedMorseChars.size} / ${morsePracticeSequence.length}`;
+
+            if (mpAchievementBanner) mpAchievementBanner.classList.remove('hidden');
+            if (btnMpNext) btnMpNext.disabled = false;
+            if (mpFeedbackBadge) mpFeedbackBadge.textContent = 'TARGET ACHIEVED';
+
+            logMorseTerminalMessage(`> [✓] TARGET CHARACTER '${currentChar}' ACHIEVED VIA BLINK PRACTICE!`);
+        } else if (targetPattern.startsWith(mpUserBuffer)) {
+            if (mpFeedbackBadge) mpFeedbackBadge.textContent = `${symbolLabel} (SIGNAL CORRECT)`;
+        } else {
+            if (mpFeedbackBadge) mpFeedbackBadge.textContent = `${symbolLabel} (SIGNAL INCORRECT)`;
+        }
+    }
+
+    if (btnMpPrev) {
+        btnMpPrev.addEventListener('click', () => {
+            const prevIdx = (morsePracticeIndex - 1 + morsePracticeSequence.length) % morsePracticeSequence.length;
+            updateMorsePracticeTarget(morsePracticeSequence[prevIdx]);
+        });
+    }
+
+    if (btnMpRetry) {
+        btnMpRetry.addEventListener('click', () => {
+            updateMorsePracticeTarget(morsePracticeSequence[morsePracticeIndex]);
+        });
+    }
+
+    if (btnMpSkip) {
+        btnMpSkip.addEventListener('click', () => {
+            const nextIdx = (morsePracticeIndex + 1) % morsePracticeSequence.length;
+            updateMorsePracticeTarget(morsePracticeSequence[nextIdx]);
+        });
+    }
+
+    if (btnMpNext) {
+        btnMpNext.addEventListener('click', () => {
+            const nextIdx = (morsePracticeIndex + 1) % morsePracticeSequence.length;
+            updateMorsePracticeTarget(morsePracticeSequence[nextIdx]);
+        });
+    }
+
+    // ----------------------------------------------------------
+    // 9. REAL MEDIAPIPE FACE MESH & AUTO-CALIBRATED BLINK ENGINE
     // ----------------------------------------------------------
     function startEyeCalibration() {
         if (!isFaceDetected) {
@@ -735,9 +932,6 @@ document.addEventListener('DOMContentLoaded', () => {
         logMorseTerminalMessage('> EYE CALIBRATION STARTED: KEEP EYES OPEN NATURALLY FOR 2 SECONDS...');
     }
 
-    // ----------------------------------------------------------
-    // 9. PHASE 7 & 8: REAL MEDIAPIPE FACE MESH & REFINED BLINK ENGINE
-    // ----------------------------------------------------------
     let morseWebcamStream = null;
     let faceMeshEngine = null;
     let morseAnimFrameId = null;
@@ -758,6 +952,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (morseVideoElement) {
                     morseVideoElement.srcObject = morseWebcamStream;
                     await morseVideoElement.play();
+                }
+                if (morsePracticeVideoElement) {
+                    morsePracticeVideoElement.srcObject = morseWebcamStream;
+                    await morsePracticeVideoElement.play();
                 }
             }
 
@@ -789,7 +987,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (morseCameraLoadingPanel) morseCameraLoadingPanel.classList.add('hidden');
             startMorseDetectionLoop();
 
-            // Trigger auto-calibration 1 second after camera startup
             setTimeout(() => {
                 if (viewMorseLab.classList.contains('active') && !isCalibrating) {
                     startEyeCalibration();
@@ -823,14 +1020,12 @@ document.addEventListener('DOMContentLoaded', () => {
             morseWebcamStream = null;
         }
 
-        if (morseVideoElement) {
-            morseVideoElement.srcObject = null;
-        }
+        if (morseVideoElement) morseVideoElement.srcObject = null;
+        if (morsePracticeVideoElement) morsePracticeVideoElement.srcObject = null;
 
         isSendingMorseFrame = false;
         morseEngineInitialized = false;
 
-        // Reset state safety to prevent phantom blinks
         isEyeBlinking = false;
         closedFrameCount = 0;
         openFrameCount = 0;
@@ -843,20 +1038,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (morseAnimFrameId) cancelAnimationFrame(morseAnimFrameId);
 
         async function processFrame() {
-            if (morseVideoElement && !morseVideoElement.paused && !morseVideoElement.ended && morseVideoElement.readyState >= 2) {
+            const activeMorseVideo = viewMorsePractice.classList.contains('active') ? morsePracticeVideoElement : morseVideoElement;
+
+            if (activeMorseVideo && !activeMorseVideo.paused && !activeMorseVideo.ended && activeMorseVideo.readyState >= 2) {
                 if (!isSendingMorseFrame && faceMeshEngine && morseEngineInitialized) {
                     isSendingMorseFrame = true;
                     try {
-                        await faceMeshEngine.send({ image: morseVideoElement });
+                        await faceMeshEngine.send({ image: activeMorseVideo });
                     } catch (e) {
                         console.warn('FaceMesh Frame Error:', e);
-                    } finally {
-                        isSendingMorseFrame = false;
-                    }
+                    } opacity: 1;
+                    isSendingMorseFrame = false;
                 }
             }
 
-            if (morseWebcamStream && viewMorseLab && viewMorseLab.classList.contains('active')) {
+            if (morseWebcamStream && (viewMorseLab.classList.contains('active') || viewMorsePractice.classList.contains('active'))) {
                 morseAnimFrameId = requestAnimationFrame(processFrame);
             }
         }
@@ -888,14 +1084,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function onFaceMeshResults(results) {
-        if (!morseCanvasElement) return;
+        const isMorsePractice = viewMorsePractice.classList.contains('active');
+        const activeCanvas = isMorsePractice ? morsePracticeCanvasElement : morseCanvasElement;
 
-        morseCanvasElement.width = morseCanvasElement.clientWidth || 640;
-        morseCanvasElement.height = morseCanvasElement.clientHeight || 480;
+        if (!activeCanvas) return;
 
-        const ctx = morseCanvasElement.getContext('2d');
-        const width = morseCanvasElement.width;
-        const height = morseCanvasElement.height;
+        activeCanvas.width = activeCanvas.clientWidth || 640;
+        activeCanvas.height = activeCanvas.clientHeight || 480;
+
+        const ctx = activeCanvas.getContext('2d');
+        const width = activeCanvas.width;
+        const height = activeCanvas.height;
 
         ctx.clearRect(0, 0, width, height);
 
@@ -905,7 +1104,6 @@ document.addEventListener('DOMContentLoaded', () => {
             isFaceDetected = true;
             const landmarks = multiFaceLandmarks[0];
 
-            // 1. Calculate RAW EAR & Smooth EAR (Exponential Moving Average)
             const earLeft = calculateSingleEyeEAR(landmarks, LEFT_EYE_INDICES);
             const earRight = calculateSingleEyeEAR(landmarks, RIGHT_EYE_INDICES);
             rawEAR = (earLeft + earRight) / 2.0;
@@ -914,7 +1112,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const now = performance.now();
 
-            // 2. Auto-Calibration Sampling Window Handling
             if (isCalibrating) {
                 const elapsed = now - calibrationStartTime;
                 calibrationSamples.push(rawEAR);
@@ -928,7 +1125,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const sum = calibrationSamples.reduce((a, b) => a + b, 0);
                     calibratedEarBaseline = sum / (calibrationSamples.length || 1);
 
-                    // Calculated Threshold = Baseline EAR * 0.70
                     blinkConfig.earThreshold = parseFloat((calibratedEarBaseline * 0.70).toFixed(2));
 
                     if (inputEarThreshold) inputEarThreshold.value = blinkConfig.earThreshold;
@@ -940,26 +1136,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // 3. Multi-Frame Confirmation & Noise Prevention State Machine
             const isFrameClosed = smoothEAR < blinkConfig.earThreshold;
 
             if (isFrameClosed) {
                 closedFrameCount++;
                 openFrameCount = 0;
 
-                // Require 2 consecutive frames closed to enter EYES_CLOSED
                 if (closedFrameCount >= 2 && !isEyeBlinking && (now - lastBlinkEndTime > blinkConfig.cooldownMs)) {
                     isEyeBlinking = true;
                     blinkStartTime = now;
 
                     if (eyeStateBadge) eyeStateBadge.textContent = 'BLINK DETECTED';
                     if (eyeTrackingHudBadge) eyeTrackingHudBadge.textContent = '[ BLINKING ]';
+                    if (mpEyeTrackingBadge) mpEyeTrackingBadge.textContent = '[ BLINKING ]';
                 }
             } else {
                 openFrameCount++;
                 closedFrameCount = 0;
 
-                // Require 2 consecutive frames open to confirm eye re-opening & register blink
                 if (openFrameCount >= 2) {
                     if (isEyeBlinking) {
                         isEyeBlinking = false;
@@ -968,13 +1162,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         const duration = Math.round(now - blinkStartTime);
                         lastMeasuredBlinkDuration = duration;
 
-                        if (duration >= 80) { // Filter out micro noise < 80ms
+                        if (duration >= 80) {
                             if (duration < blinkConfig.dotMax) {
                                 lastGeneratedSignal = 'DOT ( . )';
                                 if (lastSignalBadge) {
                                     lastSignalBadge.textContent = 'LAST: DOT ( • )';
                                     lastSignalBadge.className = 'sticker-badge badge-yellow';
                                     lastSignalBadge.classList.remove('hidden');
+                                }
+                                if (mpLastSignalBadge) {
+                                    mpLastSignalBadge.textContent = 'LAST: DOT ( • )';
+                                    mpLastSignalBadge.className = 'sticker-badge badge-yellow';
+                                    mpLastSignalBadge.classList.remove('hidden');
                                 }
                                 addMorseSignal('.');
                                 logMorseTerminalMessage(`> BLINK TELEGRAPHY: SHORT BLINK ( ${duration} ms ) -> DOT ( . )`);
@@ -986,6 +1185,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                     lastSignalBadge.className = 'sticker-badge badge-coral';
                                     lastSignalBadge.classList.remove('hidden');
                                 }
+                                if (mpLastSignalBadge) {
+                                    mpLastSignalBadge.textContent = 'LAST: DASH ( — )';
+                                    mpLastSignalBadge.className = 'sticker-badge badge-coral';
+                                    mpLastSignalBadge.classList.remove('hidden');
+                                }
                                 addMorseSignal('-');
                                 logMorseTerminalMessage(`> BLINK TELEGRAPHY: LONG BLINK ( ${duration} ms ) -> DASH ( — )`);
                                 if (eyeStateBadge) eyeStateBadge.textContent = 'DASH DETECTED';
@@ -994,15 +1198,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         if (eyeStateBadge) eyeStateBadge.textContent = 'EYES OPEN';
                         if (eyeTrackingHudBadge) eyeTrackingHudBadge.textContent = '[ TRACKING ]';
+                        if (mpEyeTrackingBadge) mpEyeTrackingBadge.textContent = '[ TRACKING ]';
                     }
                 }
             }
 
-            // 4. Render Eye Contours on Canvas Overlay
             drawRefinedEyeOverlayOnCtx(ctx, landmarks, width, height, isFrameClosed);
 
-            // 5. Update Real-Time HUD & Debug Readouts
             if (eyeDurationHudText) eyeDurationHudText.textContent = `BLINK: ${lastMeasuredBlinkDuration} ms`;
+            if (mpEyeDurationText) mpEyeDurationText.textContent = `BLINK: ${lastMeasuredBlinkDuration} ms`;
             if (morseStatusBadge) morseStatusBadge.textContent = 'EYE ENGINE ACTIVE';
 
             if (dbgFaceDetected) dbgFaceDetected.textContent = 'YES';
@@ -1014,7 +1218,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (dbgLastSignal) dbgLastSignal.textContent = lastGeneratedSignal;
 
         } else {
-            // Face lost: Reset states safely to prevent phantom blinks
             isFaceDetected = false;
             isEyeBlinking = false;
             closedFrameCount = 0;
@@ -1022,6 +1225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (eyeStateBadge) eyeStateBadge.textContent = 'NO FACE';
             if (eyeTrackingHudBadge) eyeTrackingHudBadge.textContent = '[ NO FACE ]';
+            if (mpEyeTrackingBadge) mpEyeTrackingBadge.textContent = '[ NO FACE ]';
             if (morseStatusBadge) morseStatusBadge.textContent = 'EYE SEARCHING';
 
             if (dbgFaceDetected) dbgFaceDetected.textContent = 'NO';
@@ -1069,7 +1273,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fill();
     }
 
-    // Expose Modular Functions globally for Morse Telegraphy Engine
+    // Expose Modular Functions globally
     window.addMorseSignal = addMorseSignal;
     window.decodeMorseSignal = decodeMorseSignal;
     window.clearMorseBuffer = clearMorseBuffer;

@@ -74,7 +74,7 @@
                             <span aria-hidden="true">→</span>
                         </button>
                         <button class="brutalist-button btn-coral" id="hero-btn-practice" type="button">
-                            <span>START PRACTICE</span>
+                            <span>START SIGN PRACTICE</span>
                             <span aria-hidden="true">★</span>
                         </button>
                         <button class="brutalist-button btn-yellow" id="hero-btn-morse" type="button">
@@ -141,7 +141,7 @@
 
                             <div class="feature-labels">
                                 <span class="sticker-badge badge-yellow rotate-left">EYE TRACKING</span>
-                                <span class="sticker-badge badge-peach rotate-right">AUTO CALIBRATED</span>
+                                <span class="sticker-badge badge-peach rotate-right">MORSE PRACTICE</span>
                                 <span class="sticker-badge badge-coral">LIVE TELEGRAPHY</span>
                             </div>
 
@@ -178,9 +178,9 @@
                     <div class="terminal-panel-body">
                         <div class="terminal-console-log" id="system-console-log" role="region" aria-label="Terminal Interface Log">
                             <div class="log-entry">
-                                <span class="log-time">[18:25:00]</span>
+                                <span class="log-time">[18:30:00]</span>
                                 <span class="log-prompt">></span>
-                                <span class="log-text">SILENT System Hub initialized. Click "SIGN LAB", "PRACTICE", or "MORSE LAB" to launch module.</span>
+                                <span class="log-text">SILENT System Hub initialized. Click "SIGN LAB", "SIGN PRACTICE", or "MORSE LAB" to launch module.</span>
                             </div>
                         </div>
                     </div>
@@ -469,7 +469,8 @@
                             <span class="sticker-badge badge-yellow rotate-right" id="morse-status-badge">EYE TRACKING READY</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <button class="brutalist-button btn-coral" id="btn-trigger-calibration" style="padding: 4px 10px; font-size: 0.75rem;" type="button">CALIBRATE EYES 🎯</button>
+                            <button class="brutalist-button btn-coral" id="btn-launch-morse-practice" style="padding: 4px 10px; font-size: 0.75rem;" type="button">START PRACTICE ★</button>
+                            <button class="brutalist-button btn-yellow" id="btn-trigger-calibration" style="padding: 4px 10px; font-size: 0.75rem;" type="button">CALIBRATE EYES 🎯</button>
                             <button class="brutalist-button btn-secondary" id="btn-toggle-debug" style="padding: 4px 10px; font-size: 0.75rem;" type="button">DEBUG HUD ⚙</button>
                             <button class="brutalist-button btn-yellow" id="btn-morse-return-home" style="padding: 4px 10px; font-size: 0.75rem;" type="button">RETURN HOME</button>
                         </div>
@@ -683,7 +684,7 @@
                             <div style="padding: var(--space-md);">
                                 <div class="terminal-console-log" id="morse-terminal-log" style="height: 180px;">
                                     <div class="log-entry">
-                                        <span class="log-time">[18:25:00]</span>
+                                        <span class="log-time">[18:30:00]</span>
                                         <span class="log-prompt">&gt;</span>
                                         <span class="log-text">SILENT Morse Code Telemetry Engine initialized. Use BLINK or DOT/DASH keys.</span>
                                     </div>
@@ -694,6 +695,144 @@
                 </div>
             </div>
         </div>
+
+        <!-- ==========================================================
+             VIEW 5: SILENT MORSE CODE PRACTICE (PHASE 9 DEDICATED PRACTICE)
+             ========================================================== -->
+        <div class="page-view" id="view-morse-practice">
+            <div class="container" style="padding-top: var(--space-lg);">
+                <!-- Top Header Bar -->
+                <div class="hard-card has-header" style="margin-bottom: var(--space-md);">
+                    <div class="card-header-black">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="mono-label">MORSE PRACTICE</span>
+                            <span class="mono-label text-dim">HOME &gt; MORSE LAB &gt; PRACTICE</span>
+                            <span class="sticker-badge badge-yellow rotate-right" id="mp-step-indicator">STEP 1 OF 36</span>
+                        </div>
+                        <button class="brutalist-button btn-secondary" id="btn-exit-morse-practice" style="padding: 4px 10px; font-size: 0.75rem;" type="button">EXIT PRACTICE</button>
+                    </div>
+                </div>
+
+                <!-- Target Instruction Banner -->
+                <div class="hard-card practice-instruction-banner" style="margin-bottom: var(--space-lg); background-color: var(--surface-container); border: var(--border-primary); box-shadow: var(--shadow-hard);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-sm);">
+                        <div>
+                            <span class="mono-label" style="color: var(--secondary); font-size: 0.8rem; display: block; margin-bottom: 4px;">TARGET CHARACTER // MORSE CODE</span>
+                            <h1 class="font-display" style="font-size: 2.4rem; color: var(--primary);">
+                                SEND THIS CHARACTER: <span class="sticker-badge badge-yellow" id="mp-target-char-banner" style="font-size: 2rem; padding: 2px 14px; border: var(--border-primary);">A</span>
+                            </h1>
+                            <span class="mono-label" style="font-size: 1.1rem; color: var(--accent-coral); margin-top: 4px; display: inline-block;" id="mp-target-pattern-banner">PATTERN: • —</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                            <div class="sticker-badge badge-coral rotate-right" id="mp-completed-count">
+                                <span>COMPLETED: 0 / 36</span>
+                            </div>
+                            <span class="mono-label" id="mp-progress-bar-text" style="font-size: 0.8rem; background: var(--surface); padding: 4px 8px; border: 2px solid #000; box-shadow: 2px 2px 0px #000;">PROGRESS: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0 / 36</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Workspace Grid -->
+                <div class="sign-lab-grid">
+                    <!-- Left Side: Target Character Card & Breakdown -->
+                    <section class="sign-lab-col-left">
+                        <article class="hard-card has-header reference-card">
+                            <div class="card-header-coral">
+                                <span class="mono-label">TARGET CHARACTER CARD</span>
+                                <span class="sticker-badge badge-yellow" id="mp-standard-badge">STANDARD: A</span>
+                            </div>
+
+                            <div class="reference-body">
+                                <div class="reference-visual-box" style="min-height: 200px; flex-direction: column; gap: 8px;">
+                                    <span class="mono-label text-dim">TARGET SIGN:</span>
+                                    <span class="font-display" id="mp-card-char" style="font-size: 5rem; line-height: 1; color: var(--primary);">A</span>
+                                    <span class="font-display" id="mp-card-pattern" style="font-size: 2.8rem; color: var(--accent-coral);">• —</span>
+                                </div>
+
+                                <div class="reference-info-box">
+                                    <span class="mono-label">HUMAN BLINK SEQUENCE BREAKDOWN:</span>
+                                    <div class="breakdown-chips-container" id="mp-human-breakdown" style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+                                        <div class="finger-state-pill is-extended">1 SHORT BLINK ( &lt; 350ms )</div>
+                                        <div class="finger-state-pill is-curled">1 LONG BLINK ( &ge; 350ms )</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </section>
+
+                    <!-- Right Side: Live Eye Practice Panel -->
+                    <section class="sign-lab-col-right">
+                        <article class="hard-card has-header camera-analysis-card">
+                            <div class="card-header-black">
+                                <div class="flex-row-center">
+                                    <span class="status-dot dot-live"></span>
+                                    <span class="mono-label">LIVE EYE PRACTICE PANEL</span>
+                                </div>
+                                <span class="sticker-badge badge-coral" id="mp-match-badge">MATCH: 0%</span>
+                            </div>
+
+                            <div class="camera-viewport-container" style="height: 340px; background-color: #1c1c17;">
+                                <video class="camera-video" id="morse-practice-webcam-video" autoplay playsinline muted></video>
+                                <canvas class="camera-canvas" id="morse-practice-eye-canvas"></canvas>
+
+                                <span class="corner-mark mark-tl" aria-hidden="true">+</span>
+                                <span class="corner-mark mark-tr" aria-hidden="true">+</span>
+                                <span class="corner-mark mark-bl" aria-hidden="true">+</span>
+                                <span class="corner-mark mark-br" aria-hidden="true">+</span>
+
+                                <!-- HUD Stickers -->
+                                <div class="eye-hud-sticker">
+                                    <span class="sticker-badge badge-yellow" id="mp-eye-tracking-badge">[ TRACKING ]</span>
+                                    <span class="mono-label" id="mp-eye-duration-text" style="color: var(--accent-yellow); font-size: 0.8rem; background: #000; padding: 2px 6px; border: 1px solid #000; box-shadow: 2px 2px 0px #000;">BLINK: 0 ms</span>
+                                    <span class="sticker-badge badge-coral hidden" id="mp-last-signal-badge">LAST: NONE</span>
+                                </div>
+
+                                <!-- Match Score Overlay -->
+                                <div class="practice-score-overlay">
+                                    <span class="mono-label text-dim" id="mp-seq-comparison-target">TARGET: • —</span>
+                                    <span class="mono-label text-dim" id="mp-seq-comparison-user">YOU: --</span>
+                                    <span class="font-display" id="mp-score-number" style="font-size: 2.5rem; line-height: 1;">0%</span>
+                                </div>
+
+                                <!-- Achievement Banner -->
+                                <div class="practice-achievement-sticker hidden" id="mp-achievement-banner">
+                                    <span class="sticker-badge badge-yellow rotate-left" style="font-size: 1.1rem; padding: 8px 16px;">[✓] TARGET CHARACTER ACHIEVED</span>
+                                </div>
+                            </div>
+
+                            <!-- Attempt Feedback Terminal -->
+                            <div class="finger-analysis-container">
+                                <div class="finger-analysis-header">
+                                    <h3 class="font-heading" style="font-size: 1.1rem; font-weight: 700;">ATTEMPT FEEDBACK TERMINAL</h3>
+                                    <span class="sticker-badge badge-peach" id="mp-feedback-badge">WAITING FOR SIGNAL</span>
+                                </div>
+
+                                <div class="morse-buffer-display" style="min-height: 50px;">
+                                    <span id="mp-user-buffer-text" style="color: var(--accent-yellow); font-size: 1.8rem; letter-spacing: 4px;"> </span>
+                                </div>
+                            </div>
+                        </article>
+
+                        <!-- Control Buttons -->
+                        <div class="practice-controls-bar">
+                            <button class="brutalist-button btn-secondary" id="btn-mp-prev" type="button">
+                                <span>← PREVIOUS</span>
+                            </button>
+                            <button class="brutalist-button btn-secondary" id="btn-mp-retry" type="button">
+                                <span>RETRY</span>
+                            </button>
+                            <button class="brutalist-button btn-secondary" id="btn-mp-skip" type="button">
+                                <span>SKIP</span>
+                            </button>
+                            <button class="brutalist-button btn-coral" id="btn-mp-next" type="button">
+                                <span>NEXT CHARACTER →</span>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- TerminalFooter Component -->
