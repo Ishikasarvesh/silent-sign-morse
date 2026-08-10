@@ -1,6 +1,6 @@
 /**
  * SILENT — Neo-Brutalist Laboratory Instrument
- * Phase 4, 6 & 7 Controller: ASL Sign Language Lab, Practice Mode & Real Eye Blink Morse Engine
+ * Phase 4, 6, 7 & 8 Controller: ASL Sign Language Lab, Practice Mode & Auto-Calibrated Eye Blink Engine
  * Stitch Screen ID: 0586a8cfaa1543629a7525d4f95efbb9
  */
 
@@ -98,22 +98,32 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentMorseTargetChar = 'R';
 
     // ----------------------------------------------------------
-    // 3. PHASE 7: REAL BLINK DETECTION CALIBRATION CONFIG
+    // 3. PHASE 8: REFINED AUTO-CALIBRATED EYE BLINK CONFIG
     // ----------------------------------------------------------
     const blinkConfig = {
-        dotMax: 350,       // ms: blinks < 350ms generate DOT
-        dashMin: 350,      // ms: blinks >= 350ms generate DASH
-        earThreshold: 0.21, // Eye Aspect Ratio threshold (< 0.21 = CLOSED)
-        cooldownMs: 250     // Minimum cooldown between consecutive blinks
+        dotMax: 350,        // ms: blinks < 350ms generate DOT
+        dashMin: 350,       // ms: blinks >= 350ms generate DASH
+        earThreshold: 0.21,  // Dynamic threshold (auto-calculated as baseline * 0.70)
+        cooldownMs: 250      // Cooldown timer between consecutive blinks
     };
 
+    // State Tracking & Multi-frame Noise Filter Variables
     let isEyeBlinking = false;
     let blinkStartTime = 0;
     let lastBlinkEndTime = 0;
     let lastMeasuredBlinkDuration = 0;
     let lastGeneratedSignal = 'NONE';
-    let currentAverageEAR = 0.30;
+    let rawEAR = 0.29;
+    let smoothEAR = 0.29;
+    let closedFrameCount = 0;
+    let openFrameCount = 0;
     let isFaceDetected = false;
+
+    // Auto-Calibration Sequence State
+    let isCalibrating = false;
+    let calibrationStartTime = 0;
+    let calibrationSamples = [];
+    let calibratedEarBaseline = 0.29;
 
     // ----------------------------------------------------------
     // 4. DOM References
@@ -205,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnPracticeSkip = document.getElementById('btn-practice-skip');
     const btnPracticeNext = document.getElementById('btn-practice-next');
 
-    // Morse Lab & Eye Tracking DOM References
+    // Morse Lab DOM References
     const morseChartGrid = document.getElementById('morse-chart-grid');
     const morseSelChar = document.getElementById('morse-sel-char');
     const morseSelPattern = document.getElementById('morse-sel-pattern');
@@ -227,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const morseTerminalLog = document.getElementById('morse-terminal-log');
     const btnMorseClearTerminal = document.getElementById('btn-morse-clear-terminal');
 
-    // Phase 7 Eye Tracking Elements
+    // Phase 7 & 8 Eye Tracking & Calibration Elements
     const morseVideoElement = document.getElementById('morse-webcam-video');
     const morseCanvasElement = document.getElementById('morse-eye-canvas');
     const morseCameraLoadingPanel = document.getElementById('morse-camera-loading-panel');
@@ -237,9 +247,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const eyeStateBadge = document.getElementById('eye-state-badge');
     const eyeTrackingHudBadge = document.getElementById('eye-tracking-hud-badge');
     const eyeDurationHudText = document.getElementById('eye-duration-hud-text');
+    const lastSignalBadge = document.getElementById('last-signal-badge');
     const morseStatusBadge = document.getElementById('morse-status-badge');
 
-    // Calibration Sliders & Debug Panel DOM
+    const btnTriggerCalibration = document.getElementById('btn-trigger-calibration');
+    const morseCalibrationOverlay = document.getElementById('morse-calibration-overlay');
+    const calibrationProgressFill = document.getElementById('calibration-progress-fill');
+    const calibrationTimeText = document.getElementById('calibration-time-text');
+    const calibrationStatusBadge = document.getElementById('calibration-status-badge');
+
     const inputDotMax = document.getElementById('input-dot-max');
     const valDotMax = document.getElementById('val-dot-max');
     const inputDashMin = document.getElementById('input-dash-min');
@@ -251,7 +267,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const dbgFaceDetected = document.getElementById('dbg-face-detected');
     const dbgEyeState = document.getElementById('dbg-eye-state');
-    const dbgAvgEar = document.getElementById('dbg-avg-ear');
+    const dbgRawEar = document.getElementById('dbg-raw-ear');
+    const dbgSmoothEar = document.getElementById('dbg-smooth-ear');
+    const dbgCalibratedThreshold = document.getElementById('dbg-calibrated-threshold');
     const dbgBlinkDuration = document.getElementById('dbg-blink-duration');
     const dbgLastSignal = document.getElementById('dbg-last-signal');
 
@@ -624,8 +642,26 @@ document.addEventListener('DOMContentLoaded', () => {
         updateMorseBufferUI();
     }
 
-    if (btnMorseDot) btnMorseDot.addEventListener('click', () => addMorseSignal('.'));
-    if (btnMorseDash) btnMorseDash.addEventListener('click', () => addMorseSignal('-'));
+    if (btnMorseDot) btnMorseDot.addEventListener('click', () => {
+        lastGeneratedSignal = 'DOT ( . )';
+        if (lastSignalBadge) {
+            lastSignalBadge.textContent = 'LAST: DOT ( • )';
+            lastSignalBadge.className = 'sticker-badge badge-yellow';
+            lastSignalBadge.classList.remove('hidden');
+        }
+        addMorseSignal('.');
+    });
+
+    if (btnMorseDash) btnMorseDash.addEventListener('click', () => {
+        lastGeneratedSignal = 'DASH ( - )';
+        if (lastSignalBadge) {
+            lastSignalBadge.textContent = 'LAST: DASH ( — )';
+            lastSignalBadge.className = 'sticker-badge badge-coral';
+            lastSignalBadge.classList.remove('hidden');
+        }
+        addMorseSignal('-');
+    });
+
     if (btnMorseClear) btnMorseClear.addEventListener('click', clearMorseBuffer);
     if (btnMorseSpace) btnMorseSpace.addEventListener('click', commitMorseCharacter);
     if (btnMorseTransmit) btnMorseTransmit.addEventListener('click', transmitMorseMessage);
@@ -664,6 +700,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inputEarThreshold.addEventListener('input', (e) => {
             blinkConfig.earThreshold = parseFloat(e.target.value);
             valEarThreshold.textContent = `${blinkConfig.earThreshold.toFixed(2)}`;
+            if (dbgCalibratedThreshold) dbgCalibratedThreshold.textContent = blinkConfig.earThreshold.toFixed(3);
         });
     }
 
@@ -673,16 +710,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Expose Modular Functions globally for Phase 7 Eye Tracking Engine
-    window.addMorseSignal = addMorseSignal;
-    window.decodeMorseSignal = decodeMorseSignal;
-    window.clearMorseBuffer = clearMorseBuffer;
-    window.commitMorseCharacter = commitMorseCharacter;
-    window.transmitMorseMessage = transmitMorseMessage;
-    window.setMorseTarget = setMorseTarget;
+    if (btnTriggerCalibration) {
+        btnTriggerCalibration.addEventListener('click', () => {
+            startEyeCalibration();
+        });
+    }
 
     // ----------------------------------------------------------
-    // 8. PHASE 7: REAL MEDIAPIPE FACE MESH & BLINK TELEGRAPHY ENGINE
+    // 8. PHASE 8: AUTO-CALIBRATION SEQUENCE ENGINE
+    // ----------------------------------------------------------
+    function startEyeCalibration() {
+        if (!isFaceDetected) {
+            logMorseTerminalMessage('> CALIBRATION FAILED: NO FACE DETECTED IN CAMERA VIEW.');
+            return;
+        }
+
+        isCalibrating = true;
+        calibrationStartTime = performance.now();
+        calibrationSamples = [];
+
+        if (morseCalibrationOverlay) morseCalibrationOverlay.classList.remove('hidden');
+        if (calibrationProgressFill) calibrationProgressFill.style.width = '0%';
+        if (calibrationTimeText) calibrationTimeText.textContent = 'SAMPLING: 0.0s / 2.0s';
+        logMorseTerminalMessage('> EYE CALIBRATION STARTED: KEEP EYES OPEN NATURALLY FOR 2 SECONDS...');
+    }
+
+    // ----------------------------------------------------------
+    // 9. PHASE 7 & 8: REAL MEDIAPIPE FACE MESH & REFINED BLINK ENGINE
     // ----------------------------------------------------------
     let morseWebcamStream = null;
     let faceMeshEngine = null;
@@ -735,6 +789,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (morseCameraLoadingPanel) morseCameraLoadingPanel.classList.add('hidden');
             startMorseDetectionLoop();
 
+            // Trigger auto-calibration 1 second after camera startup
+            setTimeout(() => {
+                if (viewMorseLab.classList.contains('active') && !isCalibrating) {
+                    startEyeCalibration();
+                }
+            }, 1000);
+
         } catch (err) {
             console.error('FaceMesh Initialization Error:', err);
             showMorseCameraError(err.message || 'FaceMesh WASM model failed to initialize.');
@@ -769,7 +830,13 @@ document.addEventListener('DOMContentLoaded', () => {
         isSendingMorseFrame = false;
         morseEngineInitialized = false;
 
+        // Reset state safety to prevent phantom blinks
+        isEyeBlinking = false;
+        closedFrameCount = 0;
+        openFrameCount = 0;
+
         if (morseCameraLoadingPanel) morseCameraLoadingPanel.classList.add('hidden');
+        if (morseCalibrationOverlay) morseCalibrationOverlay.classList.add('hidden');
     }
 
     function startMorseDetectionLoop() {
@@ -798,9 +865,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------
-    // 9. EYE ASPECT RATIO (EAR) CALCULATOR & BLINK CLASSIFIER
+    // 10. REFINED EAR CALCULATOR & MULTI-FRAME BLINK CLASSIFIER
     // ----------------------------------------------------------
-    // Eye Landmark Indices (MediaPipe Face Mesh)
     const LEFT_EYE_INDICES = { outer: 33, inner: 133, top1: 160, top2: 158, bot1: 144, bot2: 153 };
     const RIGHT_EYE_INDICES = { outer: 263, inner: 362, top1: 385, top2: 387, bot1: 380, bot2: 373 };
 
@@ -812,7 +878,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pTop2 = landmarks[eye.top2];
         const pBot2 = landmarks[eye.bot2];
 
-        if (!pOuter || !pInner || !pTop1 || !pBot1 || !pTop2 || !pBot2) return 0.30;
+        if (!pOuter || !pInner || !pTop1 || !pBot1 || !pTop2 || !pBot2) return 0.29;
 
         const distHoriz = Math.hypot(pOuter.x - pInner.x, pOuter.y - pInner.y);
         const distVert1 = Math.hypot(pTop1.x - pBot1.x, pTop1.y - pBot1.y);
@@ -839,20 +905,50 @@ document.addEventListener('DOMContentLoaded', () => {
             isFaceDetected = true;
             const landmarks = multiFaceLandmarks[0];
 
-            // 1. Draw Eye Contours
-            drawEyeContoursOnCtx(ctx, landmarks, width, height);
-
-            // 2. Compute Left & Right EAR
+            // 1. Calculate RAW EAR & Smooth EAR (Exponential Moving Average)
             const earLeft = calculateSingleEyeEAR(landmarks, LEFT_EYE_INDICES);
             const earRight = calculateSingleEyeEAR(landmarks, RIGHT_EYE_INDICES);
-            currentAverageEAR = (earLeft + earRight) / 2.0;
+            rawEAR = (earLeft + earRight) / 2.0;
+
+            smoothEAR = (smoothEAR === 0) ? rawEAR : (smoothEAR * 0.7 + rawEAR * 0.3);
 
             const now = performance.now();
 
-            // 3. Eye Blink State Machine
-            if (currentAverageEAR < blinkConfig.earThreshold) {
-                // Eye is CLOSED
-                if (!isEyeBlinking && (now - lastBlinkEndTime > blinkConfig.cooldownMs)) {
+            // 2. Auto-Calibration Sampling Window Handling
+            if (isCalibrating) {
+                const elapsed = now - calibrationStartTime;
+                calibrationSamples.push(rawEAR);
+
+                const progressPct = Math.min((elapsed / 2000) * 100, 100);
+                if (calibrationProgressFill) calibrationProgressFill.style.width = `${progressPct}%`;
+                if (calibrationTimeText) calibrationTimeText.textContent = `SAMPLING: ${(elapsed / 1000).toFixed(1)}s / 2.0s`;
+
+                if (elapsed >= 2000) {
+                    isCalibrating = false;
+                    const sum = calibrationSamples.reduce((a, b) => a + b, 0);
+                    calibratedEarBaseline = sum / (calibrationSamples.length || 1);
+
+                    // Calculated Threshold = Baseline EAR * 0.70
+                    blinkConfig.earThreshold = parseFloat((calibratedEarBaseline * 0.70).toFixed(2));
+
+                    if (inputEarThreshold) inputEarThreshold.value = blinkConfig.earThreshold;
+                    if (valEarThreshold) valEarThreshold.textContent = `${blinkConfig.earThreshold.toFixed(2)}`;
+                    if (morseCalibrationOverlay) morseCalibrationOverlay.classList.add('hidden');
+                    if (calibrationStatusBadge) calibrationStatusBadge.textContent = 'AUTO-CALIBRATED';
+
+                    logMorseTerminalMessage(`> EYE CALIBRATION COMPLETE: Baseline EAR ${calibratedEarBaseline.toFixed(3)} -> Threshold ${blinkConfig.earThreshold}`);
+                }
+            }
+
+            // 3. Multi-Frame Confirmation & Noise Prevention State Machine
+            const isFrameClosed = smoothEAR < blinkConfig.earThreshold;
+
+            if (isFrameClosed) {
+                closedFrameCount++;
+                openFrameCount = 0;
+
+                // Require 2 consecutive frames closed to enter EYES_CLOSED
+                if (closedFrameCount >= 2 && !isEyeBlinking && (now - lastBlinkEndTime > blinkConfig.cooldownMs)) {
                     isEyeBlinking = true;
                     blinkStartTime = now;
 
@@ -860,64 +956,88 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (eyeTrackingHudBadge) eyeTrackingHudBadge.textContent = '[ BLINKING ]';
                 }
             } else {
-                // Eye is OPEN
-                if (isEyeBlinking) {
-                    isEyeBlinking = false;
-                    lastBlinkEndTime = now;
+                openFrameCount++;
+                closedFrameCount = 0;
 
-                    const duration = Math.round(now - blinkStartTime);
-                    lastMeasuredBlinkDuration = duration;
+                // Require 2 consecutive frames open to confirm eye re-opening & register blink
+                if (openFrameCount >= 2) {
+                    if (isEyeBlinking) {
+                        isEyeBlinking = false;
+                        lastBlinkEndTime = now;
 
-                    // Filter noise < 80ms
-                    if (duration >= 80) {
-                        if (duration < blinkConfig.dotMax) {
-                            lastGeneratedSignal = 'DOT ( . )';
-                            addMorseSignal('.');
-                            logMorseTerminalMessage(`> BLINK TELEGRAPHY: SHORT BLINK ( ${duration} ms ) -> DOT ( . )`);
-                            if (eyeStateBadge) eyeStateBadge.textContent = 'DOT DETECTED';
-                        } else {
-                            lastGeneratedSignal = 'DASH ( - )';
-                            addMorseSignal('-');
-                            logMorseTerminalMessage(`> BLINK TELEGRAPHY: LONG BLINK ( ${duration} ms ) -> DASH ( — )`);
-                            if (eyeStateBadge) eyeStateBadge.textContent = 'DASH DETECTED';
+                        const duration = Math.round(now - blinkStartTime);
+                        lastMeasuredBlinkDuration = duration;
+
+                        if (duration >= 80) { // Filter out micro noise < 80ms
+                            if (duration < blinkConfig.dotMax) {
+                                lastGeneratedSignal = 'DOT ( . )';
+                                if (lastSignalBadge) {
+                                    lastSignalBadge.textContent = 'LAST: DOT ( • )';
+                                    lastSignalBadge.className = 'sticker-badge badge-yellow';
+                                    lastSignalBadge.classList.remove('hidden');
+                                }
+                                addMorseSignal('.');
+                                logMorseTerminalMessage(`> BLINK TELEGRAPHY: SHORT BLINK ( ${duration} ms ) -> DOT ( . )`);
+                                if (eyeStateBadge) eyeStateBadge.textContent = 'DOT DETECTED';
+                            } else {
+                                lastGeneratedSignal = 'DASH ( - )';
+                                if (lastSignalBadge) {
+                                    lastSignalBadge.textContent = 'LAST: DASH ( — )';
+                                    lastSignalBadge.className = 'sticker-badge badge-coral';
+                                    lastSignalBadge.classList.remove('hidden');
+                                }
+                                addMorseSignal('-');
+                                logMorseTerminalMessage(`> BLINK TELEGRAPHY: LONG BLINK ( ${duration} ms ) -> DASH ( — )`);
+                                if (eyeStateBadge) eyeStateBadge.textContent = 'DASH DETECTED';
+                            }
                         }
+                    } else {
+                        if (eyeStateBadge) eyeStateBadge.textContent = 'EYES OPEN';
+                        if (eyeTrackingHudBadge) eyeTrackingHudBadge.textContent = '[ TRACKING ]';
                     }
-                } else {
-                    if (eyeStateBadge) eyeStateBadge.textContent = 'EYES OPEN';
-                    if (eyeTrackingHudBadge) eyeTrackingHudBadge.textContent = '[ TRACKING ]';
                 }
             }
 
-            // Update Real-Time HUD & Debug Readouts
+            // 4. Render Eye Contours on Canvas Overlay
+            drawRefinedEyeOverlayOnCtx(ctx, landmarks, width, height, isFrameClosed);
+
+            // 5. Update Real-Time HUD & Debug Readouts
             if (eyeDurationHudText) eyeDurationHudText.textContent = `BLINK: ${lastMeasuredBlinkDuration} ms`;
             if (morseStatusBadge) morseStatusBadge.textContent = 'EYE ENGINE ACTIVE';
 
             if (dbgFaceDetected) dbgFaceDetected.textContent = 'YES';
             if (dbgEyeState) dbgEyeState.textContent = isEyeBlinking ? 'CLOSED' : 'OPEN';
-            if (dbgAvgEar) dbgAvgEar.textContent = currentAverageEAR.toFixed(3);
+            if (dbgRawEar) dbgRawEar.textContent = rawEAR.toFixed(3);
+            if (dbgSmoothEar) dbgSmoothEar.textContent = smoothEAR.toFixed(3);
+            if (dbgCalibratedThreshold) dbgCalibratedThreshold.textContent = blinkConfig.earThreshold.toFixed(3);
             if (dbgBlinkDuration) dbgBlinkDuration.textContent = `${lastMeasuredBlinkDuration} ms`;
             if (dbgLastSignal) dbgLastSignal.textContent = lastGeneratedSignal;
 
         } else {
+            // Face lost: Reset states safely to prevent phantom blinks
             isFaceDetected = false;
+            isEyeBlinking = false;
+            closedFrameCount = 0;
+            openFrameCount = 0;
+
             if (eyeStateBadge) eyeStateBadge.textContent = 'NO FACE';
             if (eyeTrackingHudBadge) eyeTrackingHudBadge.textContent = '[ NO FACE ]';
-            if (morseStatusBadge) morseStatusBadge.textContent = 'EYE TRACKING SEARCHING';
+            if (morseStatusBadge) morseStatusBadge.textContent = 'EYE SEARCHING';
 
             if (dbgFaceDetected) dbgFaceDetected.textContent = 'NO';
             if (dbgEyeState) dbgEyeState.textContent = 'NO FACE';
-            if (dbgAvgEar) dbgAvgEar.textContent = '0.000';
+            if (dbgRawEar) dbgRawEar.textContent = '0.000';
+            if (dbgSmoothEar) dbgSmoothEar.textContent = '0.000';
         }
     }
 
-    function drawEyeContoursOnCtx(ctx, landmarks, width, height) {
-        ctx.strokeStyle = '#ea4a51';
+    function drawRefinedEyeOverlayOnCtx(ctx, landmarks, width, height, isClosed) {
+        ctx.strokeStyle = isClosed ? '#ea4a51' : '#facc15';
         ctx.lineWidth = 2;
 
         const leftPts = [33, 160, 158, 133, 153, 144];
         const rightPts = [362, 385, 387, 263, 373, 380];
 
-        // Draw Left Eye
         ctx.beginPath();
         leftPts.forEach((idx, i) => {
             const pt = landmarks[idx];
@@ -927,7 +1047,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.closePath();
         ctx.stroke();
 
-        // Draw Right Eye
         ctx.beginPath();
         rightPts.forEach((idx, i) => {
             const pt = landmarks[idx];
@@ -937,11 +1056,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.closePath();
         ctx.stroke();
 
-        // Draw Iris / Pupil Center Dots
         const leftIris = landmarks[468] || landmarks[33];
         const rightIris = landmarks[473] || landmarks[263];
 
-        ctx.fillStyle = '#facc15';
+        ctx.fillStyle = isClosed ? '#ea4a51' : '#ffffff';
         ctx.beginPath();
         ctx.arc(leftIris.x * width, leftIris.y * height, 4, 0, 2 * Math.PI);
         ctx.fill();
@@ -951,8 +1069,17 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fill();
     }
 
+    // Expose Modular Functions globally for Morse Telegraphy Engine
+    window.addMorseSignal = addMorseSignal;
+    window.decodeMorseSignal = decodeMorseSignal;
+    window.clearMorseBuffer = clearMorseBuffer;
+    window.commitMorseCharacter = commitMorseCharacter;
+    window.transmitMorseMessage = transmitMorseMessage;
+    window.setMorseTarget = setMorseTarget;
+    window.startEyeCalibration = startEyeCalibration;
+
     // ----------------------------------------------------------
-    // 10. MEDIA PIPE HAND TRACKING PIPELINE (ASL LAB & PRACTICE)
+    // 11. MEDIA PIPE HAND TRACKING PIPELINE (ASL LAB & PRACTICE)
     // ----------------------------------------------------------
     let webcamStream = null;
     let handsEngine = null;

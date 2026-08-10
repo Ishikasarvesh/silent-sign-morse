@@ -141,7 +141,7 @@
 
                             <div class="feature-labels">
                                 <span class="sticker-badge badge-yellow rotate-left">EYE TRACKING</span>
-                                <span class="sticker-badge badge-peach rotate-right">BLINK DECODER</span>
+                                <span class="sticker-badge badge-peach rotate-right">AUTO CALIBRATED</span>
                                 <span class="sticker-badge badge-coral">LIVE TELEGRAPHY</span>
                             </div>
 
@@ -152,7 +152,7 @@
                                     <path d="M100 100C130 55 270 55 300 100C270 145 130 145 100 100Z" fill="#fdf9f0" stroke="#000000" stroke-width="4"/>
                                     <circle cx="200" cy="100" r="32" fill="#ea4a51" stroke="#000000" stroke-width="4"/>
                                     <circle cx="200" cy="100" r="14" fill="#000000"/>
-                                    <text x="14" y="28" font-family="Space Mono" font-size="12" font-weight="700" fill="#000">EYE_TRACKING // ACTIVE</text>
+                                    <text x="14" y="28" font-family="Space Mono" font-size="12" font-weight="700" fill="#000">EYE_TRACKING // REFINED</text>
                                 </svg>
                             </div>
 
@@ -178,7 +178,7 @@
                     <div class="terminal-panel-body">
                         <div class="terminal-console-log" id="system-console-log" role="region" aria-label="Terminal Interface Log">
                             <div class="log-entry">
-                                <span class="log-time">[18:19:00]</span>
+                                <span class="log-time">[18:25:00]</span>
                                 <span class="log-prompt">></span>
                                 <span class="log-text">SILENT System Hub initialized. Click "SIGN LAB", "PRACTICE", or "MORSE LAB" to launch module.</span>
                             </div>
@@ -455,7 +455,7 @@
         </div>
 
         <!-- ==========================================================
-             VIEW 4: SILENT MORSE CODE LAB (PHASE 7 REAL EYE BLINK ENGINE)
+             VIEW 4: SILENT MORSE CODE LAB (PHASE 8 AUTO-CALIBRATED ENGINE)
              Stitch Screen ID: 0586a8cfaa1543629a7525d4f95efbb9
              ========================================================== -->
         <div class="page-view" id="view-morse-lab">
@@ -469,6 +469,7 @@
                             <span class="sticker-badge badge-yellow rotate-right" id="morse-status-badge">EYE TRACKING READY</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
+                            <button class="brutalist-button btn-coral" id="btn-trigger-calibration" style="padding: 4px 10px; font-size: 0.75rem;" type="button">CALIBRATE EYES 🎯</button>
                             <button class="brutalist-button btn-secondary" id="btn-toggle-debug" style="padding: 4px 10px; font-size: 0.75rem;" type="button">DEBUG HUD ⚙</button>
                             <button class="brutalist-button btn-yellow" id="btn-morse-return-home" style="padding: 4px 10px; font-size: 0.75rem;" type="button">RETURN HOME</button>
                         </div>
@@ -505,7 +506,7 @@
                         <article class="hard-card has-header">
                             <div class="card-header-black">
                                 <span class="mono-label">BLINK TIMING CALIBRATION</span>
-                                <span class="sticker-badge badge-peach">SETTINGS</span>
+                                <span class="sticker-badge badge-peach" id="calibration-status-badge">AUTO-CALIBRATED</span>
                             </div>
                             <div style="padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-sm);">
                                 <div class="calibration-control-group">
@@ -526,10 +527,10 @@
 
                                 <div class="calibration-control-group">
                                     <div style="display: flex; justify-content: space-between;">
-                                        <span class="mono-label" style="font-size: 0.75rem;">EAR SENSITIVITY:</span>
+                                        <span class="mono-label" style="font-size: 0.75rem;">EAR THRESHOLD:</span>
                                         <span class="mono-label" id="val-ear-threshold" style="color: var(--accent-coral);">0.21</span>
                                     </div>
-                                    <input type="range" id="input-ear-threshold" min="0.15" max="0.30" step="0.01" value="0.21" class="brutalist-slider"/>
+                                    <input type="range" id="input-ear-threshold" min="0.12" max="0.32" step="0.01" value="0.21" class="brutalist-slider"/>
                                 </div>
                             </div>
                         </article>
@@ -558,22 +559,40 @@
                                 <span class="corner-mark mark-bl" aria-hidden="true">+</span>
                                 <span class="corner-mark mark-br" aria-hidden="true">+</span>
 
-                                <!-- Real-time HUD Status Sticker -->
+                                <!-- Real-time HUD Status Stickers -->
                                 <div class="eye-hud-sticker">
                                     <span class="sticker-badge badge-yellow" id="eye-tracking-hud-badge">[ TRACKING ]</span>
                                     <span class="mono-label" id="eye-duration-hud-text" style="color: var(--accent-yellow); font-size: 0.8rem; background: #000; padding: 2px 6px; border: 1px solid #000; box-shadow: 2px 2px 0px #000;">BLINK: 0 ms</span>
+                                    <span class="sticker-badge badge-coral hidden" id="last-signal-badge">LAST: NONE</span>
+                                </div>
+
+                                <!-- Auto-Calibration Sequence Progress Overlay -->
+                                <div class="morse-calibration-overlay hidden" id="morse-calibration-overlay">
+                                    <div class="hard-card modal-card" style="max-width: 380px; background: #ffffff;">
+                                        <div class="sticker-badge badge-yellow rotate-left">EYE BASELINE CALIBRATION</div>
+                                        <h3 class="modal-title" style="font-size: 1.4rem;">KEEP EYES OPEN</h3>
+                                        <p class="modal-description" style="font-size: 0.85rem;">
+                                            Hold natural eye contact for 2 seconds to establish your personal EAR baseline threshold.
+                                        </p>
+                                        <div class="calibration-progress-bar-container">
+                                            <div class="calibration-progress-fill" id="calibration-progress-fill" style="width: 0%;"></div>
+                                        </div>
+                                        <span class="mono-label" id="calibration-time-text" style="font-size: 0.8rem; color: var(--accent-coral);">SAMPLING: 0.0s / 2.0s</span>
+                                    </div>
                                 </div>
 
                                 <!-- Developer Debug Panel Overlay -->
                                 <div class="debug-panel-overlay hidden" id="developer-debug-panel">
                                     <div class="hard-card" style="padding: 10px; background: rgba(0,0,0,0.9); color: #fff; font-size: 0.75rem;">
-                                        <span class="mono-label" style="color: var(--accent-yellow);">DEVELOPER EYE DEBUG</span>
-                                        <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 2px;">
-                                            <span>FACE DETECTED: <strong id="dbg-face-detected">YES</strong></span>
-                                            <span>EYE STATE: <strong id="dbg-eye-state">OPEN</strong></span>
-                                            <span>AVG EAR: <strong id="dbg-avg-ear">0.280</strong></span>
-                                            <span>BLINK DURATION: <strong id="dbg-blink-duration">0 ms</strong></span>
-                                            <span>LAST SIGNAL: <strong id="dbg-last-signal">NONE</strong></span>
+                                        <span class="mono-label" style="color: var(--accent-yellow);">DEVELOPER EYE DEBUG // PHASE 8</span>
+                                        <div style="margin-top: 4px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                                            <span>FACE: <strong id="dbg-face-detected">YES</strong></span>
+                                            <span>STATE: <strong id="dbg-eye-state">OPEN</strong></span>
+                                            <span>RAW EAR: <strong id="dbg-raw-ear">0.292</strong></span>
+                                            <span>SMOOTH EAR: <strong id="dbg-smooth-ear">0.285</strong></span>
+                                            <span>THRESH: <strong id="dbg-calibrated-threshold">0.200</strong></span>
+                                            <span>DURATION: <strong id="dbg-blink-duration">0 ms</strong></span>
+                                            <span style="grid-column: span 2;">LAST SIGNAL: <strong id="dbg-last-signal" style="color: var(--accent-yellow);">NONE</strong></span>
                                         </div>
                                     </div>
                                 </div>
@@ -603,7 +622,7 @@
                             <div class="finger-analysis-container">
                                 <div class="finger-analysis-header">
                                     <h3 class="font-heading" style="font-size: 1.1rem; font-weight: 700;">TELEGRAPHY BLINK BINDING</h3>
-                                    <span class="sticker-badge badge-yellow">LIVE ENGINE</span>
+                                    <span class="sticker-badge badge-yellow">TEMPORAL SMOOTHED</span>
                                 </div>
                                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                                     <div class="finger-stat-chip" style="flex: 1;">
@@ -664,7 +683,7 @@
                             <div style="padding: var(--space-md);">
                                 <div class="terminal-console-log" id="morse-terminal-log" style="height: 180px;">
                                     <div class="log-entry">
-                                        <span class="log-time">[18:19:00]</span>
+                                        <span class="log-time">[18:25:00]</span>
                                         <span class="log-prompt">&gt;</span>
                                         <span class="log-text">SILENT Morse Code Telemetry Engine initialized. Use BLINK or DOT/DASH keys.</span>
                                     </div>
