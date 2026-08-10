@@ -1,6 +1,6 @@
 /* ==========================================================
    SILENT — Neo-Brutalist Laboratory Design System
-   Phase 1: Design Tokens & Base Layout Foundation
+   Phase 2: Core Global Components Architecture
    ========================================================== */
 
 /* ----------------------------------------------------------
@@ -24,6 +24,7 @@
     --accent-yellow: #facc15;
     --accent-amber: #f59e0b;
     --accent-orange: #fb923c;
+    --accent-danger: #ba1a1a;
     --border-color: #000000;
 
     /* Spacing System (4px Base Unit) */
@@ -126,6 +127,12 @@ body {
     text-transform: uppercase;
 }
 
+/* Accessible focus ring */
+:focus-visible {
+    outline: 3px solid var(--primary) !important;
+    outline-offset: 3px !important;
+}
+
 /* ----------------------------------------------------------
    4. UTILITY STYLES
    ---------------------------------------------------------- */
@@ -146,42 +153,93 @@ body {
 }
 
 /* ----------------------------------------------------------
-   5. REUSABLE COMPONENT STYLES
+   5. COMPONENT 1: TERMINAL HEADER & NAVIGATION
    ---------------------------------------------------------- */
+.terminal-header {
+    background-color: var(--primary);
+    color: var(--on-primary);
+    border-bottom: var(--border-primary);
+    padding: var(--space-sm) 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
 
-/* A. Hard Card Container */
-.hard-card {
-    background-color: var(--surface-container);
-    border: var(--border-primary);
-    box-shadow: var(--shadow-hard);
-    padding: var(--space-lg);
-    position: relative;
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--on-primary);
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+}
+
+.brand-logo:focus-visible {
+    outline: 3px solid var(--accent-yellow) !important;
+}
+
+.logo-icon {
+    color: var(--accent-yellow);
+    font-size: 1.4rem;
+}
+
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.nav-link {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--on-primary);
+    text-decoration: none;
+    padding: 6px 12px;
+    border: 2px solid transparent;
+    text-transform: uppercase;
     transition: var(--transition-mechanical);
 }
 
-.hard-card:hover {
-    background-color: var(--surface);
+.nav-link:hover,
+.nav-link.active {
+    background-color: var(--accent-yellow);
+    color: var(--primary);
+    border: 2px solid #000000;
+    box-shadow: 3px 3px 0px #000000;
 }
 
-/* Interactive Card Variant */
-.hard-card[role="button"],
-.hard-card.interactive {
-    cursor: pointer;
+.nav-link:focus-visible {
+    outline: 3px solid var(--accent-yellow) !important;
+    outline-offset: 2px !important;
 }
 
-.hard-card[role="button"]:hover,
-.hard-card.interactive:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 8px 8px 0px #000000;
+.section-indicator {
+    background-color: var(--surface-container-highest);
+    color: var(--primary);
+    border: var(--border-secondary);
+    padding: 4px 10px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    box-shadow: 2px 2px 0px #000000;
 }
 
-.hard-card[role="button"]:active,
-.hard-card.interactive:active {
-    transform: translate(6px, 6px);
-    box-shadow: 0px 0px 0px #000000;
-}
-
-/* B. Brutalist Button */
+/* ----------------------------------------------------------
+   6. COMPONENT 2: BRUTALIST BUTTON VARIANTS & STATES
+   ---------------------------------------------------------- */
 .brutalist-button {
     display: inline-flex;
     align-items: center;
@@ -215,6 +273,15 @@ body {
 }
 
 /* Button Variants */
+.brutalist-button.btn-primary {
+    background-color: var(--primary);
+    color: var(--on-primary);
+}
+
+.brutalist-button.btn-primary:hover {
+    color: var(--accent-yellow);
+}
+
 .brutalist-button.btn-coral {
     background-color: var(--accent-coral);
     color: var(--on-primary);
@@ -235,7 +302,118 @@ body {
     color: var(--accent-yellow);
 }
 
-/* C. Sticker Badge */
+.brutalist-button.btn-secondary {
+    background-color: var(--surface);
+    color: var(--primary);
+}
+
+.brutalist-button.btn-secondary:hover {
+    background-color: var(--surface-container-highest);
+    color: var(--primary);
+}
+
+.brutalist-button.btn-danger {
+    background-color: var(--accent-danger);
+    color: #ffffff;
+}
+
+.brutalist-button.btn-danger:hover {
+    background-color: var(--primary);
+    color: var(--accent-danger);
+}
+
+/* Disabled State */
+.brutalist-button:disabled,
+.brutalist-button[disabled],
+.brutalist-button.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    transform: none !important;
+    box-shadow: var(--shadow-hard) !important;
+}
+
+/* ----------------------------------------------------------
+   7. COMPONENT 3: HARD CARD & HEADER VARIANTS
+   ---------------------------------------------------------- */
+.hard-card {
+    background-color: var(--surface-container);
+    border: var(--border-primary);
+    box-shadow: var(--shadow-hard);
+    padding: var(--space-lg);
+    position: relative;
+    transition: var(--transition-mechanical);
+}
+
+.hard-card.has-header {
+    padding: 0;
+}
+
+.hard-card.has-header .card-body {
+    padding: var(--space-lg);
+}
+
+/* Header Variants */
+.card-header-black {
+    background-color: var(--primary);
+    color: var(--on-primary);
+    padding: 10px 16px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.85rem;
+    border-bottom: var(--border-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-header-coral {
+    background-color: var(--accent-coral);
+    color: var(--on-primary);
+    padding: 10px 16px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.85rem;
+    border-bottom: var(--border-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-header-yellow {
+    background-color: var(--accent-yellow);
+    color: var(--primary);
+    padding: 10px 16px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.85rem;
+    border-bottom: var(--border-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Interactive Card Hover & Press */
+.hard-card[role="button"],
+.hard-card.interactive {
+    cursor: pointer;
+}
+
+.hard-card[role="button"]:hover,
+.hard-card.interactive:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0px #000000;
+}
+
+.hard-card[role="button"]:active,
+.hard-card.interactive:active {
+    transform: translate(6px, 6px);
+    box-shadow: 0px 0px 0px #000000;
+}
+
+/* ----------------------------------------------------------
+   8. COMPONENT 4: STICKER BADGE & ROTATIONS
+   ---------------------------------------------------------- */
 .sticker-badge {
     display: inline-flex;
     align-items: center;
@@ -249,58 +427,59 @@ body {
     font-size: 0.75rem;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    transform: rotate(-1.5deg);
     box-shadow: 2px 2px 0px #000000;
     white-space: nowrap;
 }
 
-.sticker-badge.badge-hero {
+/* Badge Color Variants */
+.sticker-badge.badge-coral {
     background-color: var(--accent-coral);
     color: var(--on-primary);
-    font-size: 0.85rem;
-    padding: 6px 14px;
-    transform: rotate(-2deg);
 }
 
-.sticker-badge.badge-accent-yellow {
+.sticker-badge.badge-yellow {
     background-color: var(--accent-yellow);
     color: var(--primary);
+}
+
+.sticker-badge.badge-peach {
+    background-color: var(--accent-peach);
+    color: var(--primary);
+}
+
+.sticker-badge.badge-black {
+    background-color: var(--primary);
+    color: var(--on-primary);
+}
+
+/* Rotations matching Stitch Design */
+.sticker-badge.rotate-left {
+    transform: rotate(-1.5deg);
+}
+
+.sticker-badge.rotate-right {
     transform: rotate(1.5deg);
 }
 
-.sticker-badge.badge-accent-coral {
-    background-color: var(--accent-coral);
-    color: var(--on-primary);
-    transform: rotate(-1deg);
+.sticker-badge.rotate-hero {
+    transform: rotate(-2deg);
 }
 
-.sticker-badge.badge-accent-pink {
-    background-color: var(--accent-pink);
-    color: var(--primary);
-    transform: rotate(2deg);
-}
-
-/* D. Terminal Header & Panel */
-.terminal-header {
-    background-color: var(--primary);
-    color: var(--on-primary);
-    border-bottom: var(--border-primary);
-    padding: var(--space-md) 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
+/* ----------------------------------------------------------
+   9. COMPONENT 5: TERMINAL PANEL STRUCTURE
+   ---------------------------------------------------------- */
 .terminal-panel {
     background-color: var(--surface-container);
     border: var(--border-primary);
     box-shadow: var(--shadow-hard);
+    display: flex;
+    flex-direction: column;
 }
 
 .terminal-panel-header {
     background-color: var(--primary);
     color: var(--on-primary);
-    padding: 8px 16px;
+    padding: 10px 16px;
     font-family: var(--font-mono);
     font-size: 0.85rem;
     font-weight: 700;
@@ -308,31 +487,75 @@ body {
     align-items: center;
     justify-content: space-between;
     border-bottom: var(--border-primary);
+    gap: var(--space-md);
 }
 
 .terminal-panel-body {
     padding: var(--space-lg);
+    flex: 1;
 }
 
-/* E. Status Indicator */
+.terminal-panel-footer {
+    background-color: var(--surface-container-low);
+    padding: 12px 16px;
+    border-top: var(--border-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+/* ----------------------------------------------------------
+   10. COMPONENT 6: STATUS INDICATOR STATES
+   ---------------------------------------------------------- */
 .status-indicator {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 12px;
+    padding: 4px 10px;
     background-color: var(--surface);
     color: var(--primary);
     border: var(--border-secondary);
-    box-shadow: 3px 3px 0px #000000;
+    box-shadow: 2px 2px 0px #000000;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 .status-dot {
     width: 10px;
     height: 10px;
-    background-color: var(--accent-coral);
     border: 1px solid #000000;
     display: inline-block;
+}
+
+/* Status States */
+.status-indicator.status-live .status-dot,
+.status-dot.dot-live {
+    background-color: var(--accent-coral);
     animation: pulseDot 1.5s infinite ease-in-out;
+}
+
+.status-indicator.status-ready .status-dot,
+.status-dot.dot-ready {
+    background-color: var(--accent-amber);
+}
+
+.status-indicator.status-active .status-dot,
+.status-dot.dot-active {
+    background-color: var(--accent-yellow);
+}
+
+.status-indicator.status-warning .status-dot,
+.status-dot.dot-warning {
+    background-color: var(--accent-orange);
+}
+
+.status-indicator.status-offline .status-dot,
+.status-dot.dot-offline {
+    background-color: var(--secondary);
 }
 
 @keyframes pulseDot {
@@ -341,37 +564,121 @@ body {
 }
 
 /* ----------------------------------------------------------
-   6. PAGE SPECIFIC BASE LAYOUTS
+   11. COMPONENT 7: TERMINAL CONSOLE LOG
    ---------------------------------------------------------- */
-
-/* Header Container */
-.header-container {
+.terminal-console-log {
+    background-color: #1c1c17;
+    color: #ffffff;
+    border: var(--border-primary);
+    box-shadow: var(--shadow-hard);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    padding: var(--space-md);
+    max-height: 220px;
+    overflow-y: auto;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.brand-logo {
-    display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 8px;
-    text-decoration: none;
-    color: var(--on-primary);
-    font-family: var(--font-display);
-    font-size: 1.6rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
 }
 
-.logo-icon {
+.log-entry {
+    display: flex;
+    gap: 8px;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.log-time {
+    color: #848484;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.log-prompt {
     color: var(--accent-yellow);
-    font-size: 1.4rem;
+    font-weight: 700;
+    flex-shrink: 0;
 }
 
-/* Main Layout Padding */
+.log-text {
+    color: #fdf9f0;
+}
+
+.log-text.log-coral {
+    color: var(--accent-coral);
+}
+
+.log-text.log-yellow {
+    color: var(--accent-yellow);
+}
+
+/* Custom Brutalist Scrollbar */
+.terminal-console-log::-webkit-scrollbar {
+    width: 8px;
+}
+
+.terminal-console-log::-webkit-scrollbar-track {
+    background: #000000;
+}
+
+.terminal-console-log::-webkit-scrollbar-thumb {
+    background: var(--accent-yellow);
+    border: 1px solid #000000;
+}
+
+/* ----------------------------------------------------------
+   12. COMPONENT 8: MODE SELECTOR TABS
+   ---------------------------------------------------------- */
+.mode-selector-tabs {
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-lg);
+}
+
+.mode-tab-btn {
+    flex: 1;
+    min-width: 240px;
+    padding: 14px 20px;
+}
+
+.mode-tab-btn[aria-selected="true"],
+.mode-tab-btn.active {
+    background-color: var(--accent-coral);
+    color: var(--on-primary);
+    transform: translate(3px, 3px);
+    box-shadow: 3px 3px 0px #000000;
+}
+
+.mode-tab-btn[aria-selected="false"]:hover {
+    background-color: var(--primary);
+    color: var(--accent-yellow);
+}
+
+/* ----------------------------------------------------------
+   13. PAGE LAYOUT STRUCTURE
+   ---------------------------------------------------------- */
 .main-layout {
     flex: 1;
     padding-bottom: var(--space-xl);
+}
+
+.page-header {
+    padding: var(--space-xl) 0 var(--space-lg) 0;
+}
+
+.page-header-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.page-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-md);
 }
 
 /* Hero Section */
@@ -475,6 +782,33 @@ body {
     flex-wrap: wrap;
     gap: 8px;
     margin: var(--space-sm) 0;
+}
+
+/* Components Showcase Grid */
+.showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-lg);
+    margin-top: var(--space-lg);
+}
+
+.showcase-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.badge-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    align-items: center;
 }
 
 /* How It Works Section */
@@ -635,6 +969,15 @@ body {
     }
     .header-container {
         flex-direction: column;
+        align-items: flex-start;
         gap: var(--space-sm);
+    }
+    .header-nav {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+    .mode-tab-btn {
+        min-width: 100%;
     }
 }
