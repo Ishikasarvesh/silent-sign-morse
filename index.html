@@ -11,9 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="style.css">
 
-    <!-- MediaPipe Hands & Camera Utils Dependencies -->
+    <!-- MediaPipe Dependencies: Camera Utils, Hands (ASL), Face Mesh (Morse Eye Tracking) -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -52,7 +53,6 @@
              VIEW 1: HOME LANDING PAGE (PHASE 3)
              ========================================================== -->
         <div class="page-view active" id="view-home">
-            <!-- Hero Section -->
             <section class="hero-section" id="hero">
                 <div class="container hero-container">
                     <div class="sticker-badge badge-coral rotate-hero" id="hero-badge">
@@ -85,7 +85,6 @@
                 </div>
             </section>
 
-            <!-- Dual Core Module Showcase -->
             <section class="paths-section" id="learning-paths">
                 <div class="container">
                     <div style="text-align: center; margin-bottom: var(--space-xl);">
@@ -141,9 +140,9 @@
                             </div>
 
                             <div class="feature-labels">
-                                <span class="sticker-badge badge-yellow rotate-left">TELEGRAPHY</span>
-                                <span class="sticker-badge badge-peach rotate-right">MORSE DECODER</span>
-                                <span class="sticker-badge badge-coral">SIGNAL BUFFER</span>
+                                <span class="sticker-badge badge-yellow rotate-left">EYE TRACKING</span>
+                                <span class="sticker-badge badge-peach rotate-right">BLINK DECODER</span>
+                                <span class="sticker-badge badge-coral">LIVE TELEGRAPHY</span>
                             </div>
 
                             <div class="module-preview-frame">
@@ -153,7 +152,7 @@
                                     <path d="M100 100C130 55 270 55 300 100C270 145 130 145 100 100Z" fill="#fdf9f0" stroke="#000000" stroke-width="4"/>
                                     <circle cx="200" cy="100" r="32" fill="#ea4a51" stroke="#000000" stroke-width="4"/>
                                     <circle cx="200" cy="100" r="14" fill="#000000"/>
-                                    <text x="14" y="28" font-family="Space Mono" font-size="12" font-weight="700" fill="#000">MORSE_LAB // ACTIVE</text>
+                                    <text x="14" y="28" font-family="Space Mono" font-size="12" font-weight="700" fill="#000">EYE_TRACKING // ACTIVE</text>
                                 </svg>
                             </div>
 
@@ -170,7 +169,6 @@
                 </div>
             </section>
 
-            <!-- Terminal Log Section -->
             <section class="container" id="demo-preview" style="margin-top: var(--space-xl);">
                 <div class="terminal-panel">
                     <div class="terminal-panel-header">
@@ -180,7 +178,7 @@
                     <div class="terminal-panel-body">
                         <div class="terminal-console-log" id="system-console-log" role="region" aria-label="Terminal Interface Log">
                             <div class="log-entry">
-                                <span class="log-time">[18:11:00]</span>
+                                <span class="log-time">[18:19:00]</span>
                                 <span class="log-prompt">></span>
                                 <span class="log-text">SILENT System Hub initialized. Click "SIGN LAB", "PRACTICE", or "MORSE LAB" to launch module.</span>
                             </div>
@@ -195,8 +193,6 @@
              ========================================================== -->
         <div class="page-view" id="view-sign-lab">
             <div class="container" style="padding-top: var(--space-lg);">
-                
-                <!-- Top Lab Header Bar -->
                 <div class="hard-card has-header" style="margin-bottom: var(--space-lg);">
                     <div class="card-header-black">
                         <div style="display: flex; align-items: center; gap: 10px;">
@@ -211,10 +207,7 @@
                     </div>
                 </div>
 
-                <!-- Main 2-Column Workspace Grid -->
                 <div class="sign-lab-grid">
-                    
-                    <!-- Left Column: ASL Reference Sign & A-Z Selector -->
                     <section class="sign-lab-col-left">
                         <article class="hard-card has-header reference-card">
                             <div class="card-header-coral">
@@ -230,7 +223,6 @@
 
                                 <div class="reference-visual-box" id="reference-visual-box">
                                     <img class="ref-sign-image" id="ref-sign-image" src="assets/signs/A.jpg" alt="ASL Sign Language Reference for letter A"/>
-                                    
                                     <div class="ref-sign-fallback hidden" id="ref-sign-fallback">
                                         <span class="sticker-badge badge-coral rotate-left">ASL ASSET MISSING</span>
                                         <p class="mono-label" style="font-size: 0.8rem; margin-top: 8px;">REFERENCE IMAGE NOT AVAILABLE</p>
@@ -257,7 +249,6 @@
                         </article>
                     </section>
 
-                    <!-- Right Column: Live Camera Feed & Finger Analysis -->
                     <section class="sign-lab-col-right">
                         <article class="hard-card has-header camera-analysis-card">
                             <div class="card-header-black">
@@ -464,7 +455,7 @@
         </div>
 
         <!-- ==========================================================
-             VIEW 4: SILENT MORSE CODE LAB (PHASE 6 WORKSPACE)
+             VIEW 4: SILENT MORSE CODE LAB (PHASE 7 REAL EYE BLINK ENGINE)
              Stitch Screen ID: 0586a8cfaa1543629a7525d4f95efbb9
              ========================================================== -->
         <div class="page-view" id="view-morse-lab">
@@ -475,18 +466,21 @@
                     <div class="card-header-black">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span class="mono-label">MORSE CODE LABORATORY // TELEGRAPHY</span>
-                            <span class="sticker-badge badge-yellow rotate-right" id="morse-status-badge">EYE TRACKING STANDBY</span>
+                            <span class="sticker-badge badge-yellow rotate-right" id="morse-status-badge">EYE TRACKING READY</span>
                         </div>
-                        <button class="brutalist-button btn-yellow" id="btn-morse-return-home" style="padding: 4px 10px; font-size: 0.75rem;" type="button">RETURN HOME</button>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button class="brutalist-button btn-secondary" id="btn-toggle-debug" style="padding: 4px 10px; font-size: 0.75rem;" type="button">DEBUG HUD ⚙</button>
+                            <button class="brutalist-button btn-yellow" id="btn-morse-return-home" style="padding: 4px 10px; font-size: 0.75rem;" type="button">RETURN HOME</button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- 3-Column Bento Grid Layout -->
                 <div class="morse-lab-grid">
                     
-                    <!-- COLUMN 1: MORSE REFERENCE MANUAL (A-Z & 0-9 HTML/CSS Chart) -->
+                    <!-- COLUMN 1: MORSE REFERENCE MANUAL & BLINK TIMING CALIBRATION -->
                     <section class="morse-col-reference">
-                        <article class="hard-card has-header">
+                        <article class="hard-card has-header" style="margin-bottom: var(--space-md);">
                             <div class="card-header-coral">
                                 <span class="mono-label">MORSE REFERENCE MANUAL</span>
                                 <span class="sticker-badge badge-yellow">A-Z &amp; 0-9</span>
@@ -495,11 +489,8 @@
                             <div class="morse-manual-body">
                                 <div class="mono-label" style="font-size: 0.75rem; margin-bottom: 8px;">CLICK ANY CHARACTER TO SET TARGET:</div>
                                 
-                                <div class="morse-chart-grid" id="morse-chart-grid">
-                                    <!-- Populated via JavaScript A-Z & 0-9 -->
-                                </div>
+                                <div class="morse-chart-grid" id="morse-chart-grid"></div>
 
-                                <!-- Active Selected Character Card -->
                                 <div class="morse-active-card">
                                     <span class="mono-label text-dim">SELECTED CHARACTER:</span>
                                     <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
@@ -509,51 +500,119 @@
                                 </div>
                             </div>
                         </article>
+
+                        <!-- Blink Timing Calibration Panel -->
+                        <article class="hard-card has-header">
+                            <div class="card-header-black">
+                                <span class="mono-label">BLINK TIMING CALIBRATION</span>
+                                <span class="sticker-badge badge-peach">SETTINGS</span>
+                            </div>
+                            <div style="padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-sm);">
+                                <div class="calibration-control-group">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span class="mono-label" style="font-size: 0.75rem;">DOT MAX:</span>
+                                        <span class="mono-label" id="val-dot-max" style="color: var(--accent-coral);">350 ms</span>
+                                    </div>
+                                    <input type="range" id="input-dot-max" min="150" max="600" step="10" value="350" class="brutalist-slider"/>
+                                </div>
+
+                                <div class="calibration-control-group">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span class="mono-label" style="font-size: 0.75rem;">DASH MIN:</span>
+                                        <span class="mono-label" id="val-dash-min" style="color: var(--accent-coral);">350 ms</span>
+                                    </div>
+                                    <input type="range" id="input-dash-min" min="200" max="800" step="10" value="350" class="brutalist-slider"/>
+                                </div>
+
+                                <div class="calibration-control-group">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span class="mono-label" style="font-size: 0.75rem;">EAR SENSITIVITY:</span>
+                                        <span class="mono-label" id="val-ear-threshold" style="color: var(--accent-coral);">0.21</span>
+                                    </div>
+                                    <input type="range" id="input-ear-threshold" min="0.15" max="0.30" step="0.01" value="0.21" class="brutalist-slider"/>
+                                </div>
+                            </div>
+                        </article>
                     </section>
 
-                    <!-- COLUMN 2: LIVE EYE DETECTION PANEL (Placeholder State for Phase 7) -->
+                    <!-- COLUMN 2: LIVE EYE DETECTION CAMERA & FACE MESH ENGINE -->
                     <section class="morse-col-camera">
                         <article class="hard-card has-header camera-analysis-card">
                             <div class="card-header-black">
                                 <div class="flex-row-center">
-                                    <span class="status-dot dot-ready"></span>
+                                    <span class="status-dot dot-live" id="eye-tracking-live-dot"></span>
                                     <span class="mono-label">LIVE EYE DETECTION</span>
                                 </div>
-                                <span class="sticker-badge badge-peach" id="eye-state-badge">EYE: OPEN</span>
+                                <span class="sticker-badge badge-peach" id="eye-state-badge">EYES OPEN</span>
                             </div>
 
-                            <div class="camera-viewport-container" style="height: 380px; background-color: #1c1c17;">
-                                <!-- Corner Crosshairs Reticle -->
+                            <div class="camera-viewport-container" style="height: 380px; background-color: #1c1c17;" id="morse-camera-viewport">
+                                <!-- Live Webcam Feed -->
+                                <video class="camera-video" id="morse-webcam-video" autoplay playsinline muted></video>
+
+                                <!-- MediaPipe Face Mesh Contour Canvas Overlay -->
+                                <canvas class="camera-canvas" id="morse-eye-canvas"></canvas>
+
                                 <span class="corner-mark mark-tl" aria-hidden="true">+</span>
                                 <span class="corner-mark mark-tr" aria-hidden="true">+</span>
                                 <span class="corner-mark mark-bl" aria-hidden="true">+</span>
                                 <span class="corner-mark mark-br" aria-hidden="true">+</span>
 
-                                <!-- Center Eye Tracking Scanning HUD Overlay -->
-                                <div class="eye-tracking-hud">
-                                    <div class="hud-reticle"></div>
-                                    <span class="sticker-badge badge-yellow rotate-left" style="margin-top: 12px;">CAMERA READY</span>
-                                    <span class="mono-label text-dim" style="font-size: 0.75rem; margin-top: 4px;">[ EYE TRACKING STANDBY ]</span>
-                                    <p class="mono-label" style="font-size: 0.7rem; color: var(--accent-coral); margin-top: 6px;">
-                                        MANUAL TELEGRAPHY ACTIVE // FACE MESH INTEGRATION (PHASE 7)
-                                    </p>
+                                <!-- Real-time HUD Status Sticker -->
+                                <div class="eye-hud-sticker">
+                                    <span class="sticker-badge badge-yellow" id="eye-tracking-hud-badge">[ TRACKING ]</span>
+                                    <span class="mono-label" id="eye-duration-hud-text" style="color: var(--accent-yellow); font-size: 0.8rem; background: #000; padding: 2px 6px; border: 1px solid #000; box-shadow: 2px 2px 0px #000;">BLINK: 0 ms</span>
+                                </div>
+
+                                <!-- Developer Debug Panel Overlay -->
+                                <div class="debug-panel-overlay hidden" id="developer-debug-panel">
+                                    <div class="hard-card" style="padding: 10px; background: rgba(0,0,0,0.9); color: #fff; font-size: 0.75rem;">
+                                        <span class="mono-label" style="color: var(--accent-yellow);">DEVELOPER EYE DEBUG</span>
+                                        <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 2px;">
+                                            <span>FACE DETECTED: <strong id="dbg-face-detected">YES</strong></span>
+                                            <span>EYE STATE: <strong id="dbg-eye-state">OPEN</strong></span>
+                                            <span>AVG EAR: <strong id="dbg-avg-ear">0.280</strong></span>
+                                            <span>BLINK DURATION: <strong id="dbg-blink-duration">0 ms</strong></span>
+                                            <span>LAST SIGNAL: <strong id="dbg-last-signal">NONE</strong></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Camera Error Overlay Panel -->
+                                <div class="camera-error-overlay hidden" id="morse-camera-error-panel">
+                                    <div class="hard-card modal-card" style="max-width: 360px; background: #ffffff;">
+                                        <div class="sticker-badge badge-coral rotate-left">EYE ENGINE ERROR</div>
+                                        <h3 class="modal-title" style="font-size: 1.3rem;">CAMERA ERROR</h3>
+                                        <p class="modal-description" id="morse-error-desc" style="font-size: 0.9rem;">
+                                            Webcam permission denied or Face Mesh model initialization failed.
+                                        </p>
+                                        <button class="brutalist-button btn-yellow" id="btn-retry-morse-camera" type="button">RETRY EYE ENGINE</button>
+                                    </div>
+                                </div>
+
+                                <!-- Camera Loading Overlay -->
+                                <div class="camera-loading-overlay" id="morse-camera-loading-panel">
+                                    <div class="status-indicator status-active">
+                                        <span class="status-dot dot-active"></span>
+                                        <span>INITIALIZING MEDIAPIPE FACE MESH...</span>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Eye Detection Status Bar -->
                             <div class="finger-analysis-container">
                                 <div class="finger-analysis-header">
-                                    <h3 class="font-heading" style="font-size: 1.1rem; font-weight: 700;">TELEGRAPHY MANUAL INSTRUCTIONS</h3>
-                                    <span class="sticker-badge badge-yellow">SIGNAL BINDING</span>
+                                    <h3 class="font-heading" style="font-size: 1.1rem; font-weight: 700;">TELEGRAPHY BLINK BINDING</h3>
+                                    <span class="sticker-badge badge-yellow">LIVE ENGINE</span>
                                 </div>
                                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                                     <div class="finger-stat-chip" style="flex: 1;">
-                                        <span class="mono-label">DOT ( • ):</span>
-                                        <span class="finger-state-pill is-extended">SHORT BLINK (&lt; 300ms)</span>
+                                        <span class="mono-label">SHORT BLINK (&lt; 350ms):</span>
+                                        <span class="finger-state-pill is-extended">TRIGGER DOT ( • )</span>
                                     </div>
                                     <div class="finger-stat-chip" style="flex: 1;">
-                                        <span class="mono-label">DASH ( — ):</span>
-                                        <span class="finger-state-pill is-curled">LONG BLINK (&gt; 300ms)</span>
+                                        <span class="mono-label">LONG BLINK (&ge; 350ms):</span>
+                                        <span class="finger-state-pill is-curled">TRIGGER DASH ( — )</span>
                                     </div>
                                 </div>
                             </div>
@@ -562,8 +621,6 @@
 
                     <!-- COLUMN 3: SIGNAL BUFFER, DECODER & OUTPUT TERMINAL -->
                     <section class="morse-col-output">
-                        
-                        <!-- Target Character Practice Card -->
                         <article class="hard-card has-header" style="margin-bottom: var(--space-md);">
                             <div class="card-header-black">
                                 <span class="mono-label">TARGET CHARACTER</span>
@@ -575,7 +632,6 @@
                             </div>
                         </article>
 
-                        <!-- Signal Buffer Card -->
                         <article class="hard-card has-header" style="margin-bottom: var(--space-md);">
                             <div class="card-header-coral">
                                 <span class="mono-label">CURRENT INPUT BUFFER</span>
@@ -587,7 +643,6 @@
                                     <span id="morse-buffer-text" style="color: var(--accent-yellow); font-size: 2rem; letter-spacing: 4px;">• —</span>
                                 </div>
 
-                                <!-- Manual Interactive Telegraphy Keys -->
                                 <div class="morse-keypad">
                                     <button class="brutalist-button btn-yellow" id="btn-morse-dot" type="button" style="font-size: 1.2rem;">DOT ( • )</button>
                                     <button class="brutalist-button btn-coral" id="btn-morse-dash" type="button" style="font-size: 1.2rem;">DASH ( — )</button>
@@ -600,7 +655,6 @@
                             </div>
                         </article>
 
-                        <!-- Decoded Message Output Terminal Card -->
                         <article class="hard-card has-header">
                             <div class="card-header-black">
                                 <span class="mono-label">[ DECODED MESSAGE TERMINAL ]</span>
@@ -610,9 +664,9 @@
                             <div style="padding: var(--space-md);">
                                 <div class="terminal-console-log" id="morse-terminal-log" style="height: 180px;">
                                     <div class="log-entry">
-                                        <span class="log-time">[18:11:00]</span>
+                                        <span class="log-time">[18:19:00]</span>
                                         <span class="log-prompt">&gt;</span>
-                                        <span class="log-text">SILENT Morse Code Telemetry Engine initialized. Use DOT/DASH keys to transmit signals.</span>
+                                        <span class="log-text">SILENT Morse Code Telemetry Engine initialized. Use BLINK or DOT/DASH keys.</span>
                                     </div>
                                 </div>
                             </div>

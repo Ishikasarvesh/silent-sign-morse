@@ -1,6 +1,6 @@
 /**
  * SILENT — Neo-Brutalist Laboratory Instrument
- * Phase 4 & 6 Controller: ASL Sign Language Lab, Practice Mode & Morse Code Laboratory
+ * Phase 4, 6 & 7 Controller: ASL Sign Language Lab, Practice Mode & Real Eye Blink Morse Engine
  * Stitch Screen ID: 0586a8cfaa1543629a7525d4f95efbb9
  */
 
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bestScores = {};
 
     // ----------------------------------------------------------
-    // 2. MORSE CODE LOOKUP DICTIONARY (A-Z & 0-9)
+    // 2. MORSE CODE LOOKUP DICTIONARY & TELEGRAPHY ENGINE
     // ----------------------------------------------------------
     const morseCodeMap = {
         '.-': 'A', '-...': 'B', '-.-.': 'C', '-..': 'D', '.': 'E',
@@ -88,7 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
         '.....': '5', '-....': '6', '--...': '7', '---..': '8', '----.': '9'
     };
 
-    // Reverse Morse Lookup Dictionary (Character -> Signal)
     const morseSignalMap = {};
     Object.entries(morseCodeMap).forEach(([signal, char]) => {
         morseSignalMap[char] = signal;
@@ -99,7 +98,25 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentMorseTargetChar = 'R';
 
     // ----------------------------------------------------------
-    // 3. DOM References
+    // 3. PHASE 7: REAL BLINK DETECTION CALIBRATION CONFIG
+    // ----------------------------------------------------------
+    const blinkConfig = {
+        dotMax: 350,       // ms: blinks < 350ms generate DOT
+        dashMin: 350,      // ms: blinks >= 350ms generate DASH
+        earThreshold: 0.21, // Eye Aspect Ratio threshold (< 0.21 = CLOSED)
+        cooldownMs: 250     // Minimum cooldown between consecutive blinks
+    };
+
+    let isEyeBlinking = false;
+    let blinkStartTime = 0;
+    let lastBlinkEndTime = 0;
+    let lastMeasuredBlinkDuration = 0;
+    let lastGeneratedSignal = 'NONE';
+    let currentAverageEAR = 0.30;
+    let isFaceDetected = false;
+
+    // ----------------------------------------------------------
+    // 4. DOM References
     // ----------------------------------------------------------
     const viewHome = document.getElementById('view-home');
     const viewSignLab = document.getElementById('view-sign-lab');
@@ -188,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnPracticeSkip = document.getElementById('btn-practice-skip');
     const btnPracticeNext = document.getElementById('btn-practice-next');
 
-    // Morse Lab DOM References
+    // Morse Lab & Eye Tracking DOM References
     const morseChartGrid = document.getElementById('morse-chart-grid');
     const morseSelChar = document.getElementById('morse-sel-char');
     const morseSelPattern = document.getElementById('morse-sel-pattern');
@@ -210,13 +227,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const morseTerminalLog = document.getElementById('morse-terminal-log');
     const btnMorseClearTerminal = document.getElementById('btn-morse-clear-terminal');
 
+    // Phase 7 Eye Tracking Elements
+    const morseVideoElement = document.getElementById('morse-webcam-video');
+    const morseCanvasElement = document.getElementById('morse-eye-canvas');
+    const morseCameraLoadingPanel = document.getElementById('morse-camera-loading-panel');
+    const morseCameraErrorPanel = document.getElementById('morse-camera-error-panel');
+    const btnRetryMorseCamera = document.getElementById('btn-retry-morse-camera');
+
+    const eyeStateBadge = document.getElementById('eye-state-badge');
+    const eyeTrackingHudBadge = document.getElementById('eye-tracking-hud-badge');
+    const eyeDurationHudText = document.getElementById('eye-duration-hud-text');
+    const morseStatusBadge = document.getElementById('morse-status-badge');
+
+    // Calibration Sliders & Debug Panel DOM
+    const inputDotMax = document.getElementById('input-dot-max');
+    const valDotMax = document.getElementById('val-dot-max');
+    const inputDashMin = document.getElementById('input-dash-min');
+    const valDashMin = document.getElementById('val-dash-min');
+    const inputEarThreshold = document.getElementById('input-ear-threshold');
+    const valEarThreshold = document.getElementById('val-ear-threshold');
+    const btnToggleDebug = document.getElementById('btn-toggle-debug');
+    const developerDebugPanel = document.getElementById('developer-debug-panel');
+
+    const dbgFaceDetected = document.getElementById('dbg-face-detected');
+    const dbgEyeState = document.getElementById('dbg-eye-state');
+    const dbgAvgEar = document.getElementById('dbg-avg-ear');
+    const dbgBlinkDuration = document.getElementById('dbg-blink-duration');
+    const dbgLastSignal = document.getElementById('dbg-last-signal');
+
     // Modals
     const placeholderModal = document.getElementById('placeholder-modal');
     const modalCloseBtn = document.getElementById('modal-close-btn');
     const modalActionBtn = document.getElementById('modal-action-btn');
 
     // ----------------------------------------------------------
-    // 4. View Switcher Engine
+    // 5. View Switcher Engine
     // ----------------------------------------------------------
     function switchView(targetView) {
         if (viewHome) viewHome.classList.remove('active');
@@ -235,6 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (headerSecIndicator) headerSecIndicator.textContent = 'SEC: SIGN LAB';
             if (cameraStatusText) cameraStatusText.textContent = 'VISION ENGINE ACTIVE';
 
+            stopMorseEyeStream();
             initCameraAndMediaPipe();
         } else if (targetView === 'sign-practice') {
             if (viewSignPractice) viewSignPractice.classList.add('active');
@@ -242,16 +288,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (headerSecIndicator) headerSecIndicator.textContent = 'SEC: SIGN PRACTICE';
             if (cameraStatusText) cameraStatusText.textContent = 'PRACTICE MODE ACTIVE';
 
+            stopMorseEyeStream();
             updatePracticeTarget(practiceSequence[practiceIndex]);
             initCameraAndMediaPipe();
         } else if (targetView === 'morse-lab') {
             if (viewMorseLab) viewMorseLab.classList.add('active');
             if (navBtnMorseLab) navBtnMorseLab.classList.add('active');
             if (headerSecIndicator) headerSecIndicator.textContent = 'SEC: MORSE LAB';
-            if (cameraStatusText) cameraStatusText.textContent = 'TELEGRAPHY ACTIVE';
+            if (cameraStatusText) cameraStatusText.textContent = 'EYE TELEGRAPHY ACTIVE';
 
-            stopWebcamStream(); // Hand tracking not needed in Phase 6 Morse Lab
+            stopWebcamStream(); // Stop ASL hand stream
             initMorseLabView();
+            initMorseFaceMeshEngine();
         } else {
             if (viewHome) viewHome.classList.add('active');
             if (navBtnHome) navBtnHome.classList.add('active');
@@ -259,6 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cameraStatusText) cameraStatusText.textContent = 'CAMERA-POWERED';
 
             stopWebcamStream();
+            stopMorseEyeStream();
         }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -309,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modalActionBtn) modalActionBtn.addEventListener('click', closePlaceholderModal);
 
     // ----------------------------------------------------------
-    // 5. ASL Reference Card Controller
+    // 6. ASL Reference Card & Practice Controllers
     // ----------------------------------------------------------
     function renderAlphabetSelector() {
         if (!alphabetGrid) return;
@@ -383,9 +432,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAlphabetSelector();
     updateSelectedLetter('A');
 
-    // ----------------------------------------------------------
-    // 6. Sign Practice Controller
-    // ----------------------------------------------------------
     function updatePracticeTarget(letter) {
         if (!aslAlphabet[letter]) return;
         selectedLetter = letter;
@@ -450,7 +496,6 @@ document.addEventListener('DOMContentLoaded', () => {
             item.className = `morse-chart-item ${char === currentMorseTargetChar ? 'active' : ''}`;
             item.dataset.char = char;
 
-            // Display Morse pattern with high-contrast bullet and dash symbols
             const displayPattern = signal.replace(/\./g, '• ').replace(/-/g, '— ');
 
             item.innerHTML = `
@@ -470,7 +515,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!morseSignalMap[char]) return;
         currentMorseTargetChar = char;
 
-        // Highlight active chart item
         const items = document.querySelectorAll('.morse-chart-item');
         items.forEach(el => {
             if (el.dataset.char === char) {
@@ -499,7 +543,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (morseTargetPattern) morseTargetPattern.textContent = displayPattern;
     }
 
-    // Modular Functions for Phase 7 Binding
     function addMorseSignal(symbol) {
         if (symbol === '.' || symbol === '-') {
             currentMorseBuffer += symbol;
@@ -540,7 +583,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentDecodedMessage) {
             logMorseTerminalMessage(`> TRANSMITTED MESSAGE: "${currentDecodedMessage}"`);
 
-            // If transmitted message matches target, log success
             if (currentDecodedMessage === currentMorseTargetChar) {
                 logMorseTerminalMessage(`> [✓] TARGET CHARACTER '${currentMorseTargetChar}' ACHIEVED!`);
             }
@@ -582,7 +624,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateMorseBufferUI();
     }
 
-    // Attach Event Handlers to Morse Keypad Controls
     if (btnMorseDot) btnMorseDot.addEventListener('click', () => addMorseSignal('.'));
     if (btnMorseDash) btnMorseDash.addEventListener('click', () => addMorseSignal('-'));
     if (btnMorseClear) btnMorseClear.addEventListener('click', clearMorseBuffer);
@@ -604,6 +645,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Bind Calibration Controls
+    if (inputDotMax && valDotMax) {
+        inputDotMax.addEventListener('input', (e) => {
+            blinkConfig.dotMax = parseInt(e.target.value, 10);
+            valDotMax.textContent = `${blinkConfig.dotMax} ms`;
+        });
+    }
+
+    if (inputDashMin && valDashMin) {
+        inputDashMin.addEventListener('input', (e) => {
+            blinkConfig.dashMin = parseInt(e.target.value, 10);
+            valDashMin.textContent = `${blinkConfig.dashMin} ms`;
+        });
+    }
+
+    if (inputEarThreshold && valEarThreshold) {
+        inputEarThreshold.addEventListener('input', (e) => {
+            blinkConfig.earThreshold = parseFloat(e.target.value);
+            valEarThreshold.textContent = `${blinkConfig.earThreshold.toFixed(2)}`;
+        });
+    }
+
+    if (btnToggleDebug && developerDebugPanel) {
+        btnToggleDebug.addEventListener('click', () => {
+            developerDebugPanel.classList.toggle('hidden');
+        });
+    }
+
     // Expose Modular Functions globally for Phase 7 Eye Tracking Engine
     window.addMorseSignal = addMorseSignal;
     window.decodeMorseSignal = decodeMorseSignal;
@@ -613,7 +682,277 @@ document.addEventListener('DOMContentLoaded', () => {
     window.setMorseTarget = setMorseTarget;
 
     // ----------------------------------------------------------
-    // 8. MediaPipe Vision & Hand Tracking Engine Pipeline (ASL Views)
+    // 8. PHASE 7: REAL MEDIAPIPE FACE MESH & BLINK TELEGRAPHY ENGINE
+    // ----------------------------------------------------------
+    let morseWebcamStream = null;
+    let faceMeshEngine = null;
+    let morseAnimFrameId = null;
+    let isSendingMorseFrame = false;
+    let morseEngineInitialized = false;
+
+    async function initMorseFaceMeshEngine() {
+        if (morseCameraLoadingPanel) morseCameraLoadingPanel.classList.remove('hidden');
+        if (morseCameraErrorPanel) morseCameraErrorPanel.classList.add('hidden');
+
+        try {
+            if (!morseWebcamStream) {
+                morseWebcamStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
+                    audio: false
+                });
+
+                if (morseVideoElement) {
+                    morseVideoElement.srcObject = morseWebcamStream;
+                    await morseVideoElement.play();
+                }
+            }
+
+            if (!window.FaceMesh) {
+                showMorseCameraError('FaceMesh library not found in window scope.');
+                return;
+            }
+
+            if (!faceMeshEngine) {
+                faceMeshEngine = new window.FaceMesh({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+                });
+
+                faceMeshEngine.setOptions({
+                    maxNumFaces: 1,
+                    refineLandmarks: true,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
+
+                faceMeshEngine.onResults(onFaceMeshResults);
+
+                if (faceMeshEngine.initialize) {
+                    await faceMeshEngine.initialize();
+                }
+            }
+
+            morseEngineInitialized = true;
+            if (morseCameraLoadingPanel) morseCameraLoadingPanel.classList.add('hidden');
+            startMorseDetectionLoop();
+
+        } catch (err) {
+            console.error('FaceMesh Initialization Error:', err);
+            showMorseCameraError(err.message || 'FaceMesh WASM model failed to initialize.');
+        }
+    }
+
+    function showMorseCameraError(msg) {
+        if (morseCameraLoadingPanel) morseCameraLoadingPanel.classList.add('hidden');
+        if (morseCameraErrorPanel) morseCameraErrorPanel.classList.remove('hidden');
+        if (eyeStateBadge) eyeStateBadge.textContent = 'NO FACE';
+    }
+
+    if (btnRetryMorseCamera) {
+        btnRetryMorseCamera.addEventListener('click', () => initMorseFaceMeshEngine());
+    }
+
+    function stopMorseEyeStream() {
+        if (morseAnimFrameId) {
+            cancelAnimationFrame(morseAnimFrameId);
+            morseAnimFrameId = null;
+        }
+
+        if (morseWebcamStream) {
+            morseWebcamStream.getTracks().forEach(track => track.stop());
+            morseWebcamStream = null;
+        }
+
+        if (morseVideoElement) {
+            morseVideoElement.srcObject = null;
+        }
+
+        isSendingMorseFrame = false;
+        morseEngineInitialized = false;
+
+        if (morseCameraLoadingPanel) morseCameraLoadingPanel.classList.add('hidden');
+    }
+
+    function startMorseDetectionLoop() {
+        if (morseAnimFrameId) cancelAnimationFrame(morseAnimFrameId);
+
+        async function processFrame() {
+            if (morseVideoElement && !morseVideoElement.paused && !morseVideoElement.ended && morseVideoElement.readyState >= 2) {
+                if (!isSendingMorseFrame && faceMeshEngine && morseEngineInitialized) {
+                    isSendingMorseFrame = true;
+                    try {
+                        await faceMeshEngine.send({ image: morseVideoElement });
+                    } catch (e) {
+                        console.warn('FaceMesh Frame Error:', e);
+                    } finally {
+                        isSendingMorseFrame = false;
+                    }
+                }
+            }
+
+            if (morseWebcamStream && viewMorseLab && viewMorseLab.classList.contains('active')) {
+                morseAnimFrameId = requestAnimationFrame(processFrame);
+            }
+        }
+
+        morseAnimFrameId = requestAnimationFrame(processFrame);
+    }
+
+    // ----------------------------------------------------------
+    // 9. EYE ASPECT RATIO (EAR) CALCULATOR & BLINK CLASSIFIER
+    // ----------------------------------------------------------
+    // Eye Landmark Indices (MediaPipe Face Mesh)
+    const LEFT_EYE_INDICES = { outer: 33, inner: 133, top1: 160, top2: 158, bot1: 144, bot2: 153 };
+    const RIGHT_EYE_INDICES = { outer: 263, inner: 362, top1: 385, top2: 387, bot1: 380, bot2: 373 };
+
+    function calculateSingleEyeEAR(landmarks, eye) {
+        const pOuter = landmarks[eye.outer];
+        const pInner = landmarks[eye.inner];
+        const pTop1 = landmarks[eye.top1];
+        const pBot1 = landmarks[eye.bot1];
+        const pTop2 = landmarks[eye.top2];
+        const pBot2 = landmarks[eye.bot2];
+
+        if (!pOuter || !pInner || !pTop1 || !pBot1 || !pTop2 || !pBot2) return 0.30;
+
+        const distHoriz = Math.hypot(pOuter.x - pInner.x, pOuter.y - pInner.y);
+        const distVert1 = Math.hypot(pTop1.x - pBot1.x, pTop1.y - pBot1.y);
+        const distVert2 = Math.hypot(pTop2.x - pBot2.x, pTop2.y - pBot2.y);
+
+        return (distVert1 + distVert2) / (2.0 * (distHoriz || 0.001));
+    }
+
+    function onFaceMeshResults(results) {
+        if (!morseCanvasElement) return;
+
+        morseCanvasElement.width = morseCanvasElement.clientWidth || 640;
+        morseCanvasElement.height = morseCanvasElement.clientHeight || 480;
+
+        const ctx = morseCanvasElement.getContext('2d');
+        const width = morseCanvasElement.width;
+        const height = morseCanvasElement.height;
+
+        ctx.clearRect(0, 0, width, height);
+
+        const multiFaceLandmarks = results.multiFaceLandmarks;
+
+        if (multiFaceLandmarks && multiFaceLandmarks.length > 0) {
+            isFaceDetected = true;
+            const landmarks = multiFaceLandmarks[0];
+
+            // 1. Draw Eye Contours
+            drawEyeContoursOnCtx(ctx, landmarks, width, height);
+
+            // 2. Compute Left & Right EAR
+            const earLeft = calculateSingleEyeEAR(landmarks, LEFT_EYE_INDICES);
+            const earRight = calculateSingleEyeEAR(landmarks, RIGHT_EYE_INDICES);
+            currentAverageEAR = (earLeft + earRight) / 2.0;
+
+            const now = performance.now();
+
+            // 3. Eye Blink State Machine
+            if (currentAverageEAR < blinkConfig.earThreshold) {
+                // Eye is CLOSED
+                if (!isEyeBlinking && (now - lastBlinkEndTime > blinkConfig.cooldownMs)) {
+                    isEyeBlinking = true;
+                    blinkStartTime = now;
+
+                    if (eyeStateBadge) eyeStateBadge.textContent = 'BLINK DETECTED';
+                    if (eyeTrackingHudBadge) eyeTrackingHudBadge.textContent = '[ BLINKING ]';
+                }
+            } else {
+                // Eye is OPEN
+                if (isEyeBlinking) {
+                    isEyeBlinking = false;
+                    lastBlinkEndTime = now;
+
+                    const duration = Math.round(now - blinkStartTime);
+                    lastMeasuredBlinkDuration = duration;
+
+                    // Filter noise < 80ms
+                    if (duration >= 80) {
+                        if (duration < blinkConfig.dotMax) {
+                            lastGeneratedSignal = 'DOT ( . )';
+                            addMorseSignal('.');
+                            logMorseTerminalMessage(`> BLINK TELEGRAPHY: SHORT BLINK ( ${duration} ms ) -> DOT ( . )`);
+                            if (eyeStateBadge) eyeStateBadge.textContent = 'DOT DETECTED';
+                        } else {
+                            lastGeneratedSignal = 'DASH ( - )';
+                            addMorseSignal('-');
+                            logMorseTerminalMessage(`> BLINK TELEGRAPHY: LONG BLINK ( ${duration} ms ) -> DASH ( — )`);
+                            if (eyeStateBadge) eyeStateBadge.textContent = 'DASH DETECTED';
+                        }
+                    }
+                } else {
+                    if (eyeStateBadge) eyeStateBadge.textContent = 'EYES OPEN';
+                    if (eyeTrackingHudBadge) eyeTrackingHudBadge.textContent = '[ TRACKING ]';
+                }
+            }
+
+            // Update Real-Time HUD & Debug Readouts
+            if (eyeDurationHudText) eyeDurationHudText.textContent = `BLINK: ${lastMeasuredBlinkDuration} ms`;
+            if (morseStatusBadge) morseStatusBadge.textContent = 'EYE ENGINE ACTIVE';
+
+            if (dbgFaceDetected) dbgFaceDetected.textContent = 'YES';
+            if (dbgEyeState) dbgEyeState.textContent = isEyeBlinking ? 'CLOSED' : 'OPEN';
+            if (dbgAvgEar) dbgAvgEar.textContent = currentAverageEAR.toFixed(3);
+            if (dbgBlinkDuration) dbgBlinkDuration.textContent = `${lastMeasuredBlinkDuration} ms`;
+            if (dbgLastSignal) dbgLastSignal.textContent = lastGeneratedSignal;
+
+        } else {
+            isFaceDetected = false;
+            if (eyeStateBadge) eyeStateBadge.textContent = 'NO FACE';
+            if (eyeTrackingHudBadge) eyeTrackingHudBadge.textContent = '[ NO FACE ]';
+            if (morseStatusBadge) morseStatusBadge.textContent = 'EYE TRACKING SEARCHING';
+
+            if (dbgFaceDetected) dbgFaceDetected.textContent = 'NO';
+            if (dbgEyeState) dbgEyeState.textContent = 'NO FACE';
+            if (dbgAvgEar) dbgAvgEar.textContent = '0.000';
+        }
+    }
+
+    function drawEyeContoursOnCtx(ctx, landmarks, width, height) {
+        ctx.strokeStyle = '#ea4a51';
+        ctx.lineWidth = 2;
+
+        const leftPts = [33, 160, 158, 133, 153, 144];
+        const rightPts = [362, 385, 387, 263, 373, 380];
+
+        // Draw Left Eye
+        ctx.beginPath();
+        leftPts.forEach((idx, i) => {
+            const pt = landmarks[idx];
+            if (i === 0) ctx.moveTo(pt.x * width, pt.y * height);
+            else ctx.lineTo(pt.x * width, pt.y * height);
+        });
+        ctx.closePath();
+        ctx.stroke();
+
+        // Draw Right Eye
+        ctx.beginPath();
+        rightPts.forEach((idx, i) => {
+            const pt = landmarks[idx];
+            if (i === 0) ctx.moveTo(pt.x * width, pt.y * height);
+            else ctx.lineTo(pt.x * width, pt.y * height);
+        });
+        ctx.closePath();
+        ctx.stroke();
+
+        // Draw Iris / Pupil Center Dots
+        const leftIris = landmarks[468] || landmarks[33];
+        const rightIris = landmarks[473] || landmarks[263];
+
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath();
+        ctx.arc(leftIris.x * width, leftIris.y * height, 4, 0, 2 * Math.PI);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(rightIris.x * width, rightIris.y * height, 4, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+
+    // ----------------------------------------------------------
+    // 10. MEDIA PIPE HAND TRACKING PIPELINE (ASL LAB & PRACTICE)
     // ----------------------------------------------------------
     let webcamStream = null;
     let handsEngine = null;

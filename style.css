@@ -1,6 +1,6 @@
 /* ==========================================================
    SILENT — Neo-Brutalist Laboratory Design System
-   Phase 6: SILENT Morse Code Laboratory Screen
+   Phase 7: SILENT Real Eye Blink Detection & Morse Telegraphy Engine
    Visual Source of Truth: Stitch Screen 0586a8cfaa1543629a7525d4f95efbb9
    ========================================================== */
 
@@ -367,7 +367,7 @@ body {
 .sticker-badge.rotate-hero { transform: rotate(-2deg); }
 
 /* ----------------------------------------------------------
-   9. PHASE 4: SIGN LANGUAGE LAB WORKSPACE LAYOUT
+   9. WORKSPACE & CAMERA VIEWPORT STYLES
    ---------------------------------------------------------- */
 .sign-lab-grid {
     display: grid;
@@ -388,7 +388,6 @@ body {
     gap: var(--space-lg);
 }
 
-/* Reference Card Body */
 .reference-body {
     padding: var(--space-md);
     display: flex;
@@ -396,7 +395,6 @@ body {
     gap: var(--space-md);
 }
 
-/* A-Z Alphabet Selector Grid */
 .alphabet-selector-container {
     background-color: var(--surface-container-low);
     border: var(--border-secondary);
@@ -430,18 +428,9 @@ body {
     transition: var(--transition-mechanical);
 }
 
-.letter-btn:hover {
-    background-color: var(--accent-yellow);
-}
+.letter-btn:hover { background-color: var(--accent-yellow); }
+.letter-btn.active { background-color: var(--accent-coral); color: var(--on-primary); box-shadow: 0px 0px 0px #000000; transform: translate(2px, 2px); }
 
-.letter-btn.active {
-    background-color: var(--accent-coral);
-    color: var(--on-primary);
-    box-shadow: 0px 0px 0px #000000;
-    transform: translate(2px, 2px);
-}
-
-/* Reference Visual Display Box */
 .reference-visual-box {
     width: 100%;
     min-height: 240px;
@@ -456,56 +445,15 @@ body {
     padding: var(--space-md);
 }
 
-.ref-sign-image {
-    max-width: 100%;
-    max-height: 240px;
-    object-fit: contain;
-    display: block;
-    margin: 0 auto;
-}
+.ref-sign-image { max-width: 100%; max-height: 240px; object-fit: contain; display: block; margin: 0 auto; }
+.ref-sign-fallback { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-md); text-align: center; background-color: var(--surface-container-low); border: var(--border-secondary); box-shadow: 2px 2px 0px #000000; max-width: 280px; }
 
-.ref-sign-fallback {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-md);
-    text-align: center;
-    background-color: var(--surface-container-low);
-    border: var(--border-secondary);
-    box-shadow: 2px 2px 0px #000000;
-    max-width: 280px;
-}
+.reference-info-box { background-color: var(--surface-container-low); border: var(--border-secondary); padding: var(--space-md); }
+.reference-desc-text { font-family: var(--font-body); font-size: 0.95rem; margin-top: 4px; }
+.reference-nav-bar { display: flex; gap: var(--space-md); }
+.reference-nav-bar button { flex: 1; }
 
-/* Reference Info & Nav */
-.reference-info-box {
-    background-color: var(--surface-container-low);
-    border: var(--border-secondary);
-    padding: var(--space-md);
-}
-
-.reference-desc-text {
-    font-family: var(--font-body);
-    font-size: 0.95rem;
-    margin-top: 4px;
-}
-
-.reference-nav-bar {
-    display: flex;
-    gap: var(--space-md);
-}
-
-.reference-nav-bar button {
-    flex: 1;
-}
-
-/* ----------------------------------------------------------
-   10. CAMERA VIEWPORT & REAL-TIME LANDMARK OVERLAY
-   ---------------------------------------------------------- */
-.camera-analysis-card {
-    display: flex;
-    flex-direction: column;
-}
+.camera-analysis-card { display: flex; flex-direction: column; }
 
 .camera-viewport-container {
     position: relative;
@@ -536,160 +484,44 @@ canvas.camera-canvas {
     z-index: 5;
 }
 
-.corner-mark {
-    position: absolute;
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 1.4rem;
-    color: var(--accent-yellow);
-    line-height: 1;
-    user-select: none;
-    z-index: 10;
-}
-
+.corner-mark { position: absolute; font-family: var(--font-mono); font-weight: 700; font-size: 1.4rem; color: var(--accent-yellow); line-height: 1; user-select: none; z-index: 10; }
 .mark-tl { top: 12px; left: 12px; }
 .mark-tr { top: 12px; right: 12px; }
 .mark-bl { bottom: 12px; left: 12px; }
 .mark-br { bottom: 12px; right: 12px; }
 
-.camera-error-overlay {
-    position: absolute;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.85);
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-md);
-}
-
-.camera-loading-overlay {
-    position: absolute;
-    inset: 0;
-    background-color: rgba(28, 28, 23, 0.9);
-    z-index: 15;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-md);
-    color: #ffffff;
-    transition: opacity 0.3s ease;
-}
-
-.camera-loading-overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
+.camera-error-overlay { position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.85); z-index: 20; display: flex; align-items: center; justify-content: center; padding: var(--space-md); }
+.camera-loading-overlay { position: absolute; inset: 0; background-color: rgba(28, 28, 23, 0.9); z-index: 15; display: flex; align-items: center; justify-content: center; padding: var(--space-md); color: #ffffff; transition: opacity 0.3s ease; }
+.camera-loading-overlay.hidden { opacity: 0; pointer-events: none; }
 
 /* ----------------------------------------------------------
-   11. FINGER LANDMARK ANALYSIS MATRIX & PRACTICE STYLES
+   10. FINGER ANALYSIS & PRACTICE STYLES
    ---------------------------------------------------------- */
-.finger-analysis-container {
-    padding: var(--space-md);
-    background-color: var(--surface-container);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-}
+.finger-analysis-container { padding: var(--space-md); background-color: var(--surface-container); display: flex; flex-direction: column; gap: var(--space-md); }
+.finger-analysis-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-sm); }
+.finger-matrix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+.finger-stat-chip { background-color: var(--surface); border: var(--border-secondary); box-shadow: 2px 2px 0px #000000; padding: 8px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
 
-.finger-analysis-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: var(--space-sm);
-}
-
-.finger-matrix-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-    gap: 8px;
-}
-
-.finger-stat-chip {
-    background-color: var(--surface);
-    border: var(--border-secondary);
-    box-shadow: 2px 2px 0px #000000;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    align-items: flex-start;
-}
-
-.finger-state-pill {
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 0.75rem;
-    padding: 2px 6px;
-    border: 1px solid #000000;
-    background-color: var(--surface-container-highest);
-    color: var(--primary);
-    width: 100%;
-    text-align: center;
-}
-
+.finger-state-pill { font-family: var(--font-mono); font-weight: 700; font-size: 0.75rem; padding: 2px 6px; border: 1px solid #000000; background-color: var(--surface-container-highest); color: var(--primary); width: 100%; text-align: center; }
 .finger-state-pill.is-extended { background-color: var(--accent-yellow); color: #000000; }
 .finger-state-pill.is-curled { background-color: var(--primary); color: #ffffff; }
 .finger-state-pill.is-unknown { background-color: var(--surface-container-low); color: var(--secondary); }
 
-/* Practice View Specific Styles */
-.practice-score-overlay {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    background-color: var(--surface);
-    border: var(--border-primary);
-    box-shadow: 4px 4px 0px #000000;
-    padding: 8px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    z-index: 10;
-}
-
-.practice-achievement-sticker {
-    position: absolute;
-    bottom: 24px;
-    right: 24px;
-    z-index: 15;
-    animation: achievementPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
+.practice-score-overlay { position: absolute; top: 16px; left: 16px; background-color: var(--surface); border: var(--border-primary); box-shadow: 4px 4px 0px #000000; padding: 8px 14px; display: flex; flex-direction: column; gap: 2px; z-index: 10; }
+.practice-achievement-sticker { position: absolute; bottom: 24px; right: 24px; z-index: 15; animation: achievementPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
 @keyframes achievementPop {
     0% { transform: scale(0) rotate(-10deg); opacity: 0; }
     100% { transform: scale(1) rotate(-1.5deg); opacity: 1; }
 }
 
-.practice-finger-matrix {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.practice-finger-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: var(--surface);
-    border: var(--border-secondary);
-    box-shadow: 2px 2px 0px #000000;
-    padding: 6px 12px;
-}
-
-.practice-controls-bar {
-    display: flex;
-    gap: var(--space-sm);
-    flex-wrap: wrap;
-}
-
-.practice-controls-bar button {
-    flex: 1;
-    min-width: 110px;
-}
+.practice-finger-matrix { display: flex; flex-direction: column; gap: 6px; }
+.practice-finger-row { display: flex; align-items: center; justify-content: space-between; background-color: var(--surface); border: var(--border-secondary); box-shadow: 2px 2px 0px #000000; padding: 6px 12px; }
+.practice-controls-bar { display: flex; gap: var(--space-sm); flex-wrap: wrap; }
+.practice-controls-bar button { flex: 1; min-width: 110px; }
 
 /* ----------------------------------------------------------
-   12. PHASE 6: MORSE CODE LABORATORY STYLES
+   11. PHASE 6 & 7: MORSE CODE LAB & EYE BLINK STYLES
    ---------------------------------------------------------- */
 .morse-lab-grid {
     display: grid;
@@ -711,19 +543,13 @@ canvas.camera-canvas {
     gap: var(--space-md);
 }
 
-/* Morse Manual Body */
-.morse-manual-body {
-    padding: var(--space-md);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-}
+.morse-manual-body { padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-sm); }
 
 .morse-chart-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
     gap: 6px;
-    max-height: 380px;
+    max-height: 280px;
     overflow-y: auto;
     padding-right: 4px;
 }
@@ -742,67 +568,46 @@ canvas.camera-canvas {
     transition: var(--transition-mechanical);
 }
 
-.morse-chart-item:hover {
-    background-color: var(--accent-yellow);
-}
+.morse-chart-item:hover { background-color: var(--accent-yellow); }
+.morse-chart-item.active { background-color: var(--accent-coral); color: var(--on-primary); transform: translate(2px, 2px); box-shadow: 0px 0px 0px #000000; }
+.morse-chart-char { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; line-height: 1; }
+.morse-chart-pattern { font-family: var(--font-mono); font-weight: 700; font-size: 0.75rem; letter-spacing: 1px; }
 
-.morse-chart-item.active {
-    background-color: var(--accent-coral);
-    color: var(--on-primary);
-    transform: translate(2px, 2px);
-    box-shadow: 0px 0px 0px #000000;
-}
+.morse-active-card { background-color: var(--surface-container-low); border: var(--border-secondary); padding: var(--space-md); box-shadow: 2px 2px 0px #000000; margin-top: 4px; }
 
-.morse-chart-char {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 1.1rem;
-    line-height: 1;
-}
-
-.morse-chart-pattern {
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 0.75rem;
-    letter-spacing: 1px;
-}
-
-.morse-active-card {
-    background-color: var(--surface-container-low);
-    border: var(--border-secondary);
-    padding: var(--space-md);
-    box-shadow: 2px 2px 0px #000000;
-    margin-top: 4px;
-}
-
-/* Eye Tracking HUD Overlay */
-.eye-tracking-hud {
+/* Eye Tracking Real-Time HUD Overlay */
+.eye-hud-sticker {
     position: absolute;
-    inset: 0;
+    top: 16px;
+    left: 16px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: var(--space-md);
-    z-index: 10;
+    gap: 4px;
+    z-index: 12;
 }
 
-.hud-reticle {
-    width: 120px;
-    height: 120px;
-    border: 4px dashed var(--accent-coral);
-    border-radius: 50% !important;
+.calibration-control-group {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    animation: radarPulse 2s infinite ease-in-out;
+    flex-direction: column;
+    gap: 4px;
+    background-color: var(--surface);
+    border: var(--border-secondary);
+    padding: 8px;
+    box-shadow: 2px 2px 0px #000000;
 }
 
-@keyframes radarPulse {
-    0%, 100% { transform: scale(0.95); opacity: 0.8; }
-    50% { transform: scale(1.05); opacity: 1; }
+.brutalist-slider {
+    accent-color: var(--accent-coral);
+    cursor: pointer;
+    width: 100%;
+}
+
+.debug-panel-overlay {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    z-index: 14;
 }
 
 /* Morse Signal Buffer & Keypad */
@@ -818,19 +623,9 @@ canvas.camera-canvas {
     word-break: break-all;
 }
 
-.morse-keypad {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-sm);
-}
+.morse-keypad { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm); }
+.morse-keypad-secondary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
-.morse-keypad-secondary {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-}
-
-/* Terminal Console Log Box */
 .terminal-console-log {
     background-color: #1c1c17;
     color: #ffffff;
@@ -855,10 +650,7 @@ canvas.camera-canvas {
 .terminal-console-log::-webkit-scrollbar-track { background: #000000; }
 .terminal-console-log::-webkit-scrollbar-thumb { background: var(--accent-yellow); border: 1px solid #000000; }
 
-.status-indicator {
-    display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px; background-color: var(--surface); color: var(--primary); border: var(--border-secondary); box-shadow: 2px 2px 0px #000000; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-}
-
+.status-indicator { display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px; background-color: var(--surface); color: var(--primary); border: var(--border-secondary); box-shadow: 2px 2px 0px #000000; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
 .status-dot { width: 10px; height: 10px; border: 1px solid #000000; display: inline-block; }
 .status-indicator.status-live .status-dot, .status-dot.dot-live { background-color: var(--accent-coral); animation: pulseDot 1.5s infinite ease-in-out; }
 .status-indicator.status-ready .status-dot, .status-dot.dot-ready { background-color: var(--accent-amber); }
