@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>SILENT — Sign Language Lab & Guided Practice</title>
-    <meta name="description" content="Interactive ASL Sign Language Lab with real-time camera tracking, normalized scoring, and guided sign practice."/>
+    <title>SILENT — Sign Language Lab & Morse Code Laboratory</title>
+    <meta name="description" content="Interactive ASL Sign Language Lab and Morse Code Laboratory with real-time camera tracking, normalized scoring, and signal decoding."/>
     <!-- Google Fonts: Bricolage Grotesque, Work Sans, Space Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -77,6 +77,10 @@
                             <span>START PRACTICE</span>
                             <span aria-hidden="true">★</span>
                         </button>
+                        <button class="brutalist-button btn-yellow" id="hero-btn-morse" type="button">
+                            <span>LAUNCH MORSE LAB</span>
+                            <span aria-hidden="true">👁</span>
+                        </button>
                     </div>
                 </div>
             </section>
@@ -137,9 +141,9 @@
                             </div>
 
                             <div class="feature-labels">
-                                <span class="sticker-badge badge-yellow rotate-left">EYE TRACKING</span>
-                                <span class="sticker-badge badge-peach rotate-right">BLINK DETECTION</span>
-                                <span class="sticker-badge badge-coral">MORSE PRACTICE</span>
+                                <span class="sticker-badge badge-yellow rotate-left">TELEGRAPHY</span>
+                                <span class="sticker-badge badge-peach rotate-right">MORSE DECODER</span>
+                                <span class="sticker-badge badge-coral">SIGNAL BUFFER</span>
                             </div>
 
                             <div class="module-preview-frame">
@@ -149,7 +153,7 @@
                                     <path d="M100 100C130 55 270 55 300 100C270 145 130 145 100 100Z" fill="#fdf9f0" stroke="#000000" stroke-width="4"/>
                                     <circle cx="200" cy="100" r="32" fill="#ea4a51" stroke="#000000" stroke-width="4"/>
                                     <circle cx="200" cy="100" r="14" fill="#000000"/>
-                                    <text x="14" y="28" font-family="Space Mono" font-size="12" font-weight="700" fill="#000">BLINK_TIMING // STANDBY</text>
+                                    <text x="14" y="28" font-family="Space Mono" font-size="12" font-weight="700" fill="#000">MORSE_LAB // ACTIVE</text>
                                 </svg>
                             </div>
 
@@ -176,9 +180,9 @@
                     <div class="terminal-panel-body">
                         <div class="terminal-console-log" id="system-console-log" role="region" aria-label="Terminal Interface Log">
                             <div class="log-entry">
-                                <span class="log-time">[18:04:00]</span>
+                                <span class="log-time">[18:11:00]</span>
                                 <span class="log-prompt">></span>
-                                <span class="log-text">SILENT System Hub initialized. Click "SIGN LAB" or "PRACTICE" to launch vision engine.</span>
+                                <span class="log-text">SILENT System Hub initialized. Click "SIGN LAB", "PRACTICE", or "MORSE LAB" to launch module.</span>
                             </div>
                         </div>
                     </div>
@@ -219,20 +223,14 @@
                             </div>
                             
                             <div class="reference-body">
-                                <!-- A-Z Alphabet Selector Bar -->
                                 <div class="alphabet-selector-container">
                                     <div class="mono-label" style="font-size: 0.75rem; margin-bottom: 4px;">SELECT TARGET LETTER (A-Z):</div>
-                                    <div class="alphabet-grid" id="alphabet-selector-grid">
-                                        <!-- Populated via JavaScript A-Z -->
-                                    </div>
+                                    <div class="alphabet-grid" id="alphabet-selector-grid"></div>
                                 </div>
 
-                                <!-- Reference Sign Pose Visual Display Card -->
                                 <div class="reference-visual-box" id="reference-visual-box">
-                                    <!-- ASL Hand Reference Image -->
                                     <img class="ref-sign-image" id="ref-sign-image" src="assets/signs/A.jpg" alt="ASL Sign Language Reference for letter A"/>
                                     
-                                    <!-- Missing Asset Brutalist Fallback Banner -->
                                     <div class="ref-sign-fallback hidden" id="ref-sign-fallback">
                                         <span class="sticker-badge badge-coral rotate-left">ASL ASSET MISSING</span>
                                         <p class="mono-label" style="font-size: 0.8rem; margin-top: 8px;">REFERENCE IMAGE NOT AVAILABLE</p>
@@ -240,7 +238,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Reference Instruction Info -->
                                 <div class="reference-info-box">
                                     <span class="mono-label" id="ref-sign-title">LETTER 'A' POSTURE:</span>
                                     <p class="reference-desc-text" id="ref-sign-desc">
@@ -248,7 +245,6 @@
                                     </p>
                                 </div>
 
-                                <!-- Navigation CTAs -->
                                 <div class="reference-nav-bar">
                                     <button class="brutalist-button btn-secondary" id="btn-prev-letter" type="button">
                                         <span>← PREV</span>
@@ -263,8 +259,6 @@
 
                     <!-- Right Column: Live Camera Feed & Finger Analysis -->
                     <section class="sign-lab-col-right">
-                        
-                        <!-- Camera Analysis Container -->
                         <article class="hard-card has-header camera-analysis-card">
                             <div class="card-header-black">
                                 <div class="flex-row-center">
@@ -274,21 +268,15 @@
                                 <span class="sticker-badge badge-coral" id="camera-match-score">MATCH: --%</span>
                             </div>
 
-                            <!-- Camera Feed & Landmark Canvas Overlay -->
                             <div class="camera-viewport-container" id="camera-viewport-container">
-                                <!-- Mirrored Selfie Camera Video Stream -->
                                 <video class="camera-video" id="webcam-video" autoplay playsinline muted></video>
-                                
-                                <!-- Mirrored Landmark Tracking Canvas Overlay -->
                                 <canvas class="camera-canvas" id="landmark-canvas"></canvas>
 
-                                <!-- Technical Corner Marks -->
                                 <span class="corner-mark mark-tl" aria-hidden="true">+</span>
                                 <span class="corner-mark mark-tr" aria-hidden="true">+</span>
                                 <span class="corner-mark mark-bl" aria-hidden="true">+</span>
                                 <span class="corner-mark mark-br" aria-hidden="true">+</span>
 
-                                <!-- Camera Error Overlay Panel -->
                                 <div class="camera-error-overlay hidden" id="camera-error-panel">
                                     <div class="hard-card modal-card" style="max-width: 360px; background: #ffffff;">
                                         <div class="sticker-badge badge-coral rotate-left" id="error-badge">VISION ENGINE ERROR</div>
@@ -300,7 +288,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Camera Loading Overlay -->
                                 <div class="camera-loading-overlay" id="camera-loading-panel">
                                     <div class="status-indicator status-active">
                                         <span class="status-dot dot-active"></span>
@@ -309,7 +296,6 @@
                                 </div>
                             </div>
 
-                            <!-- Real-time Finger Analysis Panel -->
                             <div class="finger-analysis-container">
                                 <div class="finger-analysis-header">
                                     <h3 class="font-heading" style="font-size: 1.2rem; font-weight: 700;">REAL-TIME FINGER LANDMARK ANALYSIS</h3>
@@ -319,7 +305,6 @@
                                     </div>
                                 </div>
 
-                                <!-- 5 Fingers State Readout Matrix -->
                                 <div class="finger-matrix-grid">
                                     <div class="finger-stat-chip" id="chip-thumb">
                                         <span class="mono-label">THUMB:</span>
@@ -351,12 +336,9 @@
 
         <!-- ==========================================================
              VIEW 3: SILENT SIGN PRACTICE (PHASE 4 GUIDED PRACTICE)
-             Stitch Screen ID: 52ef3b6a8bc645dd813d18f779f904e8
              ========================================================== -->
         <div class="page-view" id="view-sign-practice">
             <div class="container" style="padding-top: var(--space-lg);">
-                
-                <!-- Practice Mode Header Bar -->
                 <div class="hard-card has-header" style="margin-bottom: var(--space-md);">
                     <div class="card-header-black">
                         <div style="display: flex; align-items: center; gap: 10px;">
@@ -368,7 +350,6 @@
                     </div>
                 </div>
 
-                <!-- Top Instruction Banner -->
                 <div class="hard-card practice-instruction-banner" style="margin-bottom: var(--space-lg); background-color: var(--surface-container); border: var(--border-primary); box-shadow: var(--shadow-hard);">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-sm);">
                         <div>
@@ -383,10 +364,7 @@
                     </div>
                 </div>
 
-                <!-- 2-Column Split Practice Layout -->
                 <div class="sign-lab-grid">
-                    
-                    <!-- LEFT: Reference Sign Card -->
                     <section class="sign-lab-col-left">
                         <article class="hard-card has-header reference-card">
                             <div class="card-header-coral">
@@ -408,10 +386,7 @@
                         </article>
                     </section>
 
-                    <!-- RIGHT: Camera & Feedback Area -->
                     <section class="sign-lab-col-right">
-                        
-                        <!-- Camera Feed Card -->
                         <article class="hard-card has-header camera-analysis-card">
                             <div class="card-header-black">
                                 <div class="flex-row-center">
@@ -430,20 +405,17 @@
                                 <span class="corner-mark mark-bl" aria-hidden="true">+</span>
                                 <span class="corner-mark mark-br" aria-hidden="true">+</span>
 
-                                <!-- Overlay Match Score Gauge -->
                                 <div class="practice-score-overlay">
                                     <span class="mono-label text-dim">TARGET MATCH</span>
                                     <span class="font-display" id="practice-score-number" style="font-size: 2.8rem; line-height: 1;">0%</span>
                                     <span class="mono-label" id="practice-score-bar">[░░░░░░░░░░]</span>
                                 </div>
 
-                                <!-- Achievement Success Sticker -->
                                 <div class="practice-achievement-sticker hidden" id="practice-achievement-banner">
                                     <span class="sticker-badge badge-yellow rotate-left" style="font-size: 1.1rem; padding: 8px 16px;">[✓] TARGET SIGN ACHIEVED</span>
                                 </div>
                             </div>
 
-                            <!-- 5-Finger Analysis Rows for Practice -->
                             <div class="finger-analysis-container">
                                 <h3 class="font-heading" style="font-size: 1.1rem; font-weight: 700; margin-bottom: 4px;">FINGER ANALYSIS CHECKLIST</h3>
                                 
@@ -472,7 +444,6 @@
                             </div>
                         </article>
 
-                        <!-- Practice Controls Bar -->
                         <div class="practice-controls-bar">
                             <button class="brutalist-button btn-secondary" id="btn-practice-prev" type="button">
                                 <span>← PREVIOUS</span>
@@ -487,6 +458,165 @@
                                 <span>NEXT SIGN →</span>
                             </button>
                         </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================================
+             VIEW 4: SILENT MORSE CODE LAB (PHASE 6 WORKSPACE)
+             Stitch Screen ID: 0586a8cfaa1543629a7525d4f95efbb9
+             ========================================================== -->
+        <div class="page-view" id="view-morse-lab">
+            <div class="container" style="padding-top: var(--space-lg);">
+                
+                <!-- Top Morse Header Bar -->
+                <div class="hard-card has-header" style="margin-bottom: var(--space-md);">
+                    <div class="card-header-black">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="mono-label">MORSE CODE LABORATORY // TELEGRAPHY</span>
+                            <span class="sticker-badge badge-yellow rotate-right" id="morse-status-badge">EYE TRACKING STANDBY</span>
+                        </div>
+                        <button class="brutalist-button btn-yellow" id="btn-morse-return-home" style="padding: 4px 10px; font-size: 0.75rem;" type="button">RETURN HOME</button>
+                    </div>
+                </div>
+
+                <!-- 3-Column Bento Grid Layout -->
+                <div class="morse-lab-grid">
+                    
+                    <!-- COLUMN 1: MORSE REFERENCE MANUAL (A-Z & 0-9 HTML/CSS Chart) -->
+                    <section class="morse-col-reference">
+                        <article class="hard-card has-header">
+                            <div class="card-header-coral">
+                                <span class="mono-label">MORSE REFERENCE MANUAL</span>
+                                <span class="sticker-badge badge-yellow">A-Z &amp; 0-9</span>
+                            </div>
+
+                            <div class="morse-manual-body">
+                                <div class="mono-label" style="font-size: 0.75rem; margin-bottom: 8px;">CLICK ANY CHARACTER TO SET TARGET:</div>
+                                
+                                <div class="morse-chart-grid" id="morse-chart-grid">
+                                    <!-- Populated via JavaScript A-Z & 0-9 -->
+                                </div>
+
+                                <!-- Active Selected Character Card -->
+                                <div class="morse-active-card">
+                                    <span class="mono-label text-dim">SELECTED CHARACTER:</span>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+                                        <span class="font-display" id="morse-sel-char" style="font-size: 2.2rem; line-height: 1;">A</span>
+                                        <span class="font-display" id="morse-sel-pattern" style="font-size: 1.8rem; color: var(--accent-coral);">• —</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </section>
+
+                    <!-- COLUMN 2: LIVE EYE DETECTION PANEL (Placeholder State for Phase 7) -->
+                    <section class="morse-col-camera">
+                        <article class="hard-card has-header camera-analysis-card">
+                            <div class="card-header-black">
+                                <div class="flex-row-center">
+                                    <span class="status-dot dot-ready"></span>
+                                    <span class="mono-label">LIVE EYE DETECTION</span>
+                                </div>
+                                <span class="sticker-badge badge-peach" id="eye-state-badge">EYE: OPEN</span>
+                            </div>
+
+                            <div class="camera-viewport-container" style="height: 380px; background-color: #1c1c17;">
+                                <!-- Corner Crosshairs Reticle -->
+                                <span class="corner-mark mark-tl" aria-hidden="true">+</span>
+                                <span class="corner-mark mark-tr" aria-hidden="true">+</span>
+                                <span class="corner-mark mark-bl" aria-hidden="true">+</span>
+                                <span class="corner-mark mark-br" aria-hidden="true">+</span>
+
+                                <!-- Center Eye Tracking Scanning HUD Overlay -->
+                                <div class="eye-tracking-hud">
+                                    <div class="hud-reticle"></div>
+                                    <span class="sticker-badge badge-yellow rotate-left" style="margin-top: 12px;">CAMERA READY</span>
+                                    <span class="mono-label text-dim" style="font-size: 0.75rem; margin-top: 4px;">[ EYE TRACKING STANDBY ]</span>
+                                    <p class="mono-label" style="font-size: 0.7rem; color: var(--accent-coral); margin-top: 6px;">
+                                        MANUAL TELEGRAPHY ACTIVE // FACE MESH INTEGRATION (PHASE 7)
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Eye Detection Status Bar -->
+                            <div class="finger-analysis-container">
+                                <div class="finger-analysis-header">
+                                    <h3 class="font-heading" style="font-size: 1.1rem; font-weight: 700;">TELEGRAPHY MANUAL INSTRUCTIONS</h3>
+                                    <span class="sticker-badge badge-yellow">SIGNAL BINDING</span>
+                                </div>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <div class="finger-stat-chip" style="flex: 1;">
+                                        <span class="mono-label">DOT ( • ):</span>
+                                        <span class="finger-state-pill is-extended">SHORT BLINK (&lt; 300ms)</span>
+                                    </div>
+                                    <div class="finger-stat-chip" style="flex: 1;">
+                                        <span class="mono-label">DASH ( — ):</span>
+                                        <span class="finger-state-pill is-curled">LONG BLINK (&gt; 300ms)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </section>
+
+                    <!-- COLUMN 3: SIGNAL BUFFER, DECODER & OUTPUT TERMINAL -->
+                    <section class="morse-col-output">
+                        
+                        <!-- Target Character Practice Card -->
+                        <article class="hard-card has-header" style="margin-bottom: var(--space-md);">
+                            <div class="card-header-black">
+                                <span class="mono-label">TARGET CHARACTER</span>
+                                <button class="brutalist-button btn-yellow" id="btn-morse-new-target" style="padding: 2px 8px; font-size: 0.7rem;" type="button">NEW TARGET 🎲</button>
+                            </div>
+                            <div style="padding: var(--space-sm) var(--space-md); display: flex; align-items: center; justify-content: space-between;">
+                                <span class="font-display" id="morse-target-char" style="font-size: 2.2rem; line-height: 1;">R</span>
+                                <span class="font-display" id="morse-target-pattern" style="font-size: 1.8rem; color: var(--accent-coral);">• — •</span>
+                            </div>
+                        </article>
+
+                        <!-- Signal Buffer Card -->
+                        <article class="hard-card has-header" style="margin-bottom: var(--space-md);">
+                            <div class="card-header-coral">
+                                <span class="mono-label">CURRENT INPUT BUFFER</span>
+                                <span class="sticker-badge badge-black" id="morse-decoded-badge">DECODED: --</span>
+                            </div>
+                            
+                            <div style="padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-sm);">
+                                <div class="morse-buffer-display" id="morse-buffer-display">
+                                    <span id="morse-buffer-text" style="color: var(--accent-yellow); font-size: 2rem; letter-spacing: 4px;">• —</span>
+                                </div>
+
+                                <!-- Manual Interactive Telegraphy Keys -->
+                                <div class="morse-keypad">
+                                    <button class="brutalist-button btn-yellow" id="btn-morse-dot" type="button" style="font-size: 1.2rem;">DOT ( • )</button>
+                                    <button class="brutalist-button btn-coral" id="btn-morse-dash" type="button" style="font-size: 1.2rem;">DASH ( — )</button>
+                                </div>
+                                <div class="morse-keypad-secondary">
+                                    <button class="brutalist-button btn-secondary" id="btn-morse-clear" type="button">CLEAR</button>
+                                    <button class="brutalist-button btn-secondary" id="btn-morse-space" type="button">SPACE</button>
+                                    <button class="brutalist-button btn-yellow" id="btn-morse-transmit" type="button">TRANSMIT</button>
+                                </div>
+                            </div>
+                        </article>
+
+                        <!-- Decoded Message Output Terminal Card -->
+                        <article class="hard-card has-header">
+                            <div class="card-header-black">
+                                <span class="mono-label">[ DECODED MESSAGE TERMINAL ]</span>
+                                <button class="brutalist-button btn-secondary" id="btn-morse-clear-terminal" style="padding: 2px 8px; font-size: 0.7rem;" type="button">CLEAR LOG</button>
+                            </div>
+                            
+                            <div style="padding: var(--space-md);">
+                                <div class="terminal-console-log" id="morse-terminal-log" style="height: 180px;">
+                                    <div class="log-entry">
+                                        <span class="log-time">[18:11:00]</span>
+                                        <span class="log-prompt">&gt;</span>
+                                        <span class="log-text">SILENT Morse Code Telemetry Engine initialized. Use DOT/DASH keys to transmit signals.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
                     </section>
                 </div>
             </div>
@@ -509,9 +639,9 @@
                 <span class="modal-icon" id="modal-icon">👁</span>
             </div>
             <div class="sticker-badge badge-coral rotate-left" id="modal-badge">MODULE INITIALIZING</div>
-            <h3 class="modal-title" id="modal-title">Morse Code Lab</h3>
+            <h3 class="modal-title" id="modal-title">Progress Dashboard</h3>
             <p class="modal-description" id="modal-description">
-                The Morse Code blink detection lab is scheduled for Phase 5. Sign Language Lab is live!
+                Progress Dashboard telemetry analytics will be active in future phases!
             </p>
             <button class="brutalist-button modal-action-btn" id="modal-action-btn" type="button">RETURN TO HUB</button>
         </div>

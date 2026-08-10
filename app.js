@@ -1,12 +1,12 @@
 /**
  * SILENT — Neo-Brutalist Laboratory Instrument
- * Phase 4 Controller: SILENT Sign Language Lab & Guided Practice Screen
- * Stitch Screen ID: 52ef3b6a8bc645dd813d18f779f904e8
+ * Phase 4 & 6 Controller: ASL Sign Language Lab, Practice Mode & Morse Code Laboratory
+ * Stitch Screen ID: 0586a8cfaa1543629a7525d4f95efbb9
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------------
-    // 1. ASL Reference Sign Database & Target Pose Specifications
+    // 1. ASL Reference Database & Target Pose Specifications
     // ----------------------------------------------------------
     const aslAlphabet = {
         A: { title: "LETTER 'A' POSTURE", desc: "Fist closed with thumb upright resting flat against the side of index finger." },
@@ -68,18 +68,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let selectedLetter = 'A';
 
-    // Practice Mode State Tracking
+    // Sign Practice State Tracking
     const practiceSequence = Object.keys(aslAlphabet);
     let practiceIndex = 0;
     const completedSigns = new Set();
     const bestScores = {};
 
     // ----------------------------------------------------------
-    // 2. DOM References
+    // 2. MORSE CODE LOOKUP DICTIONARY (A-Z & 0-9)
+    // ----------------------------------------------------------
+    const morseCodeMap = {
+        '.-': 'A', '-...': 'B', '-.-.': 'C', '-..': 'D', '.': 'E',
+        '..-.': 'F', '--.': 'G', '....': 'H', '..': 'I', '.---': 'J',
+        '-.-': 'K', '.-..': 'L', '--': 'M', '-.': 'N', '---': 'O',
+        '.--.': 'P', '--.-': 'Q', '.-.': 'R', '...': 'S', '-': 'T',
+        '..-': 'U', '...-': 'V', '.--': 'W', '-..-': 'X', '-.--': 'Y',
+        '--..': 'Z',
+        '-----': '0', '.----': '1', '..---': '2', '...--': '3', '....-': '4',
+        '.....': '5', '-....': '6', '--...': '7', '---..': '8', '----.': '9'
+    };
+
+    // Reverse Morse Lookup Dictionary (Character -> Signal)
+    const morseSignalMap = {};
+    Object.entries(morseCodeMap).forEach(([signal, char]) => {
+        morseSignalMap[char] = signal;
+    });
+
+    let currentMorseBuffer = '';
+    let currentDecodedMessage = '';
+    let currentMorseTargetChar = 'R';
+
+    // ----------------------------------------------------------
+    // 3. DOM References
     // ----------------------------------------------------------
     const viewHome = document.getElementById('view-home');
     const viewSignLab = document.getElementById('view-sign-lab');
     const viewSignPractice = document.getElementById('view-sign-practice');
+    const viewMorseLab = document.getElementById('view-morse-lab');
 
     const navBtnHome = document.getElementById('nav-btn-home');
     const navBtnSignLab = document.getElementById('nav-btn-sign-lab');
@@ -88,9 +113,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const navBtnProgress = document.getElementById('nav-btn-progress');
     const logoHomeLink = document.getElementById('logo-home-link');
     const btnReturnHome = document.getElementById('btn-return-home');
+    const btnMorseReturnHome = document.getElementById('btn-morse-return-home');
 
     const heroBtnExplore = document.getElementById('hero-btn-explore');
     const heroBtnPractice = document.getElementById('hero-btn-practice');
+    const heroBtnMorse = document.getElementById('hero-btn-morse');
     const btnHomeStartSign = document.getElementById('btn-home-start-sign');
     const btnHomeStartMorse = document.getElementById('btn-home-start-morse');
     const cardSignLanguage = document.getElementById('card-sign-language');
@@ -161,24 +188,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnPracticeSkip = document.getElementById('btn-practice-skip');
     const btnPracticeNext = document.getElementById('btn-practice-next');
 
+    // Morse Lab DOM References
+    const morseChartGrid = document.getElementById('morse-chart-grid');
+    const morseSelChar = document.getElementById('morse-sel-char');
+    const morseSelPattern = document.getElementById('morse-sel-pattern');
+
+    const morseTargetChar = document.getElementById('morse-target-char');
+    const morseTargetPattern = document.getElementById('morse-target-pattern');
+    const btnMorseNewTarget = document.getElementById('btn-morse-new-target');
+
+    const morseBufferDisplay = document.getElementById('morse-buffer-display');
+    const morseBufferText = document.getElementById('morse-buffer-text');
+    const morseDecodedBadge = document.getElementById('morse-decoded-badge');
+
+    const btnMorseDot = document.getElementById('btn-morse-dot');
+    const btnMorseDash = document.getElementById('btn-morse-dash');
+    const btnMorseClear = document.getElementById('btn-morse-clear');
+    const btnMorseSpace = document.getElementById('btn-morse-space');
+    const btnMorseTransmit = document.getElementById('btn-morse-transmit');
+
+    const morseTerminalLog = document.getElementById('morse-terminal-log');
+    const btnMorseClearTerminal = document.getElementById('btn-morse-clear-terminal');
+
     // Modals
     const placeholderModal = document.getElementById('placeholder-modal');
     const modalCloseBtn = document.getElementById('modal-close-btn');
     const modalActionBtn = document.getElementById('modal-action-btn');
 
     // ----------------------------------------------------------
-    // 3. View Switcher Engine
+    // 4. View Switcher Engine
     // ----------------------------------------------------------
     function switchView(targetView) {
-        // Hide all views
         if (viewHome) viewHome.classList.remove('active');
         if (viewSignLab) viewSignLab.classList.remove('active');
         if (viewSignPractice) viewSignPractice.classList.remove('active');
+        if (viewMorseLab) viewMorseLab.classList.remove('active');
 
-        // Unset all nav active classes
         if (navBtnHome) navBtnHome.classList.remove('active');
         if (navBtnSignLab) navBtnSignLab.classList.remove('active');
         if (navBtnPractice) navBtnPractice.classList.remove('active');
+        if (navBtnMorseLab) navBtnMorseLab.classList.remove('active');
 
         if (targetView === 'sign-lab') {
             if (viewSignLab) viewSignLab.classList.add('active');
@@ -195,6 +244,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             updatePracticeTarget(practiceSequence[practiceIndex]);
             initCameraAndMediaPipe();
+        } else if (targetView === 'morse-lab') {
+            if (viewMorseLab) viewMorseLab.classList.add('active');
+            if (navBtnMorseLab) navBtnMorseLab.classList.add('active');
+            if (headerSecIndicator) headerSecIndicator.textContent = 'SEC: MORSE LAB';
+            if (cameraStatusText) cameraStatusText.textContent = 'TELEGRAPHY ACTIVE';
+
+            stopWebcamStream(); // Hand tracking not needed in Phase 6 Morse Lab
+            initMorseLabView();
         } else {
             if (viewHome) viewHome.classList.add('active');
             if (navBtnHome) navBtnHome.classList.add('active');
@@ -210,13 +267,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navBtnHome) navBtnHome.addEventListener('click', () => switchView('home'));
     if (navBtnSignLab) navBtnSignLab.addEventListener('click', () => switchView('sign-lab'));
     if (navBtnPractice) navBtnPractice.addEventListener('click', () => switchView('sign-practice'));
+    if (navBtnMorseLab) navBtnMorseLab.addEventListener('click', () => switchView('morse-lab'));
+
     if (logoHomeLink) logoHomeLink.addEventListener('click', (e) => { e.preventDefault(); switchView('home'); });
     if (btnReturnHome) btnReturnHome.addEventListener('click', () => switchView('home'));
+    if (btnMorseReturnHome) btnMorseReturnHome.addEventListener('click', () => switchView('home'));
     if (btnExitPractice) btnExitPractice.addEventListener('click', () => switchView('sign-lab'));
 
     if (heroBtnExplore) heroBtnExplore.addEventListener('click', () => switchView('sign-lab'));
     if (heroBtnPractice) heroBtnPractice.addEventListener('click', () => switchView('sign-practice'));
+    if (heroBtnMorse) heroBtnMorse.addEventListener('click', () => switchView('morse-lab'));
+
     if (btnHomeStartSign) btnHomeStartSign.addEventListener('click', () => switchView('sign-lab'));
+    if (btnHomeStartMorse) btnHomeStartMorse.addEventListener('click', () => switchView('morse-lab'));
+    if (cardSignLanguage) cardSignLanguage.addEventListener('click', () => switchView('sign-lab'));
+    if (cardMorseCode) cardMorseCode.addEventListener('click', () => switchView('morse-lab'));
     if (btnLaunchPracticeMode) btnLaunchPracticeMode.addEventListener('click', () => switchView('sign-practice'));
 
     function openPlaceholderModal(title, icon, desc) {
@@ -239,16 +304,12 @@ document.addEventListener('DOMContentLoaded', () => {
         placeholderModal.setAttribute('aria-hidden', 'true');
     }
 
-    if (btnHomeStartMorse) btnHomeStartMorse.addEventListener('click', (e) => { e.stopPropagation(); openPlaceholderModal('Morse Code Lab', '👁', 'Morse Code Lab blink detection is scheduled for Phase 5. Sign Language Lab is live now!'); });
-    if (cardMorseCode) cardMorseCode.addEventListener('click', () => openPlaceholderModal('Morse Code Lab', '👁', 'Morse Code Lab blink detection is scheduled for Phase 5. Sign Language Lab is live now!'));
-    if (navBtnMorseLab) navBtnMorseLab.addEventListener('click', () => openPlaceholderModal('Morse Code Lab', '👁', 'Morse Code Lab blink detection is scheduled for Phase 5. Sign Language Lab is live now!'));
     if (navBtnProgress) navBtnProgress.addEventListener('click', () => openPlaceholderModal('Progress Dashboard', '📊', 'Progress Dashboard telemetry analytics will be active in future phases!'));
-
     if (modalCloseBtn) modalCloseBtn.addEventListener('click', closePlaceholderModal);
     if (modalActionBtn) modalActionBtn.addEventListener('click', closePlaceholderModal);
 
     // ----------------------------------------------------------
-    // 4. A-Z Letter Selector & Reference Card Controller
+    // 5. ASL Reference Card Controller
     // ----------------------------------------------------------
     function renderAlphabetSelector() {
         if (!alphabetGrid) return;
@@ -323,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSelectedLetter('A');
 
     // ----------------------------------------------------------
-    // 5. Sign Practice Flow Controller
+    // 6. Sign Practice Controller
     // ----------------------------------------------------------
     function updatePracticeTarget(letter) {
         if (!aslAlphabet[letter]) return;
@@ -378,7 +439,181 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------
-    // 6. MediaPipe Vision & Hand Tracking Engine Pipeline
+    // 7. MORSE CODE LABORATORY CONTROLLER & MODULAR DECODER ENGINE
+    // ----------------------------------------------------------
+    function renderMorseReferenceChart() {
+        if (!morseChartGrid) return;
+        morseChartGrid.innerHTML = '';
+
+        Object.entries(morseSignalMap).forEach(([char, signal]) => {
+            const item = document.createElement('div');
+            item.className = `morse-chart-item ${char === currentMorseTargetChar ? 'active' : ''}`;
+            item.dataset.char = char;
+
+            // Display Morse pattern with high-contrast bullet and dash symbols
+            const displayPattern = signal.replace(/\./g, '• ').replace(/-/g, '— ');
+
+            item.innerHTML = `
+                <span class="morse-chart-char">${char}</span>
+                <span class="morse-chart-pattern">${displayPattern}</span>
+            `;
+
+            item.addEventListener('click', () => {
+                selectMorseChartCharacter(char);
+            });
+
+            morseChartGrid.appendChild(item);
+        });
+    }
+
+    function selectMorseChartCharacter(char) {
+        if (!morseSignalMap[char]) return;
+        currentMorseTargetChar = char;
+
+        // Highlight active chart item
+        const items = document.querySelectorAll('.morse-chart-item');
+        items.forEach(el => {
+            if (el.dataset.char === char) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        });
+
+        const pattern = morseSignalMap[char];
+        const displayPattern = pattern.replace(/\./g, '• ').replace(/-/g, '— ');
+
+        if (morseSelChar) morseSelChar.textContent = char;
+        if (morseSelPattern) morseSelPattern.textContent = displayPattern;
+
+        setMorseTarget(char);
+    }
+
+    function setMorseTarget(char) {
+        if (!morseSignalMap[char]) return;
+        currentMorseTargetChar = char;
+        const pattern = morseSignalMap[char];
+        const displayPattern = pattern.replace(/\./g, '• ').replace(/-/g, '— ');
+
+        if (morseTargetChar) morseTargetChar.textContent = char;
+        if (morseTargetPattern) morseTargetPattern.textContent = displayPattern;
+    }
+
+    // Modular Functions for Phase 7 Binding
+    function addMorseSignal(symbol) {
+        if (symbol === '.' || symbol === '-') {
+            currentMorseBuffer += symbol;
+            updateMorseBufferUI();
+        }
+    }
+
+    function decodeMorseSignal(buffer) {
+        if (!buffer) return '--';
+        return morseCodeMap[buffer] || '?';
+    }
+
+    function clearMorseBuffer() {
+        currentMorseBuffer = '';
+        updateMorseBufferUI();
+    }
+
+    function commitMorseCharacter() {
+        if (!currentMorseBuffer) return;
+
+        const decodedChar = decodeMorseSignal(currentMorseBuffer);
+        if (decodedChar !== '?') {
+            currentDecodedMessage += decodedChar;
+            logMorseTerminalMessage(`> CHARACTER COMMITTED: ${decodedChar} ( [ ${currentMorseBuffer} ] )`);
+        } else {
+            logMorseTerminalMessage(`> UNKNOWN SIGNAL: [ ${currentMorseBuffer} ]`);
+        }
+
+        currentMorseBuffer = '';
+        updateMorseBufferUI();
+    }
+
+    function transmitMorseMessage() {
+        if (currentMorseBuffer) {
+            commitMorseCharacter();
+        }
+
+        if (currentDecodedMessage) {
+            logMorseTerminalMessage(`> TRANSMITTED MESSAGE: "${currentDecodedMessage}"`);
+
+            // If transmitted message matches target, log success
+            if (currentDecodedMessage === currentMorseTargetChar) {
+                logMorseTerminalMessage(`> [✓] TARGET CHARACTER '${currentMorseTargetChar}' ACHIEVED!`);
+            }
+
+            currentDecodedMessage = '';
+        } else {
+            logMorseTerminalMessage(`> TRANSMISSION BUFFER EMPTY.`);
+        }
+    }
+
+    function updateMorseBufferUI() {
+        const displayPattern = currentMorseBuffer.replace(/\./g, '• ').replace(/-/g, '— ');
+        if (morseBufferText) morseBufferText.textContent = displayPattern || ' ';
+
+        const decodedChar = decodeMorseSignal(currentMorseBuffer);
+        if (morseDecodedBadge) morseDecodedBadge.textContent = `DECODED: ${decodedChar}`;
+    }
+
+    function logMorseTerminalMessage(messageText) {
+        if (!morseTerminalLog) return;
+        const now = new Date();
+        const timeStr = `[${now.toTimeString().split(' ')[0]}]`;
+
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.innerHTML = `
+            <span class="log-time">${timeStr}</span>
+            <span class="log-prompt">&gt;</span>
+            <span class="log-text">${messageText}</span>
+        `;
+
+        morseTerminalLog.appendChild(entry);
+        morseTerminalLog.scrollTop = morseTerminalLog.scrollHeight;
+    }
+
+    function initMorseLabView() {
+        renderMorseReferenceChart();
+        setMorseTarget('R');
+        updateMorseBufferUI();
+    }
+
+    // Attach Event Handlers to Morse Keypad Controls
+    if (btnMorseDot) btnMorseDot.addEventListener('click', () => addMorseSignal('.'));
+    if (btnMorseDash) btnMorseDash.addEventListener('click', () => addMorseSignal('-'));
+    if (btnMorseClear) btnMorseClear.addEventListener('click', clearMorseBuffer);
+    if (btnMorseSpace) btnMorseSpace.addEventListener('click', commitMorseCharacter);
+    if (btnMorseTransmit) btnMorseTransmit.addEventListener('click', transmitMorseMessage);
+
+    if (btnMorseNewTarget) {
+        btnMorseNewTarget.addEventListener('click', () => {
+            const allChars = Object.keys(morseSignalMap);
+            const randomChar = allChars[Math.floor(Math.random() * allChars.length)];
+            selectMorseChartCharacter(randomChar);
+        });
+    }
+
+    if (btnMorseClearTerminal) {
+        btnMorseClearTerminal.addEventListener('click', () => {
+            if (morseTerminalLog) morseTerminalLog.innerHTML = '';
+            logMorseTerminalMessage('Terminal log cleared.');
+        });
+    }
+
+    // Expose Modular Functions globally for Phase 7 Eye Tracking Engine
+    window.addMorseSignal = addMorseSignal;
+    window.decodeMorseSignal = decodeMorseSignal;
+    window.clearMorseBuffer = clearMorseBuffer;
+    window.commitMorseCharacter = commitMorseCharacter;
+    window.transmitMorseMessage = transmitMorseMessage;
+    window.setMorseTarget = setMorseTarget;
+
+    // ----------------------------------------------------------
+    // 8. MediaPipe Vision & Hand Tracking Engine Pipeline (ASL Views)
     // ----------------------------------------------------------
     let webcamStream = null;
     let handsEngine = null;
@@ -581,9 +816,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ----------------------------------------------------------
-    // 7. Normalized 3D Gesture & Rotation-Invariant Scoring Engine
-    // ----------------------------------------------------------
     function analyzeFingerLandmarksNormalized(landmarks) {
         const wrist = landmarks[0];
         const middleMCP = landmarks[9];
@@ -636,28 +868,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isMatch) matchedFingersCount++;
         });
 
-        // Update Sign Lab Readout
         updateFingerPill(valThumb, currentFingers.thumb, matches.thumb);
         updateFingerPill(valIndex, currentFingers.index, matches.index);
         updateFingerPill(valMiddle, currentFingers.middle, matches.middle);
         updateFingerPill(valRing, currentFingers.ring, matches.ring);
         updateFingerPill(valPinky, currentFingers.pinky, matches.pinky);
 
-        // Update Practice View Readout
         updateFingerPill(pracValThumb, currentFingers.thumb, matches.thumb);
         updateFingerPill(pracValIndex, currentFingers.index, matches.index);
         updateFingerPill(pracValMiddle, currentFingers.middle, matches.middle);
         updateFingerPill(pracValRing, currentFingers.ring, matches.ring);
         updateFingerPill(pracValPinky, currentFingers.pinky, matches.pinky);
 
-        // Calculate Match Score
-        const baseMatchScore = matchedFingersCount * 18; // 5 * 18 = 90%
+        const baseMatchScore = matchedFingersCount * 18;
         let alignmentBonus = 0;
 
         if (matchedFingersCount === 5) {
-            alignmentBonus = 6 + Math.floor(Math.random() * 3); // 96-98%
+            alignmentBonus = 6 + Math.floor(Math.random() * 3);
         } else if (matchedFingersCount === 4) {
-            alignmentBonus = 4; // 76%
+            alignmentBonus = 4;
         } else {
             alignmentBonus = 0;
         }
@@ -666,7 +895,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (cameraMatchScore) cameraMatchScore.textContent = `MATCH: ${finalScore}%`;
 
-        // Update Practice Score Gauges
         if (practiceMatchBadge) practiceMatchBadge.textContent = `TARGET MATCH: ${finalScore}%`;
         if (practiceScoreNumber) practiceScoreNumber.textContent = `${finalScore}%`;
 
@@ -676,7 +904,6 @@ document.addEventListener('DOMContentLoaded', () => {
             practiceScoreBar.textContent = `[${'█'.repeat(filledBlocks)}${'░'.repeat(emptyBlocks)}]`;
         }
 
-        // Practice Achievement Check (>= 90%)
         if (finalScore >= 90) {
             completedSigns.add(selectedLetter);
             bestScores[selectedLetter] = Math.max(bestScores[selectedLetter] || 0, finalScore);
