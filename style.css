@@ -1,7 +1,7 @@
 /* ==========================================================
    SILENT — Neo-Brutalist Laboratory Design System
-   Phase 4: SILENT Sign Language Lab & Vision Engine Architecture
-   Visual Source of Truth: Stitch Screen 8110749f22ca45e7956d8e96f765ebf1
+   Phase 4: SILENT Sign Language Lab & Practice Screen
+   Visual Source of Truth: Stitch Screen 52ef3b6a8bc645dd813d18f779f904e8
    ========================================================== */
 
 /* ----------------------------------------------------------
@@ -59,7 +59,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    border-radius: var(--border-radius-zero) !important; /* Strict 0px sharp corners */
+    border-radius: var(--border-radius-zero) !important;
 }
 
 html {
@@ -80,7 +80,6 @@ body {
     flex-direction: column;
     overflow-x: hidden;
     position: relative;
-    /* Subtle 1990s retro lab grid pattern */
     background-image: 
         linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
@@ -104,11 +103,14 @@ body {
     display: block;
 }
 
-/* Helper utility flex row */
 .flex-row-center {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.text-dim {
+    color: #848484;
 }
 
 .hidden {
@@ -456,7 +458,7 @@ body {
 
 .ref-sign-image {
     max-width: 100%;
-    max-height: 220px;
+    max-height: 240px;
     object-fit: contain;
     display: block;
     margin: 0 auto;
@@ -514,24 +516,22 @@ body {
     overflow: hidden;
 }
 
-/* Mirrored Selfie Video Stream */
 video.camera-video {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transform: scaleX(-1); /* Mirrored selfie-style video */
+    transform: scaleX(-1);
     background-color: #1c1c17;
 }
 
-/* Mirrored Landmark Overlay Canvas */
 canvas.camera-canvas {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    transform: scaleX(-1); /* Mirrored tracking overlay */
+    transform: scaleX(-1);
     pointer-events: none;
     z-index: 5;
 }
@@ -552,7 +552,6 @@ canvas.camera-canvas {
 .mark-bl { bottom: 12px; left: 12px; }
 .mark-br { bottom: 12px; right: 12px; }
 
-/* Camera Error Panel Overlay */
 .camera-error-overlay {
     position: absolute;
     inset: 0;
@@ -583,7 +582,7 @@ canvas.camera-canvas {
 }
 
 /* ----------------------------------------------------------
-   11. FINGER LANDMARK ANALYSIS MATRIX
+   11. FINGER LANDMARK ANALYSIS MATRIX & PRACTICE STYLES
    ---------------------------------------------------------- */
 .finger-analysis-container {
     padding: var(--space-md);
@@ -630,19 +629,63 @@ canvas.camera-canvas {
     text-align: center;
 }
 
-.finger-state-pill.is-extended {
-    background-color: var(--accent-yellow);
-    color: #000000;
+.finger-state-pill.is-extended { background-color: var(--accent-yellow); color: #000000; }
+.finger-state-pill.is-curled { background-color: var(--primary); color: #ffffff; }
+.finger-state-pill.is-unknown { background-color: var(--surface-container-low); color: var(--secondary); }
+
+/* Practice View Specific Styles */
+.practice-score-overlay {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background-color: var(--surface);
+    border: var(--border-primary);
+    box-shadow: 4px 4px 0px #000000;
+    padding: 8px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    z-index: 10;
 }
 
-.finger-state-pill.is-curled {
-    background-color: var(--primary);
-    color: #ffffff;
+.practice-achievement-sticker {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    z-index: 15;
+    animation: achievementPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.finger-state-pill.is-unknown {
-    background-color: var(--surface-container-low);
-    color: var(--secondary);
+@keyframes achievementPop {
+    0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+    100% { transform: scale(1) rotate(-1.5deg); opacity: 1; }
+}
+
+.practice-finger-matrix {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.practice-finger-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--surface);
+    border: var(--border-secondary);
+    box-shadow: 2px 2px 0px #000000;
+    padding: 6px 12px;
+}
+
+.practice-controls-bar {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.practice-controls-bar button {
+    flex: 1;
+    min-width: 110px;
 }
 
 /* Terminal Console Log Box */
@@ -665,14 +708,11 @@ canvas.camera-canvas {
 .log-time { color: #848484; user-select: none; flex-shrink: 0; }
 .log-prompt { color: var(--accent-yellow); font-weight: 700; flex-shrink: 0; }
 .log-text { color: #fdf9f0; }
-.log-text.log-coral { color: var(--accent-coral); }
-.log-text.log-yellow { color: var(--accent-yellow); }
 
 .terminal-console-log::-webkit-scrollbar { width: 8px; }
 .terminal-console-log::-webkit-scrollbar-track { background: #000000; }
 .terminal-console-log::-webkit-scrollbar-thumb { background: var(--accent-yellow); border: 1px solid #000000; }
 
-/* Status Indicator Dots */
 .status-indicator {
     display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px; background-color: var(--surface); color: var(--primary); border: var(--border-secondary); box-shadow: 2px 2px 0px #000000; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
 }
@@ -689,7 +729,6 @@ canvas.camera-canvas {
     50% { opacity: 0.4; transform: scale(0.85); }
 }
 
-/* Footer & Main Layout */
 .main-layout { flex: 1; padding-bottom: var(--space-xl); }
 .hero-section { padding: var(--space-xl) 0 var(--space-lg) 0; text-align: center; }
 .hero-container { display: flex; flex-direction: column; align-items: center; gap: var(--space-md); }
@@ -697,16 +736,6 @@ canvas.camera-canvas {
 .hero-description { font-family: var(--font-body); font-weight: 500; font-size: 1.15rem; max-width: 680px; color: var(--primary); margin-top: var(--space-sm); }
 .paths-section { padding: var(--space-lg) 0 var(--space-xl) 0; }
 .paths-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-lg); }
-
-.how-it-works-section { padding: var(--space-xl) 0; }
-.how-container { display: flex; flex-direction: column; gap: var(--space-xl); }
-.section-header { text-align: center; }
-.steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-lg); }
-
-.step-card { display: flex; flex-direction: column; gap: var(--space-sm); }
-.step-number { font-size: 1.8rem; color: var(--accent-coral); background-color: var(--primary); display: inline-block; width: fit-content; padding: 2px 10px; }
-.step-title { font-family: var(--font-heading); font-weight: 700; font-size: 1.35rem; }
-.step-description { font-family: var(--font-body); color: var(--secondary); }
 
 .site-footer { background-color: var(--primary); color: var(--on-primary); border-top: var(--border-primary); padding: var(--space-lg) 0; margin-top: auto; }
 .footer-container { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }

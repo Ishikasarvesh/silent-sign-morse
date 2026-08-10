@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>SILENT — Sign Language Lab & Vision Engine</title>
-    <meta name="description" content="Interactive ASL Sign Language Lab with real-time camera tracking and finger analysis."/>
+    <title>SILENT — Sign Language Lab & Guided Practice</title>
+    <meta name="description" content="Interactive ASL Sign Language Lab with real-time camera tracking, normalized scoring, and guided sign practice."/>
     <!-- Google Fonts: Bricolage Grotesque, Work Sans, Space Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,6 +29,7 @@
             <nav class="header-nav" aria-label="Main Navigation">
                 <button class="nav-link active" id="nav-btn-home" type="button">HOME</button>
                 <button class="nav-link" id="nav-btn-sign-lab" type="button">SIGN LAB</button>
+                <button class="nav-link" id="nav-btn-practice" type="button">PRACTICE</button>
                 <button class="nav-link" id="nav-btn-morse-lab" type="button">MORSE LAB</button>
                 <button class="nav-link" id="nav-btn-progress" type="button">PROGRESS</button>
             </nav>
@@ -48,7 +49,7 @@
     <main class="main-layout" id="main-content">
 
         <!-- ==========================================================
-             VIEW 1: HOME LANDING PAGE
+             VIEW 1: HOME LANDING PAGE (PHASE 3)
              ========================================================== -->
         <div class="page-view active" id="view-home">
             <!-- Hero Section -->
@@ -72,10 +73,10 @@
                             <span>LAUNCH SIGN LAB</span>
                             <span aria-hidden="true">→</span>
                         </button>
-                        <a href="#demo-preview" class="brutalist-button btn-secondary">
-                            <span>VIEW PREVIEW</span>
-                            <span aria-hidden="true">↓</span>
-                        </a>
+                        <button class="brutalist-button btn-coral" id="hero-btn-practice" type="button">
+                            <span>START PRACTICE</span>
+                            <span aria-hidden="true">★</span>
+                        </button>
                     </div>
                 </div>
             </section>
@@ -165,7 +166,7 @@
                 </div>
             </section>
 
-            <!-- Preview & Demo Shell Section -->
+            <!-- Terminal Log Section -->
             <section class="container" id="demo-preview" style="margin-top: var(--space-xl);">
                 <div class="terminal-panel">
                     <div class="terminal-panel-header">
@@ -175,9 +176,9 @@
                     <div class="terminal-panel-body">
                         <div class="terminal-console-log" id="system-console-log" role="region" aria-label="Terminal Interface Log">
                             <div class="log-entry">
-                                <span class="log-time">[17:16:00]</span>
+                                <span class="log-time">[18:04:00]</span>
                                 <span class="log-prompt">></span>
-                                <span class="log-text">SILENT System Hub initialized. Click "SIGN LAB" to launch live vision engine.</span>
+                                <span class="log-text">SILENT System Hub initialized. Click "SIGN LAB" or "PRACTICE" to launch vision engine.</span>
                             </div>
                         </div>
                     </div>
@@ -200,6 +201,7 @@
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span class="mono-label" id="hands-count-label">HANDS: 0</span>
+                            <button class="brutalist-button btn-coral" id="btn-launch-practice-mode" style="padding: 4px 10px; font-size: 0.75rem;" type="button">START SIGN PRACTICE ★</button>
                             <button class="brutalist-button btn-yellow" id="btn-return-home" style="padding: 4px 10px; font-size: 0.75rem;" type="button">RETURN HOME</button>
                         </div>
                     </div>
@@ -289,12 +291,12 @@
                                 <!-- Camera Error Overlay Panel -->
                                 <div class="camera-error-overlay hidden" id="camera-error-panel">
                                     <div class="hard-card modal-card" style="max-width: 360px; background: #ffffff;">
-                                        <div class="sticker-badge badge-coral rotate-left" id="error-badge">CAMERA ERROR</div>
+                                        <div class="sticker-badge badge-coral rotate-left" id="error-badge">VISION ENGINE ERROR</div>
                                         <h3 class="modal-title" id="error-title" style="font-size: 1.3rem;">ACCESS DENIED</h3>
                                         <p class="modal-description" id="error-desc" style="font-size: 0.9rem;">
                                             Camera permissions are blocked. Please enable webcam access in your browser to start hand tracking.
                                         </p>
-                                        <button class="brutalist-button btn-yellow" id="btn-retry-camera" type="button">RETRY CAMERA</button>
+                                        <button class="brutalist-button btn-yellow" id="btn-retry-camera" type="button">RETRY VISION ENGINE</button>
                                     </div>
                                 </div>
 
@@ -342,6 +344,149 @@
                                 </div>
                             </div>
                         </article>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================================
+             VIEW 3: SILENT SIGN PRACTICE (PHASE 4 GUIDED PRACTICE)
+             Stitch Screen ID: 52ef3b6a8bc645dd813d18f779f904e8
+             ========================================================== -->
+        <div class="page-view" id="view-sign-practice">
+            <div class="container" style="padding-top: var(--space-lg);">
+                
+                <!-- Practice Mode Header Bar -->
+                <div class="hard-card has-header" style="margin-bottom: var(--space-md);">
+                    <div class="card-header-black">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="mono-label">SIGN PRACTICE</span>
+                            <span class="mono-label text-dim">HOME &gt; SIGN LAB &gt; PRACTICE</span>
+                            <span class="sticker-badge badge-yellow rotate-right" id="practice-step-indicator">STEP 1 OF 26</span>
+                        </div>
+                        <button class="brutalist-button btn-secondary" id="btn-exit-practice" style="padding: 4px 10px; font-size: 0.75rem;" type="button">EXIT PRACTICE</button>
+                    </div>
+                </div>
+
+                <!-- Top Instruction Banner -->
+                <div class="hard-card practice-instruction-banner" style="margin-bottom: var(--space-lg); background-color: var(--surface-container); border: var(--border-primary); box-shadow: var(--shadow-hard);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-sm);">
+                        <div>
+                            <span class="mono-label" style="color: var(--secondary); font-size: 0.8rem; display: block; margin-bottom: 4px;">TARGET SIGN // ASL ALPHABET</span>
+                            <h1 class="font-display" style="font-size: 2.4rem; color: var(--primary);">
+                                MAKE THIS SIGN: <span class="sticker-badge badge-yellow" id="practice-target-letter" style="font-size: 2rem; padding: 2px 14px; border: var(--border-primary);">A</span>
+                            </h1>
+                        </div>
+                        <div class="sticker-badge badge-coral rotate-right" id="practice-completed-count">
+                            <span>COMPLETED: 0 / 26</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2-Column Split Practice Layout -->
+                <div class="sign-lab-grid">
+                    
+                    <!-- LEFT: Reference Sign Card -->
+                    <section class="sign-lab-col-left">
+                        <article class="hard-card has-header reference-card">
+                            <div class="card-header-coral">
+                                <span class="mono-label">SYS.REF_IMAGE</span>
+                                <span class="sticker-badge badge-yellow" id="practice-ref-badge">STANDARD: 'A'</span>
+                            </div>
+
+                            <div class="reference-body">
+                                <div class="reference-visual-box" style="min-height: 300px;">
+                                    <img class="ref-sign-image" id="practice-ref-image" src="assets/signs/A.jpg" alt="ASL Practice Reference Image"/>
+                                </div>
+                                <div class="reference-info-box">
+                                    <span class="mono-label" id="practice-ref-title">LETTER 'A' POSTURE:</span>
+                                    <p class="reference-desc-text" id="practice-ref-desc">
+                                        Fist closed with thumb upright resting flat against the side of index finger.
+                                    </p>
+                                </div>
+                            </div>
+                        </article>
+                    </section>
+
+                    <!-- RIGHT: Camera & Feedback Area -->
+                    <section class="sign-lab-col-right">
+                        
+                        <!-- Camera Feed Card -->
+                        <article class="hard-card has-header camera-analysis-card">
+                            <div class="card-header-black">
+                                <div class="flex-row-center">
+                                    <span class="status-dot dot-live"></span>
+                                    <span class="mono-label">LIVE_FEED.CAM // LIVE TRACKING</span>
+                                </div>
+                                <span class="sticker-badge badge-coral" id="practice-match-badge">TARGET MATCH: 0%</span>
+                            </div>
+
+                            <div class="camera-viewport-container" style="height: 340px;">
+                                <video class="camera-video" id="practice-webcam-video" autoplay playsinline muted></video>
+                                <canvas class="camera-canvas" id="practice-landmark-canvas"></canvas>
+
+                                <span class="corner-mark mark-tl" aria-hidden="true">+</span>
+                                <span class="corner-mark mark-tr" aria-hidden="true">+</span>
+                                <span class="corner-mark mark-bl" aria-hidden="true">+</span>
+                                <span class="corner-mark mark-br" aria-hidden="true">+</span>
+
+                                <!-- Overlay Match Score Gauge -->
+                                <div class="practice-score-overlay">
+                                    <span class="mono-label text-dim">TARGET MATCH</span>
+                                    <span class="font-display" id="practice-score-number" style="font-size: 2.8rem; line-height: 1;">0%</span>
+                                    <span class="mono-label" id="practice-score-bar">[░░░░░░░░░░]</span>
+                                </div>
+
+                                <!-- Achievement Success Sticker -->
+                                <div class="practice-achievement-sticker hidden" id="practice-achievement-banner">
+                                    <span class="sticker-badge badge-yellow rotate-left" style="font-size: 1.1rem; padding: 8px 16px;">[✓] TARGET SIGN ACHIEVED</span>
+                                </div>
+                            </div>
+
+                            <!-- 5-Finger Analysis Rows for Practice -->
+                            <div class="finger-analysis-container">
+                                <h3 class="font-heading" style="font-size: 1.1rem; font-weight: 700; margin-bottom: 4px;">FINGER ANALYSIS CHECKLIST</h3>
+                                
+                                <div class="practice-finger-matrix">
+                                    <div class="practice-finger-row" id="prac-row-thumb">
+                                        <span class="mono-label">THUMB</span>
+                                        <span class="finger-state-pill" id="prac-val-thumb">UNKNOWN</span>
+                                    </div>
+                                    <div class="practice-finger-row" id="prac-row-index">
+                                        <span class="mono-label">INDEX</span>
+                                        <span class="finger-state-pill" id="prac-val-index">UNKNOWN</span>
+                                    </div>
+                                    <div class="practice-finger-row" id="prac-row-middle">
+                                        <span class="mono-label">MIDDLE</span>
+                                        <span class="finger-state-pill" id="prac-val-middle">UNKNOWN</span>
+                                    </div>
+                                    <div class="practice-finger-row" id="prac-row-ring">
+                                        <span class="mono-label">RING</span>
+                                        <span class="finger-state-pill" id="prac-val-ring">UNKNOWN</span>
+                                    </div>
+                                    <div class="practice-finger-row" id="prac-row-pinky">
+                                        <span class="mono-label">PINKY</span>
+                                        <span class="finger-state-pill" id="prac-val-pinky">UNKNOWN</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+
+                        <!-- Practice Controls Bar -->
+                        <div class="practice-controls-bar">
+                            <button class="brutalist-button btn-secondary" id="btn-practice-prev" type="button">
+                                <span>← PREVIOUS</span>
+                            </button>
+                            <button class="brutalist-button btn-secondary" id="btn-practice-retry" type="button">
+                                <span>RETRY</span>
+                            </button>
+                            <button class="brutalist-button btn-secondary" id="btn-practice-skip" type="button">
+                                <span>SKIP</span>
+                            </button>
+                            <button class="brutalist-button btn-coral" id="btn-practice-next" type="button">
+                                <span>NEXT SIGN →</span>
+                            </button>
+                        </div>
                     </section>
                 </div>
             </div>

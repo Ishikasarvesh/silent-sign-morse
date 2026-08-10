@@ -1,6 +1,7 @@
 /**
  * SILENT — Neo-Brutalist Laboratory Instrument
- * Phase 4 Controller: SILENT Sign Language Lab & MediaPipe Vision Engine
+ * Phase 4 Controller: SILENT Sign Language Lab & Guided Practice Screen
+ * Stitch Screen ID: 52ef3b6a8bc645dd813d18f779f904e8
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -36,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
         Z: { title: "LETTER 'Z' POSTURE", desc: "Index finger extended, tracing a 'Z' path in the air." }
     };
 
-    // Normalized Target Finger Configurations for A-Z
     const aslTargetPoses = {
         A: { thumb: 'EXTENDED', index: 'CURLED', middle: 'CURLED', ring: 'CURLED', pinky: 'CURLED' },
         B: { thumb: 'CURLED', index: 'EXTENDED', middle: 'EXTENDED', ring: 'EXTENDED', pinky: 'EXTENDED' },
@@ -68,29 +68,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let selectedLetter = 'A';
 
+    // Practice Mode State Tracking
+    const practiceSequence = Object.keys(aslAlphabet);
+    let practiceIndex = 0;
+    const completedSigns = new Set();
+    const bestScores = {};
+
     // ----------------------------------------------------------
     // 2. DOM References
     // ----------------------------------------------------------
     const viewHome = document.getElementById('view-home');
     const viewSignLab = document.getElementById('view-sign-lab');
+    const viewSignPractice = document.getElementById('view-sign-practice');
 
     const navBtnHome = document.getElementById('nav-btn-home');
     const navBtnSignLab = document.getElementById('nav-btn-sign-lab');
+    const navBtnPractice = document.getElementById('nav-btn-practice');
     const navBtnMorseLab = document.getElementById('nav-btn-morse-lab');
     const navBtnProgress = document.getElementById('nav-btn-progress');
     const logoHomeLink = document.getElementById('logo-home-link');
     const btnReturnHome = document.getElementById('btn-return-home');
 
     const heroBtnExplore = document.getElementById('hero-btn-explore');
+    const heroBtnPractice = document.getElementById('hero-btn-practice');
     const btnHomeStartSign = document.getElementById('btn-home-start-sign');
     const btnHomeStartMorse = document.getElementById('btn-home-start-morse');
     const cardSignLanguage = document.getElementById('card-sign-language');
     const cardMorseCode = document.getElementById('card-morse-code');
+    const btnLaunchPracticeMode = document.getElementById('btn-launch-practice-mode');
 
     const headerSecIndicator = document.getElementById('header-sec-indicator');
     const cameraStatusText = document.getElementById('camera-status-text');
 
-    // A-Z Selector & Reference Card
+    // Sign Lab DOM References
     const alphabetGrid = document.getElementById('alphabet-selector-grid');
     const targetLetterBadge = document.getElementById('target-letter-badge');
     const refSignImage = document.getElementById('ref-sign-image');
@@ -101,10 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnPrevLetter = document.getElementById('btn-prev-letter');
     const btnNextLetter = document.getElementById('btn-next-letter');
 
-    // Camera & MediaPipe Elements
     const videoElement = document.getElementById('webcam-video');
     const canvasElement = document.getElementById('landmark-canvas');
-    const canvasCtx = canvasElement ? canvasElement.getContext('2d') : null;
 
     const cameraLoadingPanel = document.getElementById('camera-loading-panel');
     const cameraErrorPanel = document.getElementById('camera-error-panel');
@@ -113,19 +121,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorTitle = document.getElementById('error-title');
     const errorDesc = document.getElementById('error-desc');
 
-    // Status Indicators
     const handStatusBadge = document.getElementById('hand-status-badge');
     const handsCountLabel = document.getElementById('hands-count-label');
     const trackingStateDot = document.getElementById('tracking-state-dot');
     const trackingStateText = document.getElementById('tracking-state-text');
     const cameraMatchScore = document.getElementById('camera-match-score');
 
-    // Finger Analysis Readouts
     const valThumb = document.getElementById('val-thumb');
     const valIndex = document.getElementById('val-index');
     const valMiddle = document.getElementById('val-middle');
     const valRing = document.getElementById('val-ring');
     const valPinky = document.getElementById('val-pinky');
+
+    // Practice View DOM References
+    const btnExitPractice = document.getElementById('btn-exit-practice');
+    const practiceStepIndicator = document.getElementById('practice-step-indicator');
+    const practiceTargetLetter = document.getElementById('practice-target-letter');
+    const practiceCompletedCount = document.getElementById('practice-completed-count');
+    const practiceRefBadge = document.getElementById('practice-ref-badge');
+    const practiceRefImage = document.getElementById('practice-ref-image');
+    const practiceRefTitle = document.getElementById('practice-ref-title');
+    const practiceRefDesc = document.getElementById('practice-ref-desc');
+    const practiceMatchBadge = document.getElementById('practice-match-badge');
+    const practiceScoreNumber = document.getElementById('practice-score-number');
+    const practiceScoreBar = document.getElementById('practice-score-bar');
+    const practiceAchievementBanner = document.getElementById('practice-achievement-banner');
+
+    const practiceVideoElement = document.getElementById('practice-webcam-video');
+    const practiceCanvasElement = document.getElementById('practice-landmark-canvas');
+
+    const pracValThumb = document.getElementById('prac-val-thumb');
+    const pracValIndex = document.getElementById('prac-val-index');
+    const pracValMiddle = document.getElementById('prac-val-middle');
+    const pracValRing = document.getElementById('prac-val-ring');
+    const pracValPinky = document.getElementById('prac-val-pinky');
+
+    const btnPracticePrev = document.getElementById('btn-practice-prev');
+    const btnPracticeRetry = document.getElementById('btn-practice-retry');
+    const btnPracticeSkip = document.getElementById('btn-practice-skip');
+    const btnPracticeNext = document.getElementById('btn-practice-next');
 
     // Modals
     const placeholderModal = document.getElementById('placeholder-modal');
@@ -136,24 +170,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. View Switcher Engine
     // ----------------------------------------------------------
     function switchView(targetView) {
+        // Hide all views
+        if (viewHome) viewHome.classList.remove('active');
+        if (viewSignLab) viewSignLab.classList.remove('active');
+        if (viewSignPractice) viewSignPractice.classList.remove('active');
+
+        // Unset all nav active classes
+        if (navBtnHome) navBtnHome.classList.remove('active');
+        if (navBtnSignLab) navBtnSignLab.classList.remove('active');
+        if (navBtnPractice) navBtnPractice.classList.remove('active');
+
         if (targetView === 'sign-lab') {
-            if (viewHome) viewHome.classList.remove('active');
             if (viewSignLab) viewSignLab.classList.add('active');
-
-            if (navBtnHome) navBtnHome.classList.remove('active');
             if (navBtnSignLab) navBtnSignLab.classList.add('active');
-
             if (headerSecIndicator) headerSecIndicator.textContent = 'SEC: SIGN LAB';
             if (cameraStatusText) cameraStatusText.textContent = 'VISION ENGINE ACTIVE';
 
             initCameraAndMediaPipe();
+        } else if (targetView === 'sign-practice') {
+            if (viewSignPractice) viewSignPractice.classList.add('active');
+            if (navBtnPractice) navBtnPractice.classList.add('active');
+            if (headerSecIndicator) headerSecIndicator.textContent = 'SEC: SIGN PRACTICE';
+            if (cameraStatusText) cameraStatusText.textContent = 'PRACTICE MODE ACTIVE';
+
+            updatePracticeTarget(practiceSequence[practiceIndex]);
+            initCameraAndMediaPipe();
         } else {
-            if (viewSignLab) viewSignLab.classList.remove('active');
             if (viewHome) viewHome.classList.add('active');
-
-            if (navBtnSignLab) navBtnSignLab.classList.remove('active');
             if (navBtnHome) navBtnHome.classList.add('active');
-
             if (headerSecIndicator) headerSecIndicator.textContent = 'SEC: HOME';
             if (cameraStatusText) cameraStatusText.textContent = 'CAMERA-POWERED';
 
@@ -165,12 +209,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (navBtnHome) navBtnHome.addEventListener('click', () => switchView('home'));
     if (navBtnSignLab) navBtnSignLab.addEventListener('click', () => switchView('sign-lab'));
+    if (navBtnPractice) navBtnPractice.addEventListener('click', () => switchView('sign-practice'));
     if (logoHomeLink) logoHomeLink.addEventListener('click', (e) => { e.preventDefault(); switchView('home'); });
     if (btnReturnHome) btnReturnHome.addEventListener('click', () => switchView('home'));
+    if (btnExitPractice) btnExitPractice.addEventListener('click', () => switchView('sign-lab'));
 
     if (heroBtnExplore) heroBtnExplore.addEventListener('click', () => switchView('sign-lab'));
+    if (heroBtnPractice) heroBtnPractice.addEventListener('click', () => switchView('sign-practice'));
     if (btnHomeStartSign) btnHomeStartSign.addEventListener('click', () => switchView('sign-lab'));
-    if (cardSignLanguage) cardSignLanguage.addEventListener('click', () => switchView('sign-lab'));
+    if (btnLaunchPracticeMode) btnLaunchPracticeMode.addEventListener('click', () => switchView('sign-practice'));
 
     function openPlaceholderModal(title, icon, desc) {
         if (!placeholderModal) return;
@@ -221,7 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!aslAlphabet[letter]) return;
         selectedLetter = letter;
 
-        // Update active letter button styles
         const letterBtns = document.querySelectorAll('.letter-btn');
         letterBtns.forEach(btn => {
             if (btn.textContent === letter) {
@@ -231,14 +277,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Update Target Badge & Text
         if (targetLetterBadge) targetLetterBadge.textContent = `TARGET: ${letter}`;
 
         const info = aslAlphabet[letter];
         if (refSignTitle) refSignTitle.textContent = info.title + ":";
         if (refSignDesc) refSignDesc.textContent = info.desc;
 
-        // Update ASL Reference JPG Image
         if (refSignImage) {
             const imagePath = `assets/signs/${letter}.jpg`;
             refSignImage.src = imagePath;
@@ -279,7 +323,62 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSelectedLetter('A');
 
     // ----------------------------------------------------------
-    // 5. MediaPipe Vision & Hand Tracking Engine Pipeline
+    // 5. Sign Practice Flow Controller
+    // ----------------------------------------------------------
+    function updatePracticeTarget(letter) {
+        if (!aslAlphabet[letter]) return;
+        selectedLetter = letter;
+        practiceIndex = practiceSequence.indexOf(letter);
+
+        if (practiceStepIndicator) practiceStepIndicator.textContent = `STEP ${practiceIndex + 1} OF ${practiceSequence.length}`;
+        if (practiceTargetLetter) practiceTargetLetter.textContent = letter;
+        if (practiceCompletedCount) practiceCompletedCount.textContent = `COMPLETED: ${completedSigns.size} / ${practiceSequence.length}`;
+        if (practiceRefBadge) practiceRefBadge.textContent = `STANDARD: '${letter}'`;
+
+        const info = aslAlphabet[letter];
+        if (practiceRefTitle) practiceRefTitle.textContent = info.title + ":";
+        if (practiceRefDesc) practiceRefDesc.textContent = info.desc;
+
+        if (practiceRefImage) {
+            practiceRefImage.src = `assets/signs/${letter}.jpg`;
+            practiceRefImage.alt = `ASL Practice Reference for ${letter}`;
+        }
+
+        if (practiceAchievementBanner) practiceAchievementBanner.classList.add('hidden');
+        if (practiceScoreNumber) practiceScoreNumber.textContent = '0%';
+        if (practiceScoreBar) practiceScoreBar.textContent = '[░░░░░░░░░░]';
+        if (practiceMatchBadge) practiceMatchBadge.textContent = 'TARGET MATCH: 0%';
+    }
+
+    if (btnPracticePrev) {
+        btnPracticePrev.addEventListener('click', () => {
+            const prevIndex = (practiceIndex - 1 + practiceSequence.length) % practiceSequence.length;
+            updatePracticeTarget(practiceSequence[prevIndex]);
+        });
+    }
+
+    if (btnPracticeNext) {
+        btnPracticeNext.addEventListener('click', () => {
+            const nextIndex = (practiceIndex + 1) % practiceSequence.length;
+            updatePracticeTarget(practiceSequence[nextIndex]);
+        });
+    }
+
+    if (btnPracticeRetry) {
+        btnPracticeRetry.addEventListener('click', () => {
+            updatePracticeTarget(practiceSequence[practiceIndex]);
+        });
+    }
+
+    if (btnPracticeSkip) {
+        btnPracticeSkip.addEventListener('click', () => {
+            const nextIndex = (practiceIndex + 1) % practiceSequence.length;
+            updatePracticeTarget(practiceSequence[nextIndex]);
+        });
+    }
+
+    // ----------------------------------------------------------
+    // 6. MediaPipe Vision & Hand Tracking Engine Pipeline
     // ----------------------------------------------------------
     let webcamStream = null;
     let handsEngine = null;
@@ -292,7 +391,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cameraErrorPanel) cameraErrorPanel.classList.add('hidden');
 
         try {
-            // 1. Request Webcam Stream
             if (!webcamStream) {
                 webcamStream = await navigator.mediaDevices.getUserMedia({
                     video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
@@ -303,9 +401,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     videoElement.srcObject = webcamStream;
                     await videoElement.play();
                 }
+                if (practiceVideoElement) {
+                    practiceVideoElement.srcObject = webcamStream;
+                    await practiceVideoElement.play();
+                }
             }
 
-            // 2. Initialize MediaPipe Hands Library
             if (!window.Hands) {
                 showVisionEngineError('LIBRARY_MISSING', 'MediaPipe Hands JS library (hands.js) was not found in window scope.');
                 return;
@@ -332,7 +433,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             engineInitialized = true;
 
-            // 3. Hide loading panel and start detection frame pump
             if (cameraLoadingPanel) cameraLoadingPanel.classList.add('hidden');
             startDetectionLoop();
 
@@ -374,9 +474,8 @@ document.addEventListener('DOMContentLoaded', () => {
             webcamStream = null;
         }
 
-        if (videoElement) {
-            videoElement.srcObject = null;
-        }
+        if (videoElement) videoElement.srcObject = null;
+        if (practiceVideoElement) practiceVideoElement.srcObject = null;
 
         isSendingFrame = false;
         engineInitialized = false;
@@ -385,16 +484,17 @@ document.addEventListener('DOMContentLoaded', () => {
         updateHandDetectionState(false, 0);
     }
 
-    // Single requestAnimationFrame Detection Loop
     function startDetectionLoop() {
         if (animFrameId) cancelAnimationFrame(animFrameId);
 
         async function processFrame() {
-            if (videoElement && !videoElement.paused && !videoElement.ended && videoElement.readyState >= 2) {
+            const activeVideo = viewSignPractice.classList.contains('active') ? practiceVideoElement : videoElement;
+
+            if (activeVideo && !activeVideo.paused && !activeVideo.ended && activeVideo.readyState >= 2) {
                 if (!isSendingFrame && handsEngine && engineInitialized) {
                     isSendingFrame = true;
                     try {
-                        await handsEngine.send({ image: videoElement });
+                        await handsEngine.send({ image: activeVideo });
                     } catch (e) {
                         console.warn('Frame processing exception:', e);
                     } finally {
@@ -403,7 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            if (webcamStream && viewSignLab && viewSignLab.classList.contains('active')) {
+            if (webcamStream && (viewSignLab.classList.contains('active') || viewSignPractice.classList.contains('active'))) {
                 animFrameId = requestAnimationFrame(processFrame);
             }
         }
@@ -411,7 +511,6 @@ document.addEventListener('DOMContentLoaded', () => {
         animFrameId = requestAnimationFrame(processFrame);
     }
 
-    // MediaPipe Skeleton Connections Map
     const HAND_CONNECTIONS = [
         [0, 1], [1, 2], [2, 3], [3, 4],        // Thumb
         [0, 5], [5, 6], [6, 7], [7, 8],        // Index
@@ -422,16 +521,19 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     function onHandResults(results) {
-        if (!canvasElement || !canvasCtx) return;
+        const isPracticeMode = viewSignPractice.classList.contains('active');
+        const activeCanvas = isPracticeMode ? practiceCanvasElement : canvasElement;
+        const ctx = activeCanvas ? activeCanvas.getContext('2d') : null;
 
-        // Ensure canvas dimensions match live video viewport
-        canvasElement.width = canvasElement.clientWidth || 640;
-        canvasElement.height = canvasElement.clientHeight || 480;
+        if (!activeCanvas || !ctx) return;
 
-        const width = canvasElement.width;
-        const height = canvasElement.height;
+        activeCanvas.width = activeCanvas.clientWidth || 640;
+        activeCanvas.height = activeCanvas.clientHeight || 480;
 
-        canvasCtx.clearRect(0, 0, width, height);
+        const width = activeCanvas.width;
+        const height = activeCanvas.height;
+
+        ctx.clearRect(0, 0, width, height);
 
         const multiHandLandmarks = results.multiHandLandmarks;
 
@@ -440,7 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateHandDetectionState(true, count);
 
             multiHandLandmarks.forEach(landmarks => {
-                drawBrutalistHandSkeleton(landmarks, width, height);
+                drawBrutalistHandSkeletonOnCtx(ctx, landmarks, width, height);
                 analyzeFingerLandmarksNormalized(landmarks);
             });
         } else {
@@ -448,46 +550,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Neo-Brutalist Hand Skeleton Renderer
-    function drawBrutalistHandSkeleton(landmarks, width, height) {
-        // 1. Draw Skeleton Lines
-        canvasCtx.strokeStyle = '#ea4a51';
-        canvasCtx.lineWidth = 3;
+    function drawBrutalistHandSkeletonOnCtx(ctx, landmarks, width, height) {
+        ctx.strokeStyle = '#ea4a51';
+        ctx.lineWidth = 3;
 
         HAND_CONNECTIONS.forEach(([i, j]) => {
             const pt1 = landmarks[i];
             const pt2 = landmarks[j];
 
-            canvasCtx.beginPath();
-            canvasCtx.moveTo(pt1.x * width, pt1.y * height);
-            canvasCtx.lineTo(pt2.x * width, pt2.y * height);
-            canvasCtx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(pt1.x * width, pt1.y * height);
+            ctx.lineTo(pt2.x * width, pt2.y * height);
+            ctx.stroke();
         });
 
-        // 2. Draw Landmark Joints
         landmarks.forEach((pt, index) => {
             const x = pt.x * width;
             const y = pt.y * height;
 
             const isTip = [4, 8, 12, 16, 20].includes(index);
 
-            canvasCtx.fillStyle = isTip ? '#facc15' : '#ffffff';
-            canvasCtx.strokeStyle = '#000000';
-            canvasCtx.lineWidth = 2;
+            ctx.fillStyle = isTip ? '#facc15' : '#ffffff';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
 
-            canvasCtx.beginPath();
-            canvasCtx.arc(x, y, isTip ? 6 : 4, 0, 2 * Math.PI);
-            canvasCtx.fill();
-            canvasCtx.stroke();
+            ctx.beginPath();
+            ctx.arc(x, y, isTip ? 6 : 4, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
         });
     }
 
     // ----------------------------------------------------------
-    // 6. Normalized 3D Gesture & Rotation-Invariant Scoring Engine
+    // 7. Normalized 3D Gesture & Rotation-Invariant Scoring Engine
     // ----------------------------------------------------------
     function analyzeFingerLandmarksNormalized(landmarks) {
-        // 1. Calculate Rotation & Scale Invariant 3D Joint Distances
-        // Wrist = Landmark 0, Middle MCP = Landmark 9
         const wrist = landmarks[0];
         const middleMCP = landmarks[9];
 
@@ -497,7 +594,6 @@ document.addEventListener('DOMContentLoaded', () => {
             (middleMCP.z || 0) - (wrist.z || 0)
         ) || 0.1;
 
-        // Distance from Wrist to Tip vs PIP joint (Rotation-Invariant)
         const getExtensionRatio = (tipIdx, pipIdx) => {
             const tipDist = Math.hypot(landmarks[tipIdx].x - wrist.x, landmarks[tipIdx].y - wrist.y, (landmarks[tipIdx].z || 0) - (wrist.z || 0));
             const pipDist = Math.hypot(landmarks[pipIdx].x - wrist.x, landmarks[pipIdx].y - wrist.y, (landmarks[pipIdx].z || 0) - (wrist.z || 0));
@@ -509,15 +605,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const ringExtended = getExtensionRatio(16, 14) > 1.12;
         const pinkyExtended = getExtensionRatio(20, 18) > 1.12;
 
-        // Thumb extension relative to palm width
         const thumbTip = landmarks[4];
         const indexMCP = landmarks[5];
         const pinkyMCP = landmarks[17];
 
         const thumbDistIndex = Math.hypot(thumbTip.x - indexMCP.x, thumbTip.y - indexMCP.y);
         const thumbDistPinky = Math.hypot(thumbTip.x - pinkyMCP.x, thumbTip.y - pinkyMCP.y);
-        
-        // Thumb is EXTENDED if away from both Index MCP and Pinky MCP
         const thumbExtended = (thumbDistIndex / handScale) > 0.82 && (thumbDistPinky / handScale) > 0.95;
 
         const currentFingers = {
@@ -528,10 +621,8 @@ document.addEventListener('DOMContentLoaded', () => {
             pinky: pinkyExtended ? 'EXTENDED' : 'CURLED'
         };
 
-        // 2. Fetch expected pose for current selected target letter
         const targetPose = aslTargetPoses[selectedLetter] || aslTargetPoses['A'];
 
-        // 3. Compute Finger Match Count (Unified Detection Logic)
         let matchedFingersCount = 0;
         const matches = {
             thumb: currentFingers.thumb === targetPose.thumb,
@@ -545,28 +636,53 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isMatch) matchedFingersCount++;
         });
 
-        // 4. Update UI Finger Readout Chips with Match Badges
+        // Update Sign Lab Readout
         updateFingerPill(valThumb, currentFingers.thumb, matches.thumb);
         updateFingerPill(valIndex, currentFingers.index, matches.index);
         updateFingerPill(valMiddle, currentFingers.middle, matches.middle);
         updateFingerPill(valRing, currentFingers.ring, matches.ring);
         updateFingerPill(valPinky, currentFingers.pinky, matches.pinky);
 
-        // 5. Calculate Normalized Match Score (90% - 98% when 5/5 fingers match)
-        if (cameraMatchScore) {
-            const baseMatchScore = matchedFingersCount * 18; // 5 * 18 = 90%
-            let alignmentBonus = 0;
+        // Update Practice View Readout
+        updateFingerPill(pracValThumb, currentFingers.thumb, matches.thumb);
+        updateFingerPill(pracValIndex, currentFingers.index, matches.index);
+        updateFingerPill(pracValMiddle, currentFingers.middle, matches.middle);
+        updateFingerPill(pracValRing, currentFingers.ring, matches.ring);
+        updateFingerPill(pracValPinky, currentFingers.pinky, matches.pinky);
 
-            if (matchedFingersCount === 5) {
-                alignmentBonus = 6 + Math.floor(Math.random() * 3); // 96-98%
-            } else if (matchedFingersCount === 4) {
-                alignmentBonus = 4; // 76%
-            } else {
-                alignmentBonus = 0;
-            }
+        // Calculate Match Score
+        const baseMatchScore = matchedFingersCount * 18; // 5 * 18 = 90%
+        let alignmentBonus = 0;
 
-            const finalScore = Math.min(baseMatchScore + alignmentBonus, 98);
-            cameraMatchScore.textContent = `MATCH: ${finalScore}%`;
+        if (matchedFingersCount === 5) {
+            alignmentBonus = 6 + Math.floor(Math.random() * 3); // 96-98%
+        } else if (matchedFingersCount === 4) {
+            alignmentBonus = 4; // 76%
+        } else {
+            alignmentBonus = 0;
+        }
+
+        const finalScore = Math.min(baseMatchScore + alignmentBonus, 98);
+
+        if (cameraMatchScore) cameraMatchScore.textContent = `MATCH: ${finalScore}%`;
+
+        // Update Practice Score Gauges
+        if (practiceMatchBadge) practiceMatchBadge.textContent = `TARGET MATCH: ${finalScore}%`;
+        if (practiceScoreNumber) practiceScoreNumber.textContent = `${finalScore}%`;
+
+        if (practiceScoreBar) {
+            const filledBlocks = Math.floor(finalScore / 10);
+            const emptyBlocks = 10 - filledBlocks;
+            practiceScoreBar.textContent = `[${'█'.repeat(filledBlocks)}${'░'.repeat(emptyBlocks)}]`;
+        }
+
+        // Practice Achievement Check (>= 90%)
+        if (finalScore >= 90) {
+            completedSigns.add(selectedLetter);
+            bestScores[selectedLetter] = Math.max(bestScores[selectedLetter] || 0, finalScore);
+
+            if (practiceCompletedCount) practiceCompletedCount.textContent = `COMPLETED: ${completedSigns.size} / ${practiceSequence.length}`;
+            if (practiceAchievementBanner) practiceAchievementBanner.classList.remove('hidden');
         }
     }
 
@@ -618,7 +734,17 @@ document.addEventListener('DOMContentLoaded', () => {
             updateFingerPill(valMiddle, 'UNKNOWN', false);
             updateFingerPill(valRing, 'UNKNOWN', false);
             updateFingerPill(valPinky, 'UNKNOWN', false);
+
+            updateFingerPill(pracValThumb, 'UNKNOWN', false);
+            updateFingerPill(pracValIndex, 'UNKNOWN', false);
+            updateFingerPill(pracValMiddle, 'UNKNOWN', false);
+            updateFingerPill(pracValRing, 'UNKNOWN', false);
+            updateFingerPill(pracValPinky, 'UNKNOWN', false);
+
             if (cameraMatchScore) cameraMatchScore.textContent = 'MATCH: --%';
+            if (practiceMatchBadge) practiceMatchBadge.textContent = 'TARGET MATCH: 0%';
+            if (practiceScoreNumber) practiceScoreNumber.textContent = '0%';
+            if (practiceScoreBar) practiceScoreBar.textContent = '[░░░░░░░░░░]';
         }
     }
 });
