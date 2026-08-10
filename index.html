@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>SILENT — Sign Language Lab & Morse Code Laboratory</title>
-    <meta name="description" content="Interactive ASL Sign Language Lab, Morse Code Laboratory, and Unified Silent Communication Mode with real-time camera tracking and signal decoding."/>
+    <meta name="description" content="Interactive ASL Sign Language Lab, Morse Code Laboratory, Unified Silent Communication Mode, and Interactive Quiz with real-time camera tracking and signal decoding."/>
     <!-- Google Fonts: Bricolage Grotesque, Work Sans, Space Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,6 +33,7 @@
                 <button class="nav-link" id="nav-btn-practice" type="button">PRACTICE</button>
                 <button class="nav-link" id="nav-btn-morse-lab" type="button">MORSE LAB</button>
                 <button class="nav-link" id="nav-btn-silent-mode" type="button">SILENT MODE</button>
+                <button class="nav-link" id="nav-btn-quiz" type="button">QUIZ</button>
                 <button class="nav-link" id="nav-btn-progress" type="button">PROGRESS</button>
             </nav>
 
@@ -73,6 +74,10 @@
                         <button class="brutalist-button btn-coral" id="hero-btn-silent-mode" type="button" style="font-size: 1.05rem;">
                             <span>ENTER SILENT MODE</span>
                             <span aria-hidden="true">⚡</span>
+                        </button>
+                        <button class="brutalist-button btn-yellow" id="hero-btn-quiz" type="button" style="font-size: 1.05rem;">
+                            <span>TAKE SILENT QUIZ</span>
+                            <span aria-hidden="true">🎯</span>
                         </button>
                         <button class="brutalist-button btn-yellow" id="hero-btn-explore" type="button">
                             <span>LAUNCH SIGN LAB</span>
@@ -183,9 +188,9 @@
                     <div class="terminal-panel-body">
                         <div class="terminal-console-log" id="system-console-log" role="region" aria-label="Terminal Interface Log">
                             <div class="log-entry">
-                                <span class="log-time">[18:43:00]</span>
+                                <span class="log-time">[18:49:00]</span>
                                 <span class="log-prompt">></span>
-                                <span class="log-text">SILENT System Hub initialized. Click "SILENT MODE", "SIGN LAB", or "MORSE LAB" to launch module.</span>
+                                <span class="log-text">SILENT System Hub initialized. Click "QUIZ", "SILENT MODE", "SIGN LAB", or "MORSE LAB" to launch module.</span>
                             </div>
                         </div>
                     </div>
@@ -689,7 +694,7 @@
                             <div style="padding: var(--space-md);">
                                 <div class="terminal-console-log" id="morse-terminal-log" style="height: 180px;">
                                     <div class="log-entry">
-                                        <span class="log-time">[18:43:00]</span>
+                                        <span class="log-time">[18:49:00]</span>
                                         <span class="log-prompt">&gt;</span>
                                         <span class="log-text">SILENT Morse Code Telemetry Engine initialized. Use BLINK or DOT/DASH keys.</span>
                                     </div>
@@ -984,7 +989,7 @@
                             <div style="padding: var(--space-md);">
                                 <div class="terminal-console-log" id="sm-terminal-log" style="height: 180px;">
                                     <div class="log-entry">
-                                        <span class="log-time">[18:43:00]</span>
+                                        <span class="log-time">[18:49:00]</span>
                                         <span class="log-prompt">&gt;</span>
                                         <span class="log-text">SILENT Unified Hands-Free Mode active. Sign letters or blink Morse code to build messages.</span>
                                     </div>
@@ -1007,6 +1012,128 @@
                             </div>
                         </article>
                     </section>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ==========================================================
+             VIEW 7: SILENT QUIZ (PHASE 11 INTERACTIVE QUIZ HUB)
+             ========================================================== -->
+        <div class="page-view" id="view-quiz">
+            <div class="container" style="padding-top: var(--space-lg);">
+                
+                <!-- Top Header Bar -->
+                <div class="hard-card has-header" style="margin-bottom: var(--space-md);">
+                    <div class="card-header-black">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="mono-label">SILENT QUIZ // INTERACTIVE EVALUATION</span>
+                            <span class="mono-label text-dim">HOME &gt; QUIZ</span>
+                            <span class="sticker-badge badge-yellow rotate-right" id="quiz-question-indicator">QUESTION 1 / 10</span>
+                        </div>
+                        <button class="brutalist-button btn-secondary" id="btn-exit-quiz" style="padding: 4px 10px; font-size: 0.75rem;" type="button">EXIT QUIZ</button>
+                    </div>
+                </div>
+
+                <!-- Hero & Category Selector -->
+                <div class="hard-card" style="margin-bottom: var(--space-md); background-color: var(--surface-container); text-align: center; padding: var(--space-md);">
+                    <h1 class="font-display" style="font-size: 2.2rem; color: var(--primary);">TEST YOUR SILENT COMMUNICATION KNOWLEDGE.</h1>
+                    <p class="mono-label" style="color: var(--secondary); font-size: 0.85rem; margin-top: 4px;">CHOOSE A CATEGORY BELOW TO START A 10-QUESTION QUIZ.</p>
+                    
+                    <div style="display: flex; justify-content: center; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                        <button class="brutalist-button btn-coral quiz-category-btn active" id="btn-quiz-cat-mixed" type="button" style="padding: 6px 16px; font-size: 0.85rem;">[ MIXED QUIZ ]</button>
+                        <button class="brutalist-button btn-secondary quiz-category-btn" id="btn-quiz-cat-sign" type="button" style="padding: 6px 16px; font-size: 0.85rem;">[ SIGN LANGUAGE ]</button>
+                        <button class="brutalist-button btn-secondary quiz-category-btn" id="btn-quiz-cat-morse" type="button" style="padding: 6px 16px; font-size: 0.85rem;">[ MORSE CODE ]</button>
+                    </div>
+                </div>
+
+                <!-- Main Quiz Workspace Card -->
+                <div class="sign-lab-grid" style="margin-bottom: var(--space-lg);">
+                    
+                    <!-- Left Column: Visual Question Box & Prompt -->
+                    <section class="sign-lab-col-left">
+                        <article class="hard-card has-header">
+                            <div class="card-header-coral">
+                                <span class="mono-label" id="quiz-prompt-type-badge">QUESTION TYPE: ASL GESTURE</span>
+                                <span class="sticker-badge badge-yellow" id="quiz-category-badge">MIXED QUIZ</span>
+                            </div>
+
+                            <div class="reference-body">
+                                <h2 class="font-heading" id="quiz-question-prompt" style="font-size: 1.25rem; font-weight: 800; text-transform: uppercase;">
+                                    WHAT ASL LETTER IS THIS HAND SIGN?
+                                </h2>
+
+                                <div class="reference-visual-box" id="quiz-visual-box" style="min-height: 240px; background-color: var(--surface);">
+                                    <!-- Dynamic content: Image for ASL or Text for Morse -->
+                                    <img class="ref-sign-image" id="quiz-sign-image" src="assets/signs/A.jpg" alt="ASL Quiz Question Reference"/>
+                                    <span class="font-display hidden" id="quiz-morse-text" style="font-size: 4rem; color: var(--accent-coral); letter-spacing: 4px;">• —</span>
+                                </div>
+                            </div>
+                        </article>
+                    </section>
+
+                    <!-- Right Column: Answer Options Grid & Control -->
+                    <section class="sign-lab-col-right">
+                        <article class="hard-card has-header">
+                            <div class="card-header-black">
+                                <span class="mono-label">SELECT THE CORRECT ANSWER</span>
+                                <span class="sticker-badge badge-peach" id="quiz-telemetry-accuracy">ACCURACY: 0%</span>
+                            </div>
+
+                            <div style="padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-md);">
+                                <div class="quiz-options-grid" id="quiz-options-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <button class="brutalist-button btn-secondary quiz-option-btn" type="button">A</button>
+                                    <button class="brutalist-button btn-secondary quiz-option-btn" type="button">B</button>
+                                    <button class="brutalist-button btn-secondary quiz-option-btn" type="button">C</button>
+                                    <button class="brutalist-button btn-secondary quiz-option-btn" type="button">D</button>
+                                </div>
+
+                                <!-- Feedback Banner -->
+                                <div class="hard-card hidden" id="quiz-feedback-banner" style="padding: 10px; text-align: center; border: var(--border-secondary);">
+                                    <span class="mono-label" id="quiz-feedback-text" style="font-size: 1.1rem; font-weight: 800;">[✓] CORRECT! GREAT JOB!</span>
+                                </div>
+
+                                <button class="brutalist-button btn-yellow hidden" id="btn-quiz-next-question" type="button" style="width: 100%; font-size: 1.1rem;">
+                                    <span>NEXT QUESTION →</span>
+                                </button>
+                            </div>
+                        </article>
+
+                        <!-- Telemetry Stats Bar -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; background-color: var(--surface-container); border: var(--border-primary); padding: 10px 16px; box-shadow: var(--shadow-hard);">
+                            <span class="mono-label" id="quiz-stat-correct" style="color: var(--primary);">CORRECT: 0</span>
+                            <span class="mono-label" id="quiz-stat-wrong" style="color: var(--accent-coral);">WRONG: 0</span>
+                            <span class="mono-label" id="quiz-progress-text">PROGRESS: [░░░░░░░░░░] 0 / 10</span>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Final Results Card Overlay (Hidden until 10 questions complete) -->
+                <div class="hard-card modal-card hidden" id="quiz-results-card" style="max-width: 580px; margin: 0 auto var(--space-xl) auto; background-color: var(--surface); border: var(--border-primary); box-shadow: var(--shadow-hard-hero); padding: var(--space-lg);">
+                    <div class="sticker-badge badge-yellow rotate-left" id="quiz-results-badge" style="font-size: 1.1rem; padding: 6px 14px;">[✓] QUIZ EVALUATION COMPLETE</div>
+                    
+                    <h2 class="font-display" style="font-size: 2.8rem; margin-top: var(--space-sm);">FINAL QUIZ SCORE</h2>
+                    <div class="font-display" id="quiz-results-score-num" style="font-size: 4.5rem; color: var(--accent-coral); line-height: 1;">100%</div>
+
+                    <div style="width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: var(--space-md) 0;">
+                        <div class="finger-stat-chip" style="align-items: center;">
+                            <span class="mono-label">CORRECT</span>
+                            <span class="font-display" id="quiz-res-correct" style="font-size: 1.8rem;">10</span>
+                        </div>
+                        <div class="finger-stat-chip" style="align-items: center;">
+                            <span class="mono-label">WRONG</span>
+                            <span class="font-display" id="quiz-res-wrong" style="font-size: 1.8rem; color: var(--accent-coral);">0</span>
+                        </div>
+                        <div class="finger-stat-chip" style="align-items: center;">
+                            <span class="mono-label">ACCURACY</span>
+                            <span class="font-display" id="quiz-res-accuracy" style="font-size: 1.8rem;">100%</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <button class="brutalist-button btn-yellow" id="btn-quiz-retry" type="button" style="flex: 1;">RETRY QUIZ</button>
+                        <button class="brutalist-button btn-secondary" id="btn-quiz-change-cat" type="button" style="flex: 1;">NEW CATEGORY</button>
+                    </div>
                 </div>
 
             </div>

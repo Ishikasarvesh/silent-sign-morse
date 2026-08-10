@@ -1,6 +1,6 @@
 /**
  * SILENT — Neo-Brutalist Laboratory Instrument
- * Phase 4, 6, 7, 8, 9 & 10 Controller: ASL Sign Language Lab, Practice Mode & SILENT MODE Unified Hands-Free Engine
+ * Phase 4, 6, 7, 8, 9, 10 & 11 Controller: ASL Sign Language Lab, Morse Lab, SILENT MODE & Phase 11 Interactive Quiz Engine
  * Stitch Screen ID: 0586a8cfaa1543629a7525d4f95efbb9
  */
 
@@ -117,8 +117,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let smSharedWebcamStream = null;
     let smDualAnimFrameId = null;
 
+    // Phase 11 SILENT QUIZ State Tracking
+    let quizCategory = 'MIXED'; // 'MIXED', 'SIGN', 'MORSE'
+    let quizQuestions = [];
+    let currentQuizIndex = 0;
+    let quizCorrectCount = 0;
+    let quizWrongCount = 0;
+    let quizAnswered = false;
+
     // ----------------------------------------------------------
-    // 3. PHASE 8 & 10: AUTO-CALIBRATED EYE BLINK CONFIG
+    // 3. PHASE 8, 10 & 11: AUTO-CALIBRATED EYE BLINK CONFIG
     // ----------------------------------------------------------
     const blinkConfig = {
         dotMax: 350,        // ms: blinks < 350ms generate DOT
@@ -152,12 +160,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewMorseLab = document.getElementById('view-morse-lab');
     const viewMorsePractice = document.getElementById('view-morse-practice');
     const viewSilentMode = document.getElementById('view-silent-mode');
+    const viewQuiz = document.getElementById('view-quiz');
 
     const navBtnHome = document.getElementById('nav-btn-home');
     const navBtnSignLab = document.getElementById('nav-btn-sign-lab');
     const navBtnPractice = document.getElementById('nav-btn-practice');
     const navBtnMorseLab = document.getElementById('nav-btn-morse-lab');
     const navBtnSilentMode = document.getElementById('nav-btn-silent-mode');
+    const navBtnQuiz = document.getElementById('nav-btn-quiz');
     const navBtnProgress = document.getElementById('nav-btn-progress');
 
     const logoHomeLink = document.getElementById('logo-home-link');
@@ -168,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const heroBtnPractice = document.getElementById('hero-btn-practice');
     const heroBtnMorse = document.getElementById('hero-btn-morse');
     const heroBtnSilentMode = document.getElementById('hero-btn-silent-mode');
+    const heroBtnQuiz = document.getElementById('hero-btn-quiz');
 
     const btnHomeStartSign = document.getElementById('btn-home-start-sign');
     const btnHomeStartMorse = document.getElementById('btn-home-start-morse');
@@ -368,6 +379,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const smTerminalLog = document.getElementById('sm-terminal-log');
     const btnSmClearLog = document.getElementById('btn-sm-clear-log');
 
+    // Phase 11 SILENT QUIZ DOM References
+    const btnExitQuiz = document.getElementById('btn-exit-quiz');
+    const btnQuizCatMixed = document.getElementById('btn-quiz-cat-mixed');
+    const btnQuizCatSign = document.getElementById('btn-quiz-cat-sign');
+    const btnQuizCatMorse = document.getElementById('btn-quiz-cat-morse');
+
+    const quizQuestionIndicator = document.getElementById('quiz-question-indicator');
+    const quizPromptTypeBadge = document.getElementById('quiz-prompt-type-badge');
+    const quizCategoryBadge = document.getElementById('quiz-category-badge');
+    const quizQuestionPrompt = document.getElementById('quiz-question-prompt');
+    const quizSignImage = document.getElementById('quiz-sign-image');
+    const quizMorseText = document.getElementById('quiz-morse-text');
+    const quizOptionsGrid = document.getElementById('quiz-options-grid');
+
+    const quizFeedbackBanner = document.getElementById('quiz-feedback-banner');
+    const quizFeedbackText = document.getElementById('quiz-feedback-text');
+    const btnQuizNextQuestion = document.getElementById('btn-quiz-next-question');
+
+    const quizStatCorrect = document.getElementById('quiz-stat-correct');
+    const quizStatWrong = document.getElementById('quiz-stat-wrong');
+    const quizProgressText = document.getElementById('quiz-progress-text');
+    const quizTelemetryAccuracy = document.getElementById('quiz-telemetry-accuracy');
+
+    const quizResultsCard = document.getElementById('quiz-results-card');
+    const quizResultsBadge = document.getElementById('quiz-results-badge');
+    const quizResultsScoreNum = document.getElementById('quiz-results-score-num');
+    const quizResCorrect = document.getElementById('quiz-res-correct');
+    const quizResWrong = document.getElementById('quiz-res-wrong');
+    const quizResAccuracy = document.getElementById('quiz-res-accuracy');
+    const btnQuizRetry = document.getElementById('btn-quiz-retry');
+    const btnQuizChangeCat = document.getElementById('btn-quiz-change-cat');
+
     // Modals
     const placeholderModal = document.getElementById('placeholder-modal');
     const modalCloseBtn = document.getElementById('modal-close-btn');
@@ -383,12 +426,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (viewMorseLab) viewMorseLab.classList.remove('active');
         if (viewMorsePractice) viewMorsePractice.classList.remove('active');
         if (viewSilentMode) viewSilentMode.classList.remove('active');
+        if (viewQuiz) viewQuiz.classList.remove('active');
 
         if (navBtnHome) navBtnHome.classList.remove('active');
         if (navBtnSignLab) navBtnSignLab.classList.remove('active');
         if (navBtnPractice) navBtnPractice.classList.remove('active');
         if (navBtnMorseLab) navBtnMorseLab.classList.remove('active');
         if (navBtnSilentMode) navBtnSilentMode.classList.remove('active');
+        if (navBtnQuiz) navBtnQuiz.classList.remove('active');
 
         if (targetView === 'sign-lab') {
             if (viewSignLab) viewSignLab.classList.add('active');
@@ -438,6 +483,16 @@ document.addEventListener('DOMContentLoaded', () => {
             stopWebcamStream();
             stopMorseEyeStream();
             initSilentModeDualEngine();
+        } else if (targetView === 'quiz') {
+            if (viewQuiz) viewQuiz.classList.add('active');
+            if (navBtnQuiz) navBtnQuiz.classList.add('active');
+            if (headerSecIndicator) headerSecIndicator.textContent = 'SEC: SILENT QUIZ';
+            if (cameraStatusText) cameraStatusText.textContent = 'EVALUATION ENGINE';
+
+            stopWebcamStream();
+            stopMorseEyeStream();
+            stopSilentModeStreams();
+            startQuizSession(quizCategory);
         } else {
             if (viewHome) viewHome.classList.add('active');
             if (navBtnHome) navBtnHome.classList.add('active');
@@ -457,6 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navBtnPractice) navBtnPractice.addEventListener('click', () => switchView('sign-practice'));
     if (navBtnMorseLab) navBtnMorseLab.addEventListener('click', () => switchView('morse-lab'));
     if (navBtnSilentMode) navBtnSilentMode.addEventListener('click', () => switchView('silent-mode'));
+    if (navBtnQuiz) navBtnQuiz.addEventListener('click', () => switchView('quiz'));
 
     if (logoHomeLink) logoHomeLink.addEventListener('click', (e) => { e.preventDefault(); switchView('home'); });
     if (btnReturnHome) btnReturnHome.addEventListener('click', () => switchView('home'));
@@ -464,11 +520,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnExitPractice) btnExitPractice.addEventListener('click', () => switchView('sign-lab'));
     if (btnExitMorsePractice) btnExitMorsePractice.addEventListener('click', () => switchView('morse-lab'));
     if (btnExitSilentMode) btnExitSilentMode.addEventListener('click', () => switchView('home'));
+    if (btnExitQuiz) btnExitQuiz.addEventListener('click', () => switchView('home'));
 
     if (heroBtnExplore) heroBtnExplore.addEventListener('click', () => switchView('sign-lab'));
     if (heroBtnPractice) heroBtnPractice.addEventListener('click', () => switchView('sign-practice'));
     if (heroBtnMorse) heroBtnMorse.addEventListener('click', () => switchView('morse-lab'));
     if (heroBtnSilentMode) heroBtnSilentMode.addEventListener('click', () => switchView('silent-mode'));
+    if (heroBtnQuiz) heroBtnQuiz.addEventListener('click', () => switchView('quiz'));
 
     if (btnHomeStartSign) btnHomeStartSign.addEventListener('click', () => switchView('sign-lab'));
     if (btnHomeStartMorse) btnHomeStartMorse.addEventListener('click', () => switchView('morse-lab'));
@@ -1196,7 +1254,220 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------
-    // 10. REAL MEDIAPIPE FACE MESH & AUTO-CALIBRATED BLINK ENGINE
+    // 10. PHASE 11: DYNAMIC QUIZ GENERATOR & EVALUATION ENGINE
+    // ----------------------------------------------------------
+    function generateQuizQuestions(category) {
+        const aslLetters = Object.keys(aslAlphabet);
+        const morseChars = morsePracticeSequence;
+        const questions = [];
+
+        for (let i = 0; i < 10; i++) {
+            let isASL = false;
+            if (category === 'SIGN') isASL = true;
+            else if (category === 'MORSE') isASL = false;
+            else isASL = (i % 2 === 0);
+
+            if (isASL) {
+                const target = aslLetters[Math.floor(Math.random() * aslLetters.length)];
+                const distractors = aslLetters.filter(l => l !== target);
+                const shuffledDistractors = distractors.sort(() => 0.5 - Math.random()).slice(0, 3);
+                const options = [target, ...shuffledDistractors].sort(() => 0.5 - Math.random());
+
+                questions.push({
+                    type: 'ASL',
+                    target: target,
+                    imagePath: `assets/signs/${target}.jpg`,
+                    prompt: `WHAT ASL LETTER IS THIS HAND SIGN?`,
+                    correct: target,
+                    options: options
+                });
+            } else {
+                const target = morseChars[Math.floor(Math.random() * morseChars.length)];
+                const pattern = morseSignalMap[target] || '.-';
+                const distractors = morseChars.filter(c => c !== target);
+                const shuffledDistractors = distractors.sort(() => 0.5 - Math.random()).slice(0, 3);
+                const options = [target, ...shuffledDistractors].sort(() => 0.5 - Math.random());
+
+                questions.push({
+                    type: 'MORSE',
+                    target: target,
+                    pattern: pattern,
+                    prompt: `WHAT CHARACTER DOES THIS MORSE PATTERN REPRESENT?`,
+                    correct: target,
+                    options: options
+                });
+            }
+        }
+
+        return questions;
+    }
+
+    function startQuizSession(category = 'MIXED') {
+        quizCategory = category;
+        quizQuestions = generateQuizQuestions(category);
+        currentQuizIndex = 0;
+        quizCorrectCount = 0;
+        quizWrongCount = 0;
+        quizAnswered = false;
+
+        const catBtns = [btnQuizCatMixed, btnQuizCatSign, btnQuizCatMorse];
+        catBtns.forEach(b => { if (b) b.classList.remove('active'); });
+
+        if (category === 'MIXED' && btnQuizCatMixed) btnQuizCatMixed.classList.add('active');
+        if (category === 'SIGN' && btnQuizCatSign) btnQuizCatSign.classList.add('active');
+        if (category === 'MORSE' && btnQuizCatMorse) btnQuizCatMorse.classList.add('active');
+
+        if (quizResultsCard) quizResultsCard.classList.add('hidden');
+
+        renderQuizQuestion(0);
+    }
+
+    function renderQuizQuestion(index) {
+        if (index >= quizQuestions.length) {
+            finishQuizSession();
+            return;
+        }
+
+        quizAnswered = false;
+        currentQuizIndex = index;
+        const q = quizQuestions[index];
+
+        if (quizQuestionIndicator) quizQuestionIndicator.textContent = `QUESTION ${index + 1} / 10`;
+        if (quizCategoryBadge) quizCategoryBadge.textContent = `${quizCategory} QUIZ`;
+        if (quizPromptTypeBadge) quizPromptTypeBadge.textContent = `QUESTION TYPE: ${q.type === 'ASL' ? 'ASL GESTURE' : 'MORSE SIGNAL'}`;
+        if (quizQuestionPrompt) quizQuestionPrompt.textContent = q.prompt;
+
+        if (q.type === 'ASL') {
+            if (quizSignImage) {
+                quizSignImage.src = q.imagePath;
+                quizSignImage.classList.remove('hidden');
+            }
+            if (quizMorseText) quizMorseText.classList.add('hidden');
+        } else {
+            if (quizSignImage) quizSignImage.classList.add('hidden');
+            if (quizMorseText) {
+                quizMorseText.textContent = q.pattern.replace(/\./g, '• ').replace(/-/g, '— ');
+                quizMorseText.classList.remove('hidden');
+            }
+        }
+
+        // Render 4 Options
+        if (quizOptionsGrid) {
+            quizOptionsGrid.innerHTML = '';
+            q.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'brutalist-button btn-secondary quiz-option-btn';
+                btn.type = 'button';
+                btn.textContent = option;
+                btn.addEventListener('click', () => handleQuizAnswerSelect(option, btn));
+                quizOptionsGrid.appendChild(btn);
+            });
+        }
+
+        if (quizFeedbackBanner) quizFeedbackBanner.classList.add('hidden');
+        if (btnQuizNextQuestion) btnQuizNextQuestion.classList.add('hidden');
+
+        updateQuizProgressUI();
+    }
+
+    function handleQuizAnswerSelect(chosenOption, clickedBtn) {
+        if (quizAnswered) return;
+        quizAnswered = true;
+
+        const q = quizQuestions[currentQuizIndex];
+        const allOptionBtns = document.querySelectorAll('.quiz-option-btn');
+
+        allOptionBtns.forEach(btn => {
+            btn.disabled = true;
+            if (btn.textContent === q.correct) {
+                btn.classList.add('correct');
+            }
+        });
+
+        if (chosenOption === q.correct) {
+            quizCorrectCount++;
+            if (quizFeedbackBanner) {
+                quizFeedbackBanner.style.backgroundColor = 'var(--accent-yellow)';
+                quizFeedbackBanner.style.color = 'var(--primary)';
+                if (quizFeedbackText) quizFeedbackText.textContent = '[✓] CORRECT! GREAT JOB!';
+                quizFeedbackBanner.classList.remove('hidden');
+            }
+        } else {
+            quizWrongCount++;
+            clickedBtn.classList.add('incorrect');
+            if (quizFeedbackBanner) {
+                quizFeedbackBanner.style.backgroundColor = 'var(--accent-coral)';
+                quizFeedbackBanner.style.color = 'var(--on-primary)';
+                if (quizFeedbackText) quizFeedbackText.textContent = `[✗] INCORRECT! CORRECT ANSWER IS '${q.correct}'`;
+                quizFeedbackBanner.classList.remove('hidden');
+            }
+        }
+
+        if (btnQuizNextQuestion) btnQuizNextQuestion.classList.remove('hidden');
+        updateQuizProgressUI();
+    }
+
+    function updateQuizProgressUI() {
+        const total = 10;
+        const current = currentQuizIndex + 1;
+        const accuracyPct = Math.round((quizCorrectCount / (quizCorrectCount + quizWrongCount || 1)) * 100);
+
+        if (quizStatCorrect) quizStatCorrect.textContent = `CORRECT: ${quizCorrectCount}`;
+        if (quizStatWrong) quizStatWrong.textContent = `WRONG: ${quizWrongCount}`;
+        if (quizTelemetryAccuracy) quizTelemetryAccuracy.textContent = `ACCURACY: ${accuracyPct}%`;
+
+        const filledBlocks = Math.floor((current / total) * 10);
+        const emptyBlocks = 10 - filledBlocks;
+        if (quizProgressText) quizProgressText.textContent = `PROGRESS: [${'█'.repeat(filledBlocks)}${'░'.repeat(emptyBlocks)}] ${current} / ${total}`;
+    }
+
+    function finishQuizSession() {
+        const total = 10;
+        const scorePct = Math.round((quizCorrectCount / total) * 100);
+
+        if (quizResultsScoreNum) quizResultsScoreNum.textContent = `${scorePct}%`;
+        if (quizResCorrect) quizResCorrect.textContent = `${quizCorrectCount} / 10`;
+        if (quizResWrong) quizResWrong.textContent = `${quizWrongCount} / 10`;
+        if (quizResAccuracy) quizResAccuracy.textContent = `${scorePct}%`;
+
+        if (quizResultsBadge) {
+            if (scorePct >= 80) {
+                quizResultsBadge.textContent = '[✓] SILENT QUIZ MASTER';
+                quizResultsBadge.className = 'sticker-badge badge-yellow rotate-left';
+            } else {
+                quizResultsBadge.textContent = '[!] MORE PRACTICE RECOMMENDED';
+                quizResultsBadge.className = 'sticker-badge badge-coral rotate-left';
+            }
+        }
+
+        if (quizResultsCard) quizResultsCard.classList.remove('hidden');
+        window.scrollTo({ top: quizResultsCard.offsetTop - 50, behavior: 'smooth' });
+    }
+
+    if (btnQuizCatMixed) btnQuizCatMixed.addEventListener('click', () => startQuizSession('MIXED'));
+    if (btnQuizCatSign) btnQuizCatSign.addEventListener('click', () => startQuizSession('SIGN'));
+    if (btnQuizCatMorse) btnQuizCatMorse.addEventListener('click', () => startQuizSession('MORSE'));
+
+    if (btnQuizNextQuestion) {
+        btnQuizNextQuestion.addEventListener('click', () => {
+            renderQuizQuestion(currentQuizIndex + 1);
+        });
+    }
+
+    if (btnQuizRetry) {
+        btnQuizRetry.addEventListener('click', () => {
+            startQuizSession(quizCategory);
+        });
+    }
+
+    if (btnQuizChangeCat) {
+        btnQuizChangeCat.addEventListener('click', () => {
+            startQuizSession('MIXED');
+        });
+    }
+
+    // ----------------------------------------------------------
+    // 11. REAL MEDIAPIPE FACE MESH & AUTO-CALIBRATED BLINK ENGINE
     // ----------------------------------------------------------
     function startEyeCalibration() {
         if (!isFaceDetected) {
@@ -1343,7 +1614,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------
-    // 11. REFINED EAR CALCULATOR & MULTI-FRAME BLINK CLASSIFIER
+    // 12. REFINED EAR CALCULATOR & MULTI-FRAME BLINK CLASSIFIER
     // ----------------------------------------------------------
     const LEFT_EYE_INDICES = { outer: 33, inner: 133, top1: 160, top2: 158, bot1: 144, bot2: 153 };
     const RIGHT_EYE_INDICES = { outer: 263, inner: 362, top1: 385, top2: 387, bot1: 380, bot2: 373 };
@@ -1586,7 +1857,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.startEyeCalibration = startEyeCalibration;
 
     // ----------------------------------------------------------
-    // 12. MEDIA PIPE HAND TRACKING PIPELINE (ASL LAB & SILENT MODE)
+    // 13. MEDIAPIPE HAND TRACKING PIPELINE (ASL LAB & SILENT MODE)
     // ----------------------------------------------------------
     let webcamStream = null;
     let handsEngine = null;

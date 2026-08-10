@@ -1,6 +1,6 @@
 /* ==========================================================
    SILENT — Neo-Brutalist Laboratory Design System
-   Phase 10: SILENT MODE — Unified Hands-Free Communication Engine
+   Phase 11: QUIZ — Interactive Evaluation Engine
    Visual Source of Truth: Stitch Screen 0586a8cfaa1543629a7525d4f95efbb9
    ========================================================== */
 
@@ -521,7 +521,7 @@ canvas.camera-canvas {
 .practice-controls-bar button { flex: 1; min-width: 110px; }
 
 /* ----------------------------------------------------------
-   11. PHASE 6, 7, 8, 9 & 10: MORSE CODE LAB & SILENT MODE STYLES
+   11. PHASE 6, 7, 8, 9, 10 & 11: MORSE, SILENT MODE & QUIZ STYLES
    ---------------------------------------------------------- */
 .morse-lab-grid {
     display: grid;
@@ -643,14 +643,42 @@ canvas.camera-canvas {
     gap: 6px;
 }
 
-.mode-selector-btn {
+.mode-selector-btn, .quiz-category-btn {
     transition: var(--transition-mechanical);
 }
 
-.mode-selector-btn.active {
+.mode-selector-btn.active, .quiz-category-btn.active {
     background-color: var(--accent-coral) !important;
     color: var(--on-primary) !important;
     box-shadow: 3px 3px 0px #000000 !important;
+}
+
+/* Phase 11 Quiz Options Styling */
+.quiz-options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.quiz-option-btn {
+    font-size: 1.4rem !important;
+    padding: 16px 20px !important;
+    justify-content: center !important;
+    width: 100%;
+}
+
+.quiz-option-btn.correct {
+    background-color: var(--accent-yellow) !important;
+    color: var(--primary) !important;
+    border: var(--border-primary) !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+}
+
+.quiz-option-btn.incorrect {
+    background-color: var(--accent-coral) !important;
+    color: var(--on-primary) !important;
+    border: var(--border-primary) !important;
+    box-shadow: 4px 4px 0px #000000 !important;
 }
 
 /* Morse Signal Buffer & Keypad */
@@ -733,4 +761,5 @@ canvas.camera-canvas {
     .hero-title { font-size: 3rem; }
     .header-container { flex-direction: column; align-items: flex-start; gap: var(--space-sm); }
     .header-nav { width: 100%; overflow-x: auto; padding-bottom: 4px; }
+    .quiz-options-grid { grid-template-columns: 1fr; }
 }
