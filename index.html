@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SILENT — Learn. Sign. Blink. Communicate.</title>
+    <meta name="description" content="An interactive way to learn silent communication through sign language and Morse code.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background atmospheric elements -->
+    <div class="bg-effects" aria-hidden="true">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+        <div class="bg-grid"></div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="site-header">
+        <div class="container header-container">
+            <a href="#" class="brand-logo" aria-label="SILENT Home">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">SILENT</span>
+            </a>
+            <div class="status-badge" id="camera-status">
+                <span class="status-dot"></span>
+                <span class="status-text">CAMERA-POWERED LEARNING</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section" id="hero">
+            <div class="container hero-container">
+                <div class="hero-badge">
+                    <span class="badge-sparkle">✦</span>
+                    <span>INTERACTIVE COMMUNICATION LAB</span>
+                </div>
+                <h1 class="hero-title">SILENT</h1>
+                <p class="hero-tagline">Learn. Sign. Blink. Communicate.</p>
+                <p class="hero-description">
+                    An interactive way to learn silent communication through sign language and Morse code.
+                </p>
+            </div>
+        </section>
+
+        <!-- Main Path Choice Section -->
+        <section class="paths-section" id="learning-paths">
+            <div class="container paths-container">
+                <!-- Card 1: Sign Language -->
+                <article class="path-card path-card-sign" id="card-sign-language" tabindex="0" role="button" aria-label="Start learning Sign Language">
+                    <div class="card-glow-bg"></div>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper">
+                            <span class="card-icon" aria-hidden="true">🤟</span>
+                        </div>
+                        <h2 class="card-title">SIGN LANGUAGE</h2>
+                        <p class="card-description">Learn communication through hand signs.</p>
+                        
+                        <ul class="feature-labels">
+                            <li class="feature-badge">HAND TRACKING</li>
+                            <li class="feature-badge">SIGN RECOGNITION</li>
+                            <li class="feature-badge">LIVE FEEDBACK</li>
+                        </ul>
+
+                        <div class="btn-start">
+                            <span>START LEARNING</span>
+                            <span class="btn-arrow" aria-hidden="true">→</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 2: Morse Code -->
+                <article class="path-card path-card-morse" id="card-morse-code" tabindex="0" role="button" aria-label="Start learning Morse Code">
+                    <div class="card-glow-bg"></div>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper">
+                            <span class="card-icon" aria-hidden="true">👁</span>
+                        </div>
+                        <h2 class="card-title">MORSE CODE</h2>
+                        <p class="card-description">Learn communication through dots, dashes, and your eyes.</p>
+                        
+                        <ul class="feature-labels">
+                            <li class="feature-badge">EYE TRACKING</li>
+                            <li class="feature-badge">BLINK DETECTION</li>
+                            <li class="feature-badge">MORSE PRACTICE</li>
+                        </ul>
+
+                        <div class="btn-start">
+                            <span>START LEARNING</span>
+                            <span class="btn-arrow" aria-hidden="true">→</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section class="how-it-works-section" id="how-it-works">
+            <div class="container how-container">
+                <div class="section-header">
+                    <h2 class="section-title">HOW IT WORKS</h2>
+                    <div class="section-line"></div>
+                </div>
+
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-number">01</div>
+                        <h3 class="step-title">LEARN</h3>
+                        <p class="step-description">Understand the sign or Morse pattern.</p>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-number">02</div>
+                        <h3 class="step-title">PRACTICE</h3>
+                        <p class="step-description">Use your camera to practice.</p>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-number">03</div>
+                        <h3 class="step-title">MASTER</h3>
+                        <p class="step-description">Get instant visual feedback and improve.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="site-footer">
+        <div class="container footer-container">
+            <p class="footer-brand">SILENT</p>
+            <p class="footer-subtext">Interactive communication learning</p>
+        </div>
+    </footer>
+
+    <!-- Placeholder Modal / Modal Overlay -->
+    <div class="modal-overlay" id="placeholder-modal" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="modal-card">
+            <button class="modal-close" id="modal-close-btn" aria-label="Close modal">&times;</button>
+            <div class="modal-icon-container" id="modal-icon-container">
+                <span class="modal-icon" id="modal-icon">🤟</span>
+            </div>
+            <div class="modal-badge" id="modal-badge">MODULE INITIALIZING</div>
+            <h3 class="modal-title" id="modal-title">Sign Language Lab</h3>
+            <p class="modal-description" id="modal-description">
+                The hand sign tracking module is currently in preparation. Real-time camera hand tracking and sign recognition will be coming in the next release!
+            </p>
+            <button class="modal-action-btn" id="modal-action-btn">RETURN TO HUB</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

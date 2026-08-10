@@ -1,0 +1,846 @@
+/* ==========================================================
+   SILENT — Interactive Communication Learning Hub
+   Style System
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   1. Design Tokens & CSS Variables
+   ---------------------------------------------------------- */
+:root {
+    /* Color Palette */
+    --bg-dark: #07090e;
+    --bg-card: rgba(16, 22, 36, 0.65);
+    --bg-card-hover: rgba(22, 30, 48, 0.85);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-light: rgba(255, 255, 255, 0.16);
+
+    /* Sign Language Accents (Teal / Cyan / Electric Blue) */
+    --sign-cyan: #00f2fe;
+    --sign-blue: #4facfe;
+    --sign-glow: rgba(0, 242, 254, 0.25);
+    --sign-border: rgba(0, 242, 254, 0.4);
+
+    /* Morse Code Accents (Violet / Neon Pink / Magenta) */
+    --morse-purple: #c084fc;
+    --morse-pink: #f43f5e;
+    --morse-glow: rgba(192, 132, 252, 0.25);
+    --morse-border: rgba(192, 132, 252, 0.4);
+
+    /* Text Colors */
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-accent: #38bdf8;
+
+    /* Typography */
+    --font-heading: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* Transitions & Shadows */
+    --transition-smooth: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-fast: all 0.2s ease;
+    --glass-blur: blur(16px);
+    --card-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6);
+}
+
+/* ----------------------------------------------------------
+   2. Reset & Global Styles
+   ---------------------------------------------------------- */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+    color-scheme: dark;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Container */
+.container {
+    width: 100%;
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* ----------------------------------------------------------
+   3. Atmospheric Background Effects
+   ---------------------------------------------------------- */
+.bg-effects {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.28;
+    animation: floatOrb 20s infinite ease-in-out alternate;
+}
+
+.orb-1 {
+    top: -10%;
+    left: 15%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, var(--sign-cyan), var(--sign-blue));
+}
+
+.orb-2 {
+    bottom: -15%;
+    right: 10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--morse-purple), var(--morse-pink));
+    animation-delay: -7s;
+}
+
+.orb-3 {
+    top: 40%;
+    left: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, #3b82f6, #8b5cf6);
+    animation-delay: -14s;
+}
+
+.bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 60%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 60%, transparent 100%);
+}
+
+@keyframes floatOrb {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+    50% {
+        transform: translate(60px, 40px) scale(1.1);
+    }
+    100% {
+        transform: translate(-40px, 70px) scale(0.95);
+    }
+}
+
+/* ----------------------------------------------------------
+   4. Site Header & Navigation
+   ---------------------------------------------------------- */
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(7, 9, 14, 0.75);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 1.25rem 0;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    transition: var(--transition-fast);
+}
+
+.brand-logo:hover {
+    opacity: 0.9;
+}
+
+.logo-icon {
+    font-size: 1.2rem;
+    color: var(--sign-cyan);
+    filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.6));
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.9rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-subtle);
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    user-select: none;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #10b981;
+    box-shadow: 0 0 10px #10b981;
+    animation: statusPulse 2s infinite ease-in-out;
+}
+
+@keyframes statusPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+        box-shadow: 0 0 8px #10b981;
+    }
+    50% {
+        transform: scale(1.25);
+        opacity: 0.5;
+        box-shadow: 0 0 16px #10b981;
+    }
+}
+
+/* ----------------------------------------------------------
+   5. Hero Section
+   ---------------------------------------------------------- */
+.hero-section {
+    padding: 5rem 0 3.5rem;
+    text-align: center;
+}
+
+.hero-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 800px;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 1rem;
+    background: rgba(0, 242, 254, 0.06);
+    border: 1px solid rgba(0, 242, 254, 0.2);
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--sign-cyan);
+    margin-bottom: 1.75rem;
+    text-transform: uppercase;
+}
+
+.badge-sparkle {
+    font-size: 0.85rem;
+}
+
+.hero-title {
+    font-family: var(--font-heading);
+    font-size: clamp(3.5rem, 8vw, 6.5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.18em;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.hero-tagline {
+    font-family: var(--font-heading);
+    font-size: clamp(1.25rem, 3vw, 1.85rem);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--sign-cyan);
+    margin-bottom: 1.25rem;
+    background: linear-gradient(90deg, var(--sign-cyan), var(--morse-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-description {
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    color: var(--text-secondary);
+    max-width: 620px;
+    font-weight: 400;
+    line-height: 1.7;
+}
+
+/* ----------------------------------------------------------
+   6. Main Choice Path Cards
+   ---------------------------------------------------------- */
+.paths-section {
+    padding: 2.5rem 0 5rem;
+}
+
+.paths-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.25rem;
+}
+
+/* Path Card Base */
+.path-card {
+    position: relative;
+    background: var(--bg-card);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border-subtle);
+    border-radius: 24px;
+    padding: 2.75rem 2.25rem;
+    cursor: pointer;
+    overflow: hidden;
+    outline: none;
+    transition: var(--transition-smooth);
+    box-shadow: var(--card-shadow);
+}
+
+.card-glow-bg {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--transition-smooth);
+    z-index: 1;
+}
+
+.card-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.card-icon-wrapper {
+    width: 68px;
+    height: 68px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.75rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    transition: var(--transition-smooth);
+}
+
+.card-icon {
+    font-size: 2.2rem;
+    transition: var(--transition-smooth);
+    display: inline-block;
+}
+
+.card-title {
+    font-family: var(--font-heading);
+    font-size: 1.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text-primary);
+    margin-bottom: 0.65rem;
+}
+
+.card-description {
+    color: var(--text-secondary);
+    font-size: 1.025rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    min-height: 3.2rem;
+}
+
+/* Feature Labels List */
+.feature-labels {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 2.5rem;
+    margin-top: auto;
+}
+
+.feature-badge {
+    font-size: 0.725rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    transition: var(--transition-smooth);
+}
+
+/* Action Button Inside Card */
+.btn-start {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 1rem 1.4rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    transition: var(--transition-smooth);
+    user-select: none;
+}
+
+.btn-arrow {
+    font-size: 1.15rem;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --- Card 1: Sign Language Specific Styling & Hover --- */
+.path-card-sign .card-glow-bg {
+    background: radial-gradient(circle at 50% -20%, var(--sign-glow), transparent 70%);
+}
+
+.path-card-sign:hover,
+.path-card-sign:focus-visible {
+    transform: translateY(-8px);
+    background: var(--bg-card-hover);
+    border-color: var(--sign-border);
+    box-shadow: 0 20px 40px -12px rgba(0, 242, 254, 0.25);
+}
+
+.path-card-sign:hover .card-glow-bg,
+.path-card-sign:focus-visible .card-glow-bg {
+    opacity: 1;
+}
+
+.path-card-sign:hover .card-icon-wrapper,
+.path-card-sign:focus-visible .card-icon-wrapper {
+    background: rgba(0, 242, 254, 0.12);
+    border-color: rgba(0, 242, 254, 0.4);
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
+}
+
+.path-card-sign:hover .card-icon,
+.path-card-sign:focus-visible .card-icon {
+    transform: scale(1.15) rotate(-5deg);
+}
+
+.path-card-sign:hover .feature-badge,
+.path-card-sign:focus-visible .feature-badge {
+    background: rgba(0, 242, 254, 0.08);
+    border-color: rgba(0, 242, 254, 0.25);
+    color: var(--sign-cyan);
+}
+
+.path-card-sign:hover .btn-start,
+.path-card-sign:focus-visible .btn-start {
+    background: linear-gradient(135deg, var(--sign-cyan), var(--sign-blue));
+    color: #07090e;
+    border-color: transparent;
+    box-shadow: 0 8px 24px rgba(0, 242, 254, 0.35);
+}
+
+.path-card-sign:hover .btn-arrow,
+.path-card-sign:focus-visible .btn-arrow {
+    transform: translateX(6px);
+}
+
+/* --- Card 2: Morse Code Specific Styling & Hover --- */
+.path-card-morse .card-glow-bg {
+    background: radial-gradient(circle at 50% -20%, var(--morse-glow), transparent 70%);
+}
+
+.path-card-morse:hover,
+.path-card-morse:focus-visible {
+    transform: translateY(-8px);
+    background: var(--bg-card-hover);
+    border-color: var(--morse-border);
+    box-shadow: 0 20px 40px -12px rgba(192, 132, 252, 0.25);
+}
+
+.path-card-morse:hover .card-glow-bg,
+.path-card-morse:focus-visible .card-glow-bg {
+    opacity: 1;
+}
+
+.path-card-morse:hover .card-icon-wrapper,
+.path-card-morse:focus-visible .card-icon-wrapper {
+    background: rgba(192, 132, 252, 0.12);
+    border-color: rgba(192, 132, 252, 0.4);
+    box-shadow: 0 0 20px rgba(192, 132, 252, 0.3);
+}
+
+.path-card-morse:hover .card-icon,
+.path-card-morse:focus-visible .card-icon {
+    transform: scale(1.15) rotate(5deg);
+}
+
+.path-card-morse:hover .feature-badge,
+.path-card-morse:focus-visible .feature-badge {
+    background: rgba(192, 132, 252, 0.08);
+    border-color: rgba(192, 132, 252, 0.25);
+    color: var(--morse-purple);
+}
+
+.path-card-morse:hover .btn-start,
+.path-card-morse:focus-visible .btn-start {
+    background: linear-gradient(135deg, var(--morse-purple), var(--morse-pink));
+    color: #07090e;
+    border-color: transparent;
+    box-shadow: 0 8px 24px rgba(192, 132, 252, 0.35);
+}
+
+.path-card-morse:hover .btn-arrow,
+.path-card-morse:focus-visible .btn-arrow {
+    transform: translateX(6px);
+}
+
+/* ----------------------------------------------------------
+   7. How It Works Section
+   ---------------------------------------------------------- */
+.how-it-works-section {
+    padding: 4rem 0 6rem;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+}
+
+.section-title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--text-primary);
+    margin-bottom: 0.8rem;
+}
+
+.section-line {
+    width: 48px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--sign-cyan), var(--morse-purple));
+    margin: 0 auto;
+    border-radius: 3px;
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.step-card {
+    background: rgba(16, 22, 36, 0.35);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 2.25rem 1.75rem;
+    position: relative;
+    transition: var(--transition-smooth);
+}
+
+.step-card:hover {
+    background: rgba(22, 30, 48, 0.55);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-4px);
+}
+
+.step-number {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 1.25rem;
+    background: linear-gradient(135deg, var(--text-primary), var(--text-muted));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0.85;
+}
+
+.step-card:nth-child(1) .step-number {
+    background: linear-gradient(135deg, var(--sign-cyan), var(--sign-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.step-card:nth-child(2) .step-number {
+    background: linear-gradient(135deg, #38bdf8, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.step-card:nth-child(3) .step-number {
+    background: linear-gradient(135deg, var(--morse-purple), var(--morse-pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.step-title {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--text-primary);
+    margin-bottom: 0.6rem;
+}
+
+.step-description {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* ----------------------------------------------------------
+   8. Footer Section
+   ---------------------------------------------------------- */
+.site-footer {
+    border-top: 1px solid var(--border-subtle);
+    padding: 2.5rem 0;
+    text-align: center;
+    background: rgba(5, 7, 11, 0.9);
+}
+
+.footer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.footer-brand {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--text-primary);
+}
+
+.footer-subtext {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+}
+
+/* ----------------------------------------------------------
+   9. Interactive Modal / Coming Soon State
+   ---------------------------------------------------------- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(5, 7, 11, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-card {
+    position: relative;
+    background: rgba(18, 24, 38, 0.95);
+    border: 1px solid var(--border-light);
+    border-radius: 24px;
+    padding: 2.75rem 2.25rem;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    transform: scale(0.92);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-overlay.active .modal-card {
+    transform: scale(1);
+}
+
+.modal-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+}
+
+.modal-icon-container {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 242, 254, 0.1);
+    border: 1px solid rgba(0, 242, 254, 0.3);
+}
+
+.modal-icon {
+    font-size: 2.4rem;
+}
+
+.modal-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 100px;
+    font-size: 0.725rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-accent);
+    margin-bottom: 1rem;
+}
+
+.modal-title {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.modal-description {
+    color: var(--text-secondary);
+    font-size: 0.975rem;
+    line-height: 1.65;
+    margin-bottom: 2rem;
+}
+
+.modal-action-btn {
+    width: 100%;
+    padding: 0.95rem 1.5rem;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, var(--sign-cyan), var(--sign-blue));
+    color: #07090e;
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    box-shadow: 0 8px 24px rgba(0, 242, 254, 0.25);
+}
+
+.modal-action-btn:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px rgba(0, 242, 254, 0.35);
+}
+
+/* Modal Themes depending on card selected */
+.modal-overlay[data-theme="morse"] .modal-icon-container {
+    background: rgba(192, 132, 252, 0.1);
+    border-color: rgba(192, 132, 252, 0.3);
+}
+
+.modal-overlay[data-theme="morse"] .modal-badge {
+    color: var(--morse-purple);
+}
+
+.modal-overlay[data-theme="morse"] .modal-action-btn {
+    background: linear-gradient(135deg, var(--morse-purple), var(--morse-pink));
+    box-shadow: 0 8px 24px rgba(192, 132, 252, 0.25);
+}
+
+.modal-overlay[data-theme="morse"] .modal-action-btn:hover {
+    box-shadow: 0 12px 28px rgba(192, 132, 252, 0.35);
+}
+
+/* ----------------------------------------------------------
+   10. Responsiveness & Mobile Tweaks
+   ---------------------------------------------------------- */
+@media (max-width: 900px) {
+    .paths-container {
+        grid-template-columns: 1fr;
+        max-width: 560px;
+    }
+
+    .steps-grid {
+        grid-template-columns: 1fr;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .hero-section {
+        padding: 3.5rem 0 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-container {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .path-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .hero-badge {
+        font-size: 0.7rem;
+    }
+
+    .modal-card {
+        padding: 2rem 1.5rem;
+    }
+}
