@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>SILENT — Sign Language Lab & Morse Code Laboratory</title>
-    <meta name="description" content="Interactive ASL Sign Language Lab, Morse Code Laboratory, Unified Silent Communication Mode, and Interactive Quiz with real-time camera tracking and signal decoding."/>
+    <meta name="description" content="Interactive ASL Sign Language Lab, Morse Code Laboratory, Unified Silent Communication Mode, Interactive Quiz, and Progress Dashboard with real-time camera tracking."/>
     <!-- Google Fonts: Bricolage Grotesque, Work Sans, Space Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -188,9 +188,9 @@
                     <div class="terminal-panel-body">
                         <div class="terminal-console-log" id="system-console-log" role="region" aria-label="Terminal Interface Log">
                             <div class="log-entry">
-                                <span class="log-time">[18:49:00]</span>
+                                <span class="log-time">[18:54:00]</span>
                                 <span class="log-prompt">></span>
-                                <span class="log-text">SILENT System Hub initialized. Click "QUIZ", "SILENT MODE", "SIGN LAB", or "MORSE LAB" to launch module.</span>
+                                <span class="log-text">SILENT System Hub initialized. Click "PROGRESS", "QUIZ", "SILENT MODE", "SIGN LAB", or "MORSE LAB" to launch module.</span>
                             </div>
                         </div>
                     </div>
@@ -694,7 +694,7 @@
                             <div style="padding: var(--space-md);">
                                 <div class="terminal-console-log" id="morse-terminal-log" style="height: 180px;">
                                     <div class="log-entry">
-                                        <span class="log-time">[18:49:00]</span>
+                                        <span class="log-time">[18:54:00]</span>
                                         <span class="log-prompt">&gt;</span>
                                         <span class="log-text">SILENT Morse Code Telemetry Engine initialized. Use BLINK or DOT/DASH keys.</span>
                                     </div>
@@ -989,7 +989,7 @@
                             <div style="padding: var(--space-md);">
                                 <div class="terminal-console-log" id="sm-terminal-log" style="height: 180px;">
                                     <div class="log-entry">
-                                        <span class="log-time">[18:49:00]</span>
+                                        <span class="log-time">[18:54:00]</span>
                                         <span class="log-prompt">&gt;</span>
                                         <span class="log-text">SILENT Unified Hands-Free Mode active. Sign letters or blink Morse code to build messages.</span>
                                     </div>
@@ -1064,7 +1064,6 @@
                                 </h2>
 
                                 <div class="reference-visual-box" id="quiz-visual-box" style="min-height: 240px; background-color: var(--surface);">
-                                    <!-- Dynamic content: Image for ASL or Text for Morse -->
                                     <img class="ref-sign-image" id="quiz-sign-image" src="assets/signs/A.jpg" alt="ASL Quiz Question Reference"/>
                                     <span class="font-display hidden" id="quiz-morse-text" style="font-size: 4rem; color: var(--accent-coral); letter-spacing: 4px;">• —</span>
                                 </div>
@@ -1139,6 +1138,164 @@
             </div>
         </div>
 
+        <!-- ==========================================================
+             VIEW 8: SILENT PROGRESS DASHBOARD (PHASE 12 ANALYTICS ENGINE)
+             ========================================================== -->
+        <div class="page-view" id="view-progress">
+            <div class="container" style="padding-top: var(--space-lg);">
+                
+                <!-- Top Header Bar -->
+                <div class="hard-card has-header" style="margin-bottom: var(--space-md);">
+                    <div class="card-header-black">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="mono-label">SILENT PROGRESS DASHBOARD // ANALYTICS ENGINE</span>
+                            <span class="mono-label text-dim">HOME &gt; PROGRESS</span>
+                            <span class="sticker-badge badge-yellow rotate-right">PERSISTED DATA</span>
+                        </div>
+                        <button class="brutalist-button btn-secondary" id="btn-exit-progress" style="padding: 4px 10px; font-size: 0.75rem;" type="button">EXIT DASHBOARD</button>
+                    </div>
+                </div>
+
+                <!-- Hero Section & Stats Bar -->
+                <div class="hard-card" style="margin-bottom: var(--space-md); background-color: var(--surface-container); padding: var(--space-md);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-sm); margin-bottom: var(--space-md);">
+                        <div>
+                            <h1 class="font-display" style="font-size: 2.2rem; color: var(--primary);">YOUR SILENT LEARNING METRICS.</h1>
+                            <p class="mono-label" style="color: var(--secondary); font-size: 0.85rem; margin-top: 4px;">REAL-TIME TELEMETRY TRACKED ACROSS ALL MODULES.</p>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button class="brutalist-button btn-yellow" id="btn-prog-continue" type="button" style="font-size: 0.85rem; padding: 8px 16px;">
+                                <span>CONTINUE LEARNING</span>
+                                <span aria-hidden="true">→</span>
+                            </button>
+                            <button class="brutalist-button btn-coral" id="btn-prog-reset" type="button" style="font-size: 0.85rem; padding: 8px 16px;">
+                                <span>RESET PROGRESS</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 4 Hero Stat Cards -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+                        <div class="prog-stat-card">
+                            <span class="mono-label text-dim">OVERALL PROGRESS</span>
+                            <span class="font-display" id="prog-overall-pct" style="font-size: 2.8rem; color: var(--accent-coral);">0%</span>
+                            <span class="mono-label" id="prog-overall-bar">[░░░░░░░░░░]</span>
+                        </div>
+                        <div class="prog-stat-card">
+                            <span class="mono-label text-dim">ASL SIGNS</span>
+                            <span class="font-display" id="prog-asl-stat" style="font-size: 2.2rem;">0 / 26</span>
+                            <span class="mono-label" id="prog-asl-pct">0% MASTERED</span>
+                        </div>
+                        <div class="prog-stat-card">
+                            <span class="mono-label text-dim">MORSE CHARS</span>
+                            <span class="font-display" id="prog-morse-stat" style="font-size: 2.2rem;">0 / 36</span>
+                            <span class="mono-label" id="prog-morse-pct">0% MASTERED</span>
+                        </div>
+                        <div class="prog-stat-card">
+                            <span class="mono-label text-dim">QUIZ ACCURACY</span>
+                            <span class="font-display" id="prog-quiz-stat" style="font-size: 2.2rem; color: var(--accent-yellow);">0%</span>
+                            <span class="mono-label" id="prog-quiz-count">0 QUIZZES</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Module Progress Cards Grid -->
+                <div class="sign-lab-grid" style="margin-bottom: var(--space-lg);">
+                    
+                    <!-- Left Column: Sign Language & Quiz Details -->
+                    <section class="sign-lab-col-left">
+                        <!-- Sign Language Card -->
+                        <article class="hard-card has-header" style="margin-bottom: var(--space-md);">
+                            <div class="card-header-coral">
+                                <span class="mono-label">ASL SIGN LANGUAGE MASTERY</span>
+                                <span class="sticker-badge badge-yellow" id="prog-asl-count-badge">0 / 26 SIGNS</span>
+                            </div>
+                            <div style="padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-sm);">
+                                <span class="mono-label" id="prog-asl-bar-text">PROGRESS: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0 / 26</span>
+                                <span class="mono-label text-dim" style="font-size: 0.75rem;">COMPLETED ASL ALPHABET SIGNS (A-Z):</span>
+                                
+                                <div class="prog-chip-grid" id="prog-asl-chips-grid"></div>
+                            </div>
+                        </article>
+
+                        <!-- Quiz Performance Card -->
+                        <article class="hard-card has-header">
+                            <div class="card-header-black">
+                                <span class="mono-label">QUIZ PERFORMANCE TELEMETRY</span>
+                                <span class="sticker-badge badge-peach" id="prog-quiz-best-badge">BEST: --%</span>
+                            </div>
+                            <div style="padding: var(--space-md); display: flex; flex-direction: column; gap: 8px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <div class="finger-stat-chip">
+                                        <span class="mono-label">QUIZZES TAKEN:</span>
+                                        <span class="finger-state-pill" id="prog-quiz-taken-val">0</span>
+                                    </div>
+                                    <div class="finger-stat-chip">
+                                        <span class="mono-label">BEST SCORE:</span>
+                                        <span class="finger-state-pill is-extended" id="prog-quiz-best-val">--</span>
+                                    </div>
+                                    <div class="finger-stat-chip">
+                                        <span class="mono-label">TOTAL CORRECT:</span>
+                                        <span class="finger-state-pill is-extended" id="prog-quiz-correct-val">0</span>
+                                    </div>
+                                    <div class="finger-stat-chip">
+                                        <span class="mono-label">TOTAL WRONG:</span>
+                                        <span class="finger-state-pill is-curled" id="prog-quiz-wrong-val">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </section>
+
+                    <!-- Right Column: Morse Code & Achievements Details -->
+                    <section class="sign-lab-col-right">
+                        <!-- Morse Code Card -->
+                        <article class="hard-card has-header" style="margin-bottom: var(--space-md);">
+                            <div class="card-header-black">
+                                <span class="mono-label">MORSE CODE TELEGRAPHY MASTERY</span>
+                                <span class="sticker-badge badge-yellow" id="prog-morse-count-badge">0 / 36 CHARS</span>
+                            </div>
+                            <div style="padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-sm);">
+                                <span class="mono-label" id="prog-morse-bar-text">PROGRESS: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0 / 36</span>
+                                <span class="mono-label text-dim" style="font-size: 0.75rem;">COMPLETED MORSE CHARACTERS (A-Z &amp; 0-9):</span>
+                                
+                                <div class="prog-chip-grid" id="prog-morse-chips-grid"></div>
+                            </div>
+                        </article>
+
+                        <!-- Achievements Milestone Grid -->
+                        <article class="hard-card has-header">
+                            <div class="card-header-coral">
+                                <span class="mono-label">MILESTONE ACHIEVEMENTS</span>
+                                <span class="sticker-badge badge-yellow" id="prog-achieve-count-badge">0 / 8 UNLOCKED</span>
+                            </div>
+                            <div style="padding: var(--space-md); display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;" id="prog-achievements-grid">
+                            </div>
+                        </article>
+                    </section>
+                </div>
+
+                <!-- Lower Layout: Recent Activity Terminal Log -->
+                <article class="hard-card has-header" style="margin-bottom: var(--space-lg);">
+                    <div class="card-header-black">
+                        <span class="mono-label">[ RECENT ACTIVITY LOG ]</span>
+                        <span class="sticker-badge badge-peach">TIMESTAMPED EVENTS</span>
+                    </div>
+                    
+                    <div style="padding: var(--space-md);">
+                        <div class="terminal-console-log" id="prog-activity-log-terminal" style="height: 180px;">
+                            <div class="log-entry">
+                                <span class="log-time">[18:54:00]</span>
+                                <span class="log-prompt">&gt;</span>
+                                <span class="log-text">SILENT Analytics Engine initialized. Progress metrics saved to localStorage.</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+        </div>
+
     </main>
 
     <!-- TerminalFooter Component -->
@@ -1148,6 +1305,21 @@
             <p class="footer-subtext mono-label">NEO-BRUTALIST SILENT COMMUNICATION HUB</p>
         </div>
     </footer>
+
+    <!-- Confirmation Modal for Progress Reset -->
+    <div class="modal-overlay" id="reset-confirm-modal" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="hard-card modal-card" style="max-width: 440px;">
+            <div class="sticker-badge badge-coral rotate-left">CAUTION // DATA RESET</div>
+            <h3 class="modal-title" style="font-size: 1.5rem; margin-top: 8px;">RESET ALL PROGRESS?</h3>
+            <p class="modal-description" style="font-size: 0.9rem;">
+                Are you sure you want to reset all completed ASL signs, Morse characters, quiz scores, and achievements? This action cannot be undone.
+            </p>
+            <div style="display: flex; gap: 10px; margin-top: var(--space-sm);">
+                <button class="brutalist-button btn-coral" id="btn-confirm-reset-yes" type="button" style="flex: 1;">YES, RESET ALL</button>
+                <button class="brutalist-button btn-secondary" id="btn-confirm-reset-no" type="button" style="flex: 1;">CANCEL</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Placeholder Modal for Other Modules -->
     <div class="modal-overlay" id="placeholder-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">

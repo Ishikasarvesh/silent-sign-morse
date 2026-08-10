@@ -1,6 +1,6 @@
 /**
  * SILENT — Neo-Brutalist Laboratory Instrument
- * Phase 4, 6, 7, 8, 9, 10 & 11 Controller: ASL Sign Language Lab, Morse Lab, SILENT MODE & Phase 11 Interactive Quiz Engine
+ * Phase 4, 6, 7, 8, 9, 10, 11 & 12 Controller: ASL Sign Language Lab, Morse Lab, SILENT MODE, Quiz & Phase 12 Persistent Progress Analytics Engine
  * Stitch Screen ID: 0586a8cfaa1543629a7525d4f95efbb9
  */
 
@@ -126,7 +126,122 @@ document.addEventListener('DOMContentLoaded', () => {
     let quizAnswered = false;
 
     // ----------------------------------------------------------
-    // 3. PHASE 8, 10 & 11: AUTO-CALIBRATED EYE BLINK CONFIG
+    // 3. PHASE 12: PERSISTENT PROGRESS ANALYTICS ENGINE
+    // ----------------------------------------------------------
+    const STORAGE_KEY = 'SILENT_PROGRESS_DATA';
+
+    let progressData = {
+        completedSigns: [],
+        completedMorse: [],
+        quizSessionsCount: 0,
+        quizTotalCorrect: 0,
+        quizTotalWrong: 0,
+        quizBestScore: 0,
+        recentActivities: [
+            { time: '18:54:00', text: 'SILENT Analytics Engine initialized.' }
+        ],
+        achievements: {
+            firstSign: false,
+            firstMorse: false,
+            quizStarted: false,
+            signs10: false,
+            signs26: false,
+            morse36: false,
+            quizMaster: false,
+            silentModeUsed: false
+        }
+    };
+
+    function loadProgressData() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                progressData = { ...progressData, ...parsed };
+                if (parsed.completedSigns) {
+                    parsed.completedSigns.forEach(s => completedSigns.add(s));
+                }
+                if (parsed.completedMorse) {
+                    parsed.completedMorse.forEach(m => completedMorseChars.add(m));
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to load progress from localStorage:', e);
+        }
+    }
+
+    function saveProgressData() {
+        try {
+            progressData.completedSigns = Array.from(completedSigns);
+            progressData.completedMorse = Array.from(completedMorseChars);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progressData));
+        } catch (e) {
+            console.warn('Failed to save progress to localStorage:', e);
+        }
+    }
+
+    function recordActivity(text) {
+        const now = new Date();
+        const timeStr = now.toTimeString().split(' ')[0];
+        progressData.recentActivities.unshift({ time: timeStr, text: text });
+        if (progressData.recentActivities.length > 25) {
+            progressData.recentActivities.pop();
+        }
+        saveProgressData();
+    }
+
+    function recordASLSignCompleted(letter) {
+        if (!completedSigns.has(letter)) {
+            completedSigns.add(letter);
+            recordActivity(`ASL SIGN COMPLETED → ${letter}`);
+
+            if (completedSigns.size >= 1) progressData.achievements.firstSign = true;
+            if (completedSigns.size >= 10) progressData.achievements.signs10 = true;
+            if (completedSigns.size >= 26) progressData.achievements.signs26 = true;
+
+            saveProgressData();
+            renderProgressDashboard();
+        }
+    }
+
+    function recordMorseCharCompleted(char) {
+        if (!completedMorseChars.has(char)) {
+            completedMorseChars.add(char);
+            recordActivity(`MORSE CHARACTER COMPLETED → ${char}`);
+
+            if (completedMorseChars.size >= 1) progressData.achievements.firstMorse = true;
+            if (completedMorseChars.size >= 36) progressData.achievements.morse36 = true;
+
+            saveProgressData();
+            renderProgressDashboard();
+        }
+    }
+
+    function recordQuizCompleted(correct, total) {
+        progressData.quizSessionsCount++;
+        progressData.quizTotalCorrect += correct;
+        progressData.quizTotalWrong += (total - correct);
+
+        const scorePct = Math.round((correct / total) * 100);
+        progressData.quizBestScore = Math.max(progressData.quizBestScore, scorePct);
+
+        progressData.achievements.quizStarted = true;
+        if (scorePct >= 80) progressData.achievements.quizMaster = true;
+
+        recordActivity(`QUIZ COMPLETED → ${correct}/${total} (${scorePct}%)`);
+        saveProgressData();
+        renderProgressDashboard();
+    }
+
+    function recordSilentModeUsed(msg) {
+        progressData.achievements.silentModeUsed = true;
+        recordActivity(`SILENT MODE TRANSMISSION → "${msg}"`);
+        saveProgressData();
+        renderProgressDashboard();
+    }
+
+    // ----------------------------------------------------------
+    // 4. AUTO-CALIBRATED EYE BLINK CONFIG
     // ----------------------------------------------------------
     const blinkConfig = {
         dotMax: 350,        // ms: blinks < 350ms generate DOT
@@ -152,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let calibratedEarBaseline = 0.29;
 
     // ----------------------------------------------------------
-    // 4. DOM References
+    // 5. DOM References
     // ----------------------------------------------------------
     const viewHome = document.getElementById('view-home');
     const viewSignLab = document.getElementById('view-sign-lab');
@@ -161,6 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewMorsePractice = document.getElementById('view-morse-practice');
     const viewSilentMode = document.getElementById('view-silent-mode');
     const viewQuiz = document.getElementById('view-quiz');
+    const viewProgress = document.getElementById('view-progress');
 
     const navBtnHome = document.getElementById('nav-btn-home');
     const navBtnSignLab = document.getElementById('nav-btn-sign-lab');
@@ -411,13 +527,49 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnQuizRetry = document.getElementById('btn-quiz-retry');
     const btnQuizChangeCat = document.getElementById('btn-quiz-change-cat');
 
+    // Phase 12 SILENT PROGRESS DASHBOARD DOM References
+    const btnExitProgress = document.getElementById('btn-exit-progress');
+    const btnProgContinue = document.getElementById('btn-prog-continue');
+    const btnProgReset = document.getElementById('btn-prog-reset');
+
+    const progOverallPct = document.getElementById('prog-overall-pct');
+    const progOverallBar = document.getElementById('prog-overall-bar');
+    const progAslStat = document.getElementById('prog-asl-stat');
+    const progAslPct = document.getElementById('prog-asl-pct');
+    const progMorseStat = document.getElementById('prog-morse-stat');
+    const progMorsePct = document.getElementById('prog-morse-pct');
+    const progQuizStat = document.getElementById('prog-quiz-stat');
+    const progQuizCount = document.getElementById('prog-quiz-count');
+
+    const progAslCountBadge = document.getElementById('prog-asl-count-badge');
+    const progAslBarText = document.getElementById('prog-asl-bar-text');
+    const progAslChipsGrid = document.getElementById('prog-asl-chips-grid');
+
+    const progMorseCountBadge = document.getElementById('prog-morse-count-badge');
+    const progMorseBarText = document.getElementById('prog-morse-bar-text');
+    const progMorseChipsGrid = document.getElementById('prog-morse-chips-grid');
+
+    const progQuizBestBadge = document.getElementById('prog-quiz-best-badge');
+    const progQuizTakenVal = document.getElementById('prog-quiz-taken-val');
+    const progQuizBestVal = document.getElementById('prog-quiz-best-val');
+    const progQuizCorrectVal = document.getElementById('prog-quiz-correct-val');
+    const progQuizWrongVal = document.getElementById('prog-quiz-wrong-val');
+
+    const progAchieveCountBadge = document.getElementById('prog-achieve-count-badge');
+    const progAchievementsGrid = document.getElementById('prog-achievements-grid');
+    const progActivityLogTerminal = document.getElementById('prog-activity-log-terminal');
+
+    const resetConfirmModal = document.getElementById('reset-confirm-modal');
+    const btnConfirmResetYes = document.getElementById('btn-confirm-reset-yes');
+    const btnConfirmResetNo = document.getElementById('btn-confirm-reset-no');
+
     // Modals
     const placeholderModal = document.getElementById('placeholder-modal');
     const modalCloseBtn = document.getElementById('modal-close-btn');
     const modalActionBtn = document.getElementById('modal-action-btn');
 
     // ----------------------------------------------------------
-    // 5. View Switcher Engine
+    // 6. View Switcher Engine
     // ----------------------------------------------------------
     function switchView(targetView) {
         if (viewHome) viewHome.classList.remove('active');
@@ -427,6 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (viewMorsePractice) viewMorsePractice.classList.remove('active');
         if (viewSilentMode) viewSilentMode.classList.remove('active');
         if (viewQuiz) viewQuiz.classList.remove('active');
+        if (viewProgress) viewProgress.classList.remove('active');
 
         if (navBtnHome) navBtnHome.classList.remove('active');
         if (navBtnSignLab) navBtnSignLab.classList.remove('active');
@@ -434,6 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (navBtnMorseLab) navBtnMorseLab.classList.remove('active');
         if (navBtnSilentMode) navBtnSilentMode.classList.remove('active');
         if (navBtnQuiz) navBtnQuiz.classList.remove('active');
+        if (navBtnProgress) navBtnProgress.classList.remove('active');
 
         if (targetView === 'sign-lab') {
             if (viewSignLab) viewSignLab.classList.add('active');
@@ -493,6 +647,16 @@ document.addEventListener('DOMContentLoaded', () => {
             stopMorseEyeStream();
             stopSilentModeStreams();
             startQuizSession(quizCategory);
+        } else if (targetView === 'progress') {
+            if (viewProgress) viewProgress.classList.add('active');
+            if (navBtnProgress) navBtnProgress.classList.add('active');
+            if (headerSecIndicator) headerSecIndicator.textContent = 'SEC: PROGRESS';
+            if (cameraStatusText) cameraStatusText.textContent = 'ANALYTICS ENGINE';
+
+            stopWebcamStream();
+            stopMorseEyeStream();
+            stopSilentModeStreams();
+            renderProgressDashboard();
         } else {
             if (viewHome) viewHome.classList.add('active');
             if (navBtnHome) navBtnHome.classList.add('active');
@@ -513,6 +677,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navBtnMorseLab) navBtnMorseLab.addEventListener('click', () => switchView('morse-lab'));
     if (navBtnSilentMode) navBtnSilentMode.addEventListener('click', () => switchView('silent-mode'));
     if (navBtnQuiz) navBtnQuiz.addEventListener('click', () => switchView('quiz'));
+    if (navBtnProgress) navBtnProgress.addEventListener('click', () => switchView('progress'));
 
     if (logoHomeLink) logoHomeLink.addEventListener('click', (e) => { e.preventDefault(); switchView('home'); });
     if (btnReturnHome) btnReturnHome.addEventListener('click', () => switchView('home'));
@@ -521,6 +686,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnExitMorsePractice) btnExitMorsePractice.addEventListener('click', () => switchView('morse-lab'));
     if (btnExitSilentMode) btnExitSilentMode.addEventListener('click', () => switchView('home'));
     if (btnExitQuiz) btnExitQuiz.addEventListener('click', () => switchView('home'));
+    if (btnExitProgress) btnExitProgress.addEventListener('click', () => switchView('home'));
 
     if (heroBtnExplore) heroBtnExplore.addEventListener('click', () => switchView('sign-lab'));
     if (heroBtnPractice) heroBtnPractice.addEventListener('click', () => switchView('sign-practice'));
@@ -555,12 +721,204 @@ document.addEventListener('DOMContentLoaded', () => {
         placeholderModal.setAttribute('aria-hidden', 'true');
     }
 
-    if (navBtnProgress) navBtnProgress.addEventListener('click', () => openPlaceholderModal('Progress Dashboard', '📊', 'Progress Dashboard telemetry analytics will be active in future phases!'));
     if (modalCloseBtn) modalCloseBtn.addEventListener('click', closePlaceholderModal);
     if (modalActionBtn) modalActionBtn.addEventListener('click', closePlaceholderModal);
 
+    // Initial Progress Loading
+    loadProgressData();
+
     // ----------------------------------------------------------
-    // 6. ASL Reference Card & Practice Controllers
+    // 7. RENDER PROGRESS DASHBOARD ENGINE
+    // ----------------------------------------------------------
+    function renderProgressDashboard() {
+        const aslCount = completedSigns.size;
+        const morseCount = completedMorseChars.size;
+
+        const aslPctNum = Math.round((aslCount / 26) * 100);
+        const morsePctNum = Math.round((morseCount / 36) * 100);
+
+        const totalQuizQuestions = progressData.quizTotalCorrect + progressData.quizTotalWrong;
+        const quizAccuracyPct = totalQuizQuestions > 0 ? Math.round((progressData.quizTotalCorrect / totalQuizQuestions) * 100) : 0;
+
+        const overallPctNum = Math.round((aslPctNum * 0.4) + (morsePctNum * 0.4) + (quizAccuracyPct * 0.2));
+
+        if (progOverallPct) progOverallPct.textContent = `${overallPctNum}%`;
+        if (progOverallBar) {
+            const filled = Math.floor(overallPctNum / 10);
+            progOverallBar.textContent = `[${'█'.repeat(filled)}${'░'.repeat(10 - filled)}]`;
+        }
+
+        if (progAslStat) progAslStat.textContent = `${aslCount} / 26`;
+        if (progAslPct) progAslPct.textContent = `${aslPctNum}% MASTERED`;
+
+        if (progMorseStat) progMorseStat.textContent = `${morseCount} / 36`;
+        if (progMorsePct) progMorsePct.textContent = `${morsePctNum}% MASTERED`;
+
+        if (progQuizStat) progQuizStat.textContent = `${quizAccuracyPct}%`;
+        if (progQuizCount) progQuizCount.textContent = `${progressData.quizSessionsCount} QUIZZES TAKEN`;
+
+        if (progAslCountBadge) progAslCountBadge.textContent = `${aslCount} / 26 SIGNS`;
+        if (progAslBarText) {
+            const filled = Math.floor((aslCount / 26) * 30);
+            progAslBarText.textContent = `PROGRESS: [${'█'.repeat(filled)}${'░'.repeat(30 - filled)}] ${aslCount} / 26`;
+        }
+
+        if (progMorseCountBadge) progMorseCountBadge.textContent = `${morseCount} / 36 CHARS`;
+        if (progMorseBarText) {
+            const filled = Math.floor((morseCount / 36) * 30);
+            progMorseBarText.textContent = `PROGRESS: [${'█'.repeat(filled)}${'░'.repeat(30 - filled)}] ${morseCount} / 36`;
+        }
+
+        if (progQuizBestBadge) progQuizBestBadge.textContent = `BEST: ${progressData.quizBestScore}%`;
+        if (progQuizTakenVal) progQuizTakenVal.textContent = `${progressData.quizSessionsCount}`;
+        if (progQuizBestVal) progQuizBestVal.textContent = `${progressData.quizBestScore}%`;
+        if (progQuizCorrectVal) progQuizCorrectVal.textContent = `${progressData.quizTotalCorrect}`;
+        if (progQuizWrongVal) progQuizWrongVal.textContent = `${progressData.quizTotalWrong}`;
+
+        // Render 26 ASL Chips
+        if (progAslChipsGrid) {
+            progAslChipsGrid.innerHTML = '';
+            Object.keys(aslAlphabet).forEach(letter => {
+                const chip = document.createElement('div');
+                const isDone = completedSigns.has(letter);
+                chip.className = `prog-chip ${isDone ? 'completed' : ''}`;
+                chip.textContent = isDone ? `${letter}✓` : letter;
+                progAslChipsGrid.appendChild(chip);
+            });
+        }
+
+        // Render 36 Morse Chips
+        if (progMorseChipsGrid) {
+            progMorseChipsGrid.innerHTML = '';
+            morsePracticeSequence.forEach(char => {
+                const chip = document.createElement('div');
+                const isDone = completedMorseChars.has(char);
+                chip.className = `prog-chip ${isDone ? 'completed' : ''}`;
+                chip.textContent = isDone ? `${char}✓` : char;
+                progMorseChipsGrid.appendChild(chip);
+            });
+        }
+
+        // Render Milestone Achievements
+        const achievementSpecs = [
+            { id: 'firstSign', label: 'FIRST SIGN', desc: 'Complete 1 ASL sign' },
+            { id: 'firstMorse', label: 'FIRST MORSE', desc: 'Complete 1 Morse char' },
+            { id: 'quizStarted', label: 'QUIZ STARTED', desc: 'Take 1 evaluation quiz' },
+            { id: 'signs10', label: '10 SIGNS', desc: 'Master 10 ASL signs' },
+            { id: 'signs26', label: '26 SIGNS MASTER', desc: 'Master all 26 ASL signs' },
+            { id: 'morse36', label: '36 MORSE MASTER', desc: 'Master all 36 Morse chars' },
+            { id: 'quizMaster', label: 'QUIZ MASTER', desc: 'Score 80%+ on any quiz' },
+            { id: 'silentModeUsed', label: 'SILENT MODE USED', desc: 'Transmit a message' }
+        ];
+
+        let unlockedCount = 0;
+        if (progAchievementsGrid) {
+            progAchievementsGrid.innerHTML = '';
+            achievementSpecs.forEach(ach => {
+                const isUnlocked = progressData.achievements[ach.id];
+                if (isUnlocked) unlockedCount++;
+
+                const card = document.createElement('div');
+                card.className = `achievement-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+                card.innerHTML = `
+                    <span class="sticker-badge ${isUnlocked ? 'badge-yellow' : 'badge-coral'}" style="font-size: 0.65rem;">
+                        ${isUnlocked ? '[✓] UNLOCKED' : '[LOCKED]'}
+                    </span>
+                    <span class="mono-label" style="font-size: 0.8rem; margin-top: 4px;">${ach.label}</span>
+                    <span class="mono-label text-dim" style="font-size: 0.65rem;">${ach.desc}</span>
+                `;
+                progAchievementsGrid.appendChild(card);
+            });
+        }
+
+        if (progAchieveCountBadge) progAchieveCountBadge.textContent = `${unlockedCount} / 8 UNLOCKED`;
+
+        // Render Recent Activity Terminal Log
+        if (progActivityLogTerminal) {
+            progActivityLogTerminal.innerHTML = '';
+            progressData.recentActivities.forEach(act => {
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.innerHTML = `
+                    <span class="log-time">[${act.time}]</span>
+                    <span class="log-prompt">&gt;</span>
+                    <span class="log-text">${act.text}</span>
+                `;
+                progActivityLogTerminal.appendChild(entry);
+            });
+        }
+    }
+
+    // Action Button Handlers
+    if (btnProgContinue) {
+        btnProgContinue.addEventListener('click', () => {
+            if (completedSigns.size < 26) {
+                switchView('sign-practice');
+            } else if (completedMorseChars.size < 36) {
+                switchView('morse-practice');
+            } else {
+                switchView('quiz');
+            }
+        });
+    }
+
+    if (btnProgReset) {
+        btnProgReset.addEventListener('click', () => {
+            if (resetConfirmModal) {
+                resetConfirmModal.classList.add('active');
+                resetConfirmModal.setAttribute('aria-hidden', 'false');
+            }
+        });
+    }
+
+    if (btnConfirmResetNo) {
+        btnConfirmResetNo.addEventListener('click', () => {
+            if (resetConfirmModal) {
+                resetConfirmModal.classList.remove('active');
+                resetConfirmModal.setAttribute('aria-hidden', 'true');
+            }
+        });
+    }
+
+    if (btnConfirmResetYes) {
+        btnConfirmResetYes.addEventListener('click', () => {
+            completedSigns.clear();
+            completedMorseChars.clear();
+            progressData = {
+                completedSigns: [],
+                completedMorse: [],
+                quizSessionsCount: 0,
+                quizTotalCorrect: 0,
+                quizTotalWrong: 0,
+                quizBestScore: 0,
+                recentActivities: [
+                    { time: '18:54:00', text: 'Progress reset cleanly.' }
+                ],
+                achievements: {
+                    firstSign: false,
+                    firstMorse: false,
+                    quizStarted: false,
+                    signs10: false,
+                    signs26: false,
+                    morse36: false,
+                    quizMaster: false,
+                    silentModeUsed: false
+                }
+            };
+
+            localStorage.removeItem(STORAGE_KEY);
+            saveProgressData();
+            renderProgressDashboard();
+
+            if (resetConfirmModal) {
+                resetConfirmModal.classList.remove('active');
+                resetConfirmModal.setAttribute('aria-hidden', 'true');
+            }
+        });
+    }
+
+    // ----------------------------------------------------------
+    // 8. ASL Reference Card & Practice Controllers
     // ----------------------------------------------------------
     function renderAlphabetSelector() {
         if (!alphabetGrid) return;
@@ -687,7 +1045,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------
-    // 7. MORSE CODE LABORATORY CONTROLLER & MODULAR DECODER ENGINE
+    // 9. MORSE CODE LABORATORY CONTROLLER & MODULAR DECODER ENGINE
     // ----------------------------------------------------------
     function renderMorseReferenceChart() {
         if (!morseChartGrid) return;
@@ -808,6 +1166,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (currentDecodedMessage === currentMorseTargetChar) {
                 logMorseTerminalMessage(`> [✓] TARGET CHARACTER '${currentMorseTargetChar}' ACHIEVED!`);
+                recordMorseCharCompleted(currentMorseTargetChar);
             }
 
             currentDecodedMessage = '';
@@ -922,7 +1281,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------
-    // 8. PHASE 9: DEDICATED MORSE PRACTICE ENGINE & MATCH SCORER
+    // 10. PHASE 9: DEDICATED MORSE PRACTICE ENGINE & MATCH SCORER
     // ----------------------------------------------------------
     function getHumanReadableMorseBreakdown(signal) {
         if (!signal) return '';
@@ -1007,7 +1366,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mpScoreNumber) mpScoreNumber.textContent = '100%';
             if (mpMatchBadge) mpMatchBadge.textContent = 'MATCH: 100%';
 
-            completedMorseChars.add(currentChar);
+            recordMorseCharCompleted(currentChar);
+
             if (mpCompletedCount) mpCompletedCount.textContent = `COMPLETED: ${completedMorseChars.size} / ${morsePracticeSequence.length}`;
 
             const filledBlocks = Math.floor((completedMorseChars.size / morsePracticeSequence.length) * 30);
@@ -1054,7 +1414,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------
-    // 9. PHASE 10: SILENT MODE UNIFIED CONTROLLER & TELEMETRY
+    // 11. PHASE 10: SILENT MODE UNIFIED CONTROLLER & TELEMETRY
     // ----------------------------------------------------------
     function logSilentModeTerminalMessage(msgText) {
         if (!smTerminalLog) return;
@@ -1147,6 +1507,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (smFeedbackStatusBadge) smFeedbackStatusBadge.textContent = 'TRANSMITTING...';
                 const msg = smMessageBuffer;
                 logSilentModeTerminalMessage(`MESSAGE TRANSMITTED: "${msg}"`);
+                recordSilentModeUsed(msg);
                 
                 setTimeout(() => {
                     if (smFeedbackStatusBadge) smFeedbackStatusBadge.textContent = 'MESSAGE SENT';
@@ -1254,7 +1615,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------
-    // 10. PHASE 11: DYNAMIC QUIZ GENERATOR & EVALUATION ENGINE
+    // 12. PHASE 11: DYNAMIC QUIZ GENERATOR & EVALUATION ENGINE
     // ----------------------------------------------------------
     function generateQuizQuestions(category) {
         const aslLetters = Object.keys(aslAlphabet);
@@ -1425,6 +1786,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const total = 10;
         const scorePct = Math.round((quizCorrectCount / total) * 100);
 
+        recordQuizCompleted(quizCorrectCount, total);
+
         if (quizResultsScoreNum) quizResultsScoreNum.textContent = `${scorePct}%`;
         if (quizResCorrect) quizResCorrect.textContent = `${quizCorrectCount} / 10`;
         if (quizResWrong) quizResWrong.textContent = `${quizWrongCount} / 10`;
@@ -1467,7 +1830,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------
-    // 11. REAL MEDIAPIPE FACE MESH & AUTO-CALIBRATED BLINK ENGINE
+    // 13. REAL MEDIAPIPE FACE MESH & AUTO-CALIBRATED BLINK ENGINE
     // ----------------------------------------------------------
     function startEyeCalibration() {
         if (!isFaceDetected) {
@@ -1614,7 +1977,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------
-    // 12. REFINED EAR CALCULATOR & MULTI-FRAME BLINK CLASSIFIER
+    // 14. REFINED EAR CALCULATOR & MULTI-FRAME BLINK CLASSIFIER
     // ----------------------------------------------------------
     const LEFT_EYE_INDICES = { outer: 33, inner: 133, top1: 160, top2: 158, bot1: 144, bot2: 153 };
     const RIGHT_EYE_INDICES = { outer: 263, inner: 362, top1: 385, top2: 387, bot1: 380, bot2: 373 };
@@ -1857,7 +2220,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.startEyeCalibration = startEyeCalibration;
 
     // ----------------------------------------------------------
-    // 13. MEDIAPIPE HAND TRACKING PIPELINE (ASL LAB & SILENT MODE)
+    // 15. MEDIAPIPE HAND TRACKING PIPELINE (ASL LAB & SILENT MODE)
     // ----------------------------------------------------------
     let webcamStream = null;
     let handsEngine = null;
@@ -2203,7 +2566,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (finalScore >= 90) {
-            completedSigns.add(selectedLetter);
+            recordASLSignCompleted(selectedLetter);
             bestScores[selectedLetter] = Math.max(bestScores[selectedLetter] || 0, finalScore);
 
             if (practiceCompletedCount) practiceCompletedCount.textContent = `COMPLETED: ${completedSigns.size} / ${practiceSequence.length}`;
